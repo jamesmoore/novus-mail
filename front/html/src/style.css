@@ -1,0 +1,113 @@
+button {
+	
+	border-radius: 7px;
+	background-color: rgb(25,25,25);
+	color: rgb(255,255,255);
+	padding-top: 5px;
+	padding-bottom: 5px;
+	border: none;
+
+}
+
+#dialogBox {
+
+	background-color: rgb(255,255,255);
+
+}
+
+
+input, select {
+
+	border-radius: 7px;
+	border: none;
+	background-color: rgb(215, 215, 215);
+
+}
+
+input[type="image"] {
+	
+	background-color: transparent;
+
+}
+
+button:hover {
+
+	cursor: pointer;
+
+}
+
+button:active {
+	
+	transform: scale(0.95);
+
+}
+
+select:hover {
+	
+	cursor: pointer;
+
+}
+
+.counter {
+
+	background-color: transparent;
+	color: rgb(12,12,12);
+
+}
+
+#mailList {
+
+	border-radius: 7px;
+	outline: 2px solid rgb(200, 200, 200);
+
+}
+
+@media (prefers-color-scheme: dark) {
+
+	body {
+
+		background-color: rgb(15,15,15);
+		color: rgb(255,255,255);
+
+	}
+
+	button {
+
+		background-color: rgb(230,230,230);
+		color: rgb(0,0,0);
+
+	}
+
+	input, select {
+
+		background-color: rgb(40, 40, 40);
+		color: rgb(255, 255, 255);
+
+	}
+
+	input::placeholder {
+
+		color: rgb(138, 138, 138);
+
+	}
+
+	.counter {
+		
+		color: rgb(255, 255, 255);
+
+	}
+
+	#dialogBox {
+
+		background-color: rgb(15,15,15);
+
+	}
+
+
+	#mailList {
+
+		outline: 2px solid rgb(55, 55, 55);
+
+	}
+
+}
