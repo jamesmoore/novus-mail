@@ -1,5 +1,5 @@
 services:
-  nortixmail:
+  novusmail:
     build: .
     ports:
       - "25:25"
