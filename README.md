@@ -24,8 +24,7 @@ The http server will be listening on port 80. Make sure that your port 25 is acc
 
 # Run with docker 🐋
 1. git clone / download this repo
-2. open terminal inside NortixMail folder
-3. run `docker compose up -d`
+2. run `docker compose up -d`
 
 In the `docker-compose.yaml` file, port `25:25` is mapped by default. It is recommended to not change this setting if you are using a reverse proxy as some of them cannot forward smtp packets
 
