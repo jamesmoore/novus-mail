@@ -37,9 +37,9 @@ let mod = {
 		if(cert){
 
 			let extract = new crypto.X509Certificate(cert).subject;
-			let res = extract.match(/CN=([^ ]+)/);
+			let res = extract.match(/CN=(?:\*\.)?([^\s\/]+)/);
 			return res[1] || "";
-		
+
 		}else{
 
 			return "";
