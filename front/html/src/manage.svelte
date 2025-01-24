@@ -17,13 +17,19 @@
 
 			addresses = data.addresses;
 			if (data.addresses.length > 0){
-			
+
 				selectedAddress = data.addresses[data.addresses.length-1].addr;
 
 			}
 
 		});
 
+	}
+
+	function refreshHostName() {
+		f.fetchPost('/domain', {}, (data) => {
+			hostName = '@' + data;
+		});
 	}
 
 	function addAddress(){
@@ -34,13 +40,13 @@
 			f.fetchPost('/addAddress', {address: newAddressText}, (data) => {
 
 				if(data == "exist"){
-					
+
 					dialog.alrt("address already exist");
 
 				}
 
 				if(data == "done"){
-				
+
 					newAddressText = "";
 					refreshAddress();
 
@@ -68,7 +74,7 @@
 
 						refreshAddress();
 
-					}	
+					}
 
 				});
 
@@ -79,9 +85,8 @@
 	}
 
 	onMount(() => {
-
 		refreshAddress();
-
+		refreshHostName();
 	});
 
 
@@ -102,7 +107,7 @@
 
 		</div>
 		<button on:click={addAddress} class="adaptWidthSmall">Add this address</button>
-		
+
 		<div style="height: 30px;"></div>
 
 		<!--List of existing addresses-->
