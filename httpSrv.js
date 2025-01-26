@@ -9,7 +9,7 @@ let mod = {
 		const app = express();
 
 		app.use(express.json());
-		app.use(express.static('./front/html/dist'));
+		app.use(express.static('./front-react/dist'));
 
 		app.get('/', (_req, res) => {
 
