@@ -56,6 +56,24 @@ function Mailbox() {
     }
   }
 
+  async function deleteClicked(e: React.MouseEvent<HTMLDivElement>, itemKey: string) {
+    e.stopPropagation();
+    if (e.type === 'click' && e.button === 0) {
+      await deleteMail(itemKey);
+    }
+  }
+
+  async function deleteKeyUp(e: React.KeyboardEvent<HTMLDivElement>, itemKey: string) {
+    e.stopPropagation();
+    if (e.type === 'keyup' && e.key === 'Enter') {
+      await deleteMail(itemKey);
+    }
+  }
+
+  async function deleteMail(itemKey: string) {
+    console.log("Deleting: " + itemKey);
+  }
+
   async function prevPage() {
     if (page > 1) {
       setPage(page - 1);
@@ -89,10 +107,6 @@ function Mailbox() {
         setError('Failed to fetch message ' + error);
         setLoading(false);
       });
-  }
-
-  async function deleteClicked() {
-    console.log("Delete clicked");
   }
 
   async function backClicked() {
@@ -210,7 +224,7 @@ function Mailbox() {
                       <div></div>
                       <span>{mail.subject}</span>
                     </div>
-                    <input onKeyUp={deleteClicked} onClick={deleteClicked} type="image" src="trashIcon.svg" alt="X" style={{ width: "2rem", height: "2rem", padding: "1rem" }} />
+                    <input onKeyUp={(e) => deleteKeyUp(e, mail.id)} onClick={(e) => deleteClicked(e, mail.id)} type="image" src="trashIcon.svg" alt="X" style={{ width: "2rem", height: "2rem", padding: "1rem" }} />
                   </div>
 
                   {/* hr size inside flex is 0, gotta wrap with div, not sure why */}
