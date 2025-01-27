@@ -43,6 +43,7 @@ function Mailbox() {
   const [message, setMessage] = useState<MailMessage | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteItemKey, setDeleteItemKey] = useState<string | null>(null);
+  const [refreshInterval, setRefreshInterval] = useState<number | null>(null);
 
   async function copyClicked() {
     await handleCopy(selectedAddress + domainName);
@@ -156,6 +157,7 @@ function Mailbox() {
         setLoading(false);
         if (data.addresses.length > 0) {
           setSelectedAddress(data.addresses[data.addresses.length - 1].addr);
+          setRefreshInterval(data.refreshInterval);
         }
       })
       .catch(error => {
@@ -188,6 +190,15 @@ function Mailbox() {
     refreshMails,
     [selectedAddress, page]
   );
+
+  useEffect(() => {
+    if (refreshInterval != null) {
+      const interval = setInterval(refreshMails, refreshInterval * 1000);
+      return () => {
+        clearInterval(interval);
+      };
+    }
+  }, [refreshInterval, selectedAddress]);
 
   function refreshMails() {
     fetch('/mails', {
@@ -266,7 +277,6 @@ function Mailbox() {
               }
             </>
           }
-
 
           {viewType === 'mailData' && message &&
             <>
