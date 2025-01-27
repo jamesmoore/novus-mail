@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import DialogConf from './DialogConf';
+import { isEnterKeyUp, isLeftMouseClick } from './Events';
 
 interface Address {
   addr: string;
@@ -40,39 +41,67 @@ function Mailbox() {
   const [mails, setMails] = useState<Mail[]>([]);
   const [viewType, setViewType] = useState('mails');
   const [message, setMessage] = useState<MailMessage | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleteItemKey, setDeleteItemKey] = useState<string | null>(null);
 
   async function copyClicked() {
     await handleCopy(selectedAddress + domainName);
   }
 
   async function mailClicked(e: React.MouseEvent<HTMLDivElement>, itemKey: string) {
-    if (e.type === 'click' && e.button === 0) {
+    if (isLeftMouseClick(e)) {
       await getMail(itemKey);
     }
   }
 
   async function mailKeyUp(e: React.KeyboardEvent<HTMLDivElement>, itemKey: string) {
-    if (e.type === 'keyup' && e.key === 'Enter') {
+    if (isEnterKeyUp(e)) {
       await getMail(itemKey);
     }
   }
 
   async function deleteClicked(e: React.MouseEvent<HTMLDivElement>, itemKey: string) {
     e.stopPropagation();
-    if (e.type === 'click' && e.button === 0) {
+    if (isLeftMouseClick(e)) {
       await deleteMail(itemKey);
     }
   }
 
   async function deleteKeyUp(e: React.KeyboardEvent<HTMLDivElement>, itemKey: string) {
     e.stopPropagation();
-    if (e.type === 'keyup' && e.key === 'Enter') {
+    if (isEnterKeyUp(e)) {
       await deleteMail(itemKey);
     }
   }
 
   async function deleteMail(itemKey: string) {
-    console.log("Deleting: " + itemKey);
+    setDeleteItemKey(itemKey);
+    setDeleteConfirm(true);
+  }
+
+  async function deleteYes() {
+    await fetch('/deleteMail', {
+      method: 'POST',
+      body: JSON.stringify(
+        {
+          id: deleteItemKey,
+        }
+      ),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(() => {
+        setDeleteConfirm(false);
+        refreshMails();
+      })
+      .catch(error => {
+        setError('Failed to delete mail ' + error);
+      });
+  }
+
+  async function deleteNo() {
+    setDeleteConfirm(false);
   }
 
   async function prevPage() {
@@ -106,7 +135,6 @@ function Mailbox() {
       })
       .catch(error => {
         setError('Failed to fetch message ' + error);
-        setLoading(false);
       });
   }
 
@@ -146,11 +174,9 @@ function Mailbox() {
       .then(response => response.text())
       .then((data: string) => {
         setDomainName('@' + data);
-        setLoading(false);
       })
       .catch(error => {
         setError('Failed to fetch domain ' + error);
-        setLoading(false);
       });
   }, []);
 
@@ -158,7 +184,12 @@ function Mailbox() {
     setPage(1);
   }, [selectedAddress]);
 
-  useEffect(() => {
+  useEffect(
+    refreshMails,
+    [selectedAddress, page]
+  );
+
+  function refreshMails() {
     fetch('/mails', {
       method: 'POST',
       body: JSON.stringify(
@@ -174,13 +205,11 @@ function Mailbox() {
       .then(response => response.json())
       .then((data: Mail[]) => {
         setMails(data);
-        setLoading(false);
       })
       .catch(error => {
         setError('Failed to fetch mails ' + error);
-        setLoading(false);
       });
-  }, [selectedAddress, page]);
+  }
 
   if (loading) {
     return <div>Loading...</div>;
@@ -260,9 +289,9 @@ function Mailbox() {
         </div>
 
         <div>
-          <button className="counter" onClick={prevPage}>❮</button>
+          <button className="counter" onClick={prevPage}>&lt;</button>
           <span>{page}</span>
-          <button className="counter" onClick={nextPage}>❯</button>
+          <button className="counter" onClick={nextPage}>&gt;</button>
         </div>
 
         <button onClick={() => { window.location.replace('/manage.html') }} className="adaptWidthSmall">Manage addresses</button>
@@ -272,7 +301,7 @@ function Mailbox() {
 
       </div >
 
-      <DialogConf visible={false} text="delete?"></DialogConf>
+      <DialogConf visible={deleteConfirm} text="delete?" onNo={deleteNo} onYes={deleteYes} ></DialogConf>
     </main >
   );
 }
