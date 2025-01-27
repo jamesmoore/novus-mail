@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import DialogConf from './DialogConf';
 
 interface Address {
   addr: string;
@@ -270,6 +271,8 @@ function Mailbox() {
         <div></div>
 
       </div >
+
+      <DialogConf visible={false} text="delete?"></DialogConf>
     </main >
   );
 }
