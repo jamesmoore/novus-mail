@@ -1,15 +1,8 @@
 import { useState, useEffect } from 'react';
 import DialogConf from './DialogConf';
 import { isEnterKeyUp, isLeftMouseClick } from './Events';
-
-interface Address {
-  addr: string;
-}
-
-interface AddressesResponse {
-  addresses: Address[];
-  refreshInterval: number;
-}
+import { useNavigate } from 'react-router-dom';
+import { Address, AddressesResponse } from './models/addresses-response';
 
 interface Mail {
   id: string;
@@ -44,6 +37,7 @@ function Mailbox() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteItemKey, setDeleteItemKey] = useState<string | null>(null);
   const [refreshInterval, setRefreshInterval] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   async function copyClicked() {
     await handleCopy(selectedAddress + domainName);
@@ -304,7 +298,7 @@ function Mailbox() {
           <button className="counter" onClick={nextPage}>&gt;</button>
         </div>
 
-        <button onClick={() => { window.location.replace('/manage.html') }} className="adaptWidthSmall">Manage addresses</button>
+        <button onClick={() => { navigate('/manage'); }} className="adaptWidthSmall">Manage addresses</button>
 
         {/* Put a div so that there will be a gap from the flex at the top of the page */}
         <div></div>
