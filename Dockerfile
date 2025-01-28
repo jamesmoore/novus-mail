@@ -10,8 +10,7 @@ RUN npm install
 
 WORKDIR front-react
 
-RUN npm install
-RUN npm run build
+RUN npm install && npm run build && rm -rf node_modules
 
 WORKDIR /app
 
