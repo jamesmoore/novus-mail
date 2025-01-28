@@ -186,13 +186,13 @@ function Mailbox() {
   );
 
   useEffect(() => {
-    if (refreshInterval != null) {
+    if (refreshInterval != null && viewType === 'mails') {
       const interval = setInterval(refreshMails, refreshInterval * 1000);
       return () => {
         clearInterval(interval);
       };
     }
-  }, [refreshInterval, selectedAddress]);
+  }, [refreshInterval, selectedAddress, viewType]);
 
   function refreshMails() {
     fetch('/mails', {
