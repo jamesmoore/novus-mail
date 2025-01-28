@@ -1,15 +1,22 @@
 "use strict";
 import express from 'express'
 import config from './config.js'
+import path from 'path'
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const staticContentPath = './front-react/dist';
 
 let mod = {
 
-	start: function(db, domainName, port){
+	start: function (db, domainName, port) {
 
 		const app = express();
 
 		app.use(express.json());
-		app.use(express.static('./front/html/dist'));
+		app.use(express.static(staticContentPath));
 
 		app.get('/', (_req, res) => {
 
@@ -23,9 +30,9 @@ let mod = {
 			try {
 
 				let rows = db.prepare("SELECT addr FROM address").all();
-				res.json({addresses: rows, refreshInterval: refreshInterval});
+				res.json({ addresses: rows, refreshInterval: refreshInterval });
 
-			} catch(err) {
+			} catch (err) {
 
 				console.log("DB get addresses fail")
 				console.log(err)
@@ -36,11 +43,11 @@ let mod = {
 
 		app.post('/domain', (req, res) => {
 
-			if (domainName){
+			if (domainName) {
 
 				return res.status(200).send(domainName);
 
-			}else{
+			} else {
 
 				return res.status(200).send(req.headers.host.split(':')[0]);
 
@@ -49,14 +56,14 @@ let mod = {
 		})
 
 		app.post('/addAddress', (req, res) => {
-		
+
 			const json = req.body;
-			
+
 			try {
 
 				let rows = db.prepare("SELECT addr FROM address WHERE addr = ?").all(json.address);
-				if(rows.length > 0){
-					
+				if (rows.length > 0) {
+
 					return res.status(200).send("exist");
 
 				}
@@ -64,7 +71,7 @@ let mod = {
 				db.prepare("INSERT INTO address (addr) VALUES (?)").run(json.address);
 				return res.status(200).send("done");
 
-			} catch(err) {
+			} catch (err) {
 
 				console.log("DB add addresses fail")
 				console.log(err)
@@ -84,7 +91,7 @@ let mod = {
 
 				return res.status(200).send("done");
 
-			} catch(err) {
+			} catch (err) {
 
 				console.log("DB delete address fail")
 				console.log(err)
@@ -100,10 +107,10 @@ let mod = {
 
 			try {
 
-				let rows = db.prepare("SELECT id, sender, subject FROM mail WHERE recipient = @recipient ORDER BY id DESC LIMIT @mailCount OFFSET (@page-1)*@mailCount").all({recipient: json.addr, page: json.page, mailCount: config.getConfig('MailCountPerPage')});
+				let rows = db.prepare("SELECT id, sender, subject FROM mail WHERE recipient = @recipient ORDER BY id DESC LIMIT @mailCount OFFSET (@page-1)*@mailCount").all({ recipient: json.addr, page: json.page, mailCount: config.getConfig('MailCountPerPage') });
 				res.json(rows);
 
-			} catch(err) {
+			} catch (err) {
 
 				console.log("DB get mails fail")
 				console.log(err)
@@ -121,7 +128,7 @@ let mod = {
 				let rows = db.prepare("SELECT sender, subject, content FROM mail WHERE id = ?").all(json.id);
 				res.json(rows[0])
 
-			} catch(err) {
+			} catch (err) {
 
 				console.log("DB get mail data fail")
 				console.log(err)
@@ -139,7 +146,7 @@ let mod = {
 				db.prepare("DELETE FROM mail WHERE id = ?").run(json.id);
 				res.status(200).send();
 
-			} catch(err) {
+			} catch (err) {
 
 				console.log("DB delete mail fail")
 				console.log(err)
@@ -148,10 +155,19 @@ let mod = {
 
 		})
 
-		app.listen(port, () => {
-			console.log('http server listening at port: ' + port);	
+		// catch-all handler for react router
+		app.get('*', (_req, res) => {
+			res.sendFile(path.join(__dirname, staticContentPath, 'index.html'), function (err) {
+				if (err) {
+					res.status(500).send(err)
+				}
+			});
 		})
-		
+
+		app.listen(port, () => {
+			console.log('http server listening at port: ' + port);
+		})
+
 	}
 
 }

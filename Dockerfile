@@ -8,7 +8,7 @@ COPY . /app
 
 RUN npm install
 
-WORKDIR front
+WORKDIR front-react
 
 RUN npm install
 RUN npm run build
