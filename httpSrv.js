@@ -16,12 +16,18 @@ let mod = {
 		const app = express();
 
 		app.use(express.json());
+
+		app.use((req, res, next) => {
+			res.set('Referrer-Policy', 'no-referrer');
+			next();
+		});
+
 		app.use(express.static(staticContentPath));
 
 		app.get('/', (_req, res) => {
 
 			res.redirect('/index.html');
-
+			
 		})
 
 		let refreshInterval = config.getConfig("MailRefreshInterval");
