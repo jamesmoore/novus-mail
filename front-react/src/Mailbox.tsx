@@ -10,12 +10,6 @@ interface Mail {
   subject: string;
 }
 
-interface MailMessage {
-  sender: string;
-  subject: string;
-  content: string;
-}
-
 const handleCopy = async (text: string) => {
   try {
     await navigator.clipboard.writeText(text);
@@ -32,8 +26,6 @@ function Mailbox() {
   const [selectedAddress, setSelectedAddress] = useState('');
   const [page, setPage] = useState(1);
   const [mails, setMails] = useState<Mail[]>([]);
-  const [viewType, setViewType] = useState('mails');
-  const [message, setMessage] = useState<MailMessage | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteItemKey, setDeleteItemKey] = useState<string | null>(null);
   const [refreshInterval, setRefreshInterval] = useState<number | null>(null);
@@ -45,13 +37,13 @@ function Mailbox() {
 
   async function mailClicked(e: React.MouseEvent<HTMLDivElement>, itemKey: string) {
     if (isLeftMouseClick(e)) {
-      await getMail(itemKey);
+      navigate('/mail/' + itemKey);
     }
   }
 
   async function mailKeyUp(e: React.KeyboardEvent<HTMLDivElement>, itemKey: string) {
     if (isEnterKeyUp(e)) {
-      await getMail(itemKey);
+      navigate('/mail' + itemKey);
     }
   }
 
@@ -111,33 +103,6 @@ function Mailbox() {
     }
   }
 
-  async function getMail(id: string) {
-    fetch('/mailData', {
-      method: 'POST',
-      body: JSON.stringify(
-        {
-          id: id,
-        }
-      ),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then(response => response.json())
-      .then((message: MailMessage) => {
-        setMessage(message);
-        setViewType('mailData');
-      })
-      .catch(error => {
-        setError('Failed to fetch message ' + error);
-      });
-  }
-
-  async function backClicked() {
-    setViewType('mails');
-    setMessage(null);
-  }
-
   useEffect(() => {
     fetch('/addresses', {
       method: 'POST',
@@ -186,13 +151,13 @@ function Mailbox() {
   );
 
   useEffect(() => {
-    if (refreshInterval != null && viewType === 'mails') {
+    if (refreshInterval != null) {
       const interval = setInterval(refreshMails, refreshInterval * 1000);
       return () => {
         clearInterval(interval);
       };
     }
-  }, [refreshInterval, selectedAddress, viewType]);
+  }, [refreshInterval, selectedAddress]);
 
   function refreshMails() {
     fetch('/mails', {
@@ -248,47 +213,23 @@ function Mailbox() {
         </div>
 
         <div id="mailList" className="fillWidth">
-
-          {viewType === 'mails' &&
+          {mails.map((mail) => (
             <>
-              {mails.map((mail) => (
-                <>
-                  <div key={mail.id} onKeyUp={(e) => mailKeyUp(e, mail.id)} onClick={(e) => mailClicked(e, mail.id)} role="button" tabIndex={1} className="clickable" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }} >
-                    <div>
-                      <span>{mail.sender}</span>
-                      <div></div>
-                      <span>{mail.subject}</span>
-                    </div>
-                    <input onKeyUp={(e) => deleteKeyUp(e, mail.id)} onClick={(e) => deleteClicked(e, mail.id)} type="image" src="trashIcon.svg" alt="X" style={{ width: "2rem", height: "2rem", padding: "1rem" }} />
-                  </div>
-
-                  {/* hr size inside flex is 0, gotta wrap with div, not sure why */}
-                  <div>
-                    <hr />
-                  </div>
-                </>
-              ))
-              }
-            </>
-          }
-
-          {viewType === 'mailData' && message &&
-            <>
-              <span>{message.sender}</span>
-              <div></div>
-              <span>{message.subject}</span>
+              <div key={mail.id} onKeyUp={(e) => mailKeyUp(e, mail.id)} onClick={(e) => mailClicked(e, mail.id)} role="button" tabIndex={1} className="clickable" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }} >
+                <div>
+                  <span>{mail.sender}</span>
+                  <div></div>
+                  <span>{mail.subject}</span>
+                </div>
+                <input onKeyUp={(e) => deleteKeyUp(e, mail.id)} onClick={(e) => deleteClicked(e, mail.id)} type="image" src="trashIcon.svg" alt="X" style={{ width: "2rem", height: "2rem", padding: "1rem" }} />
+              </div>
 
               {/* hr size inside flex is 0, gotta wrap with div, not sure why */}
               <div>
                 <hr />
               </div>
-
-              <div id="mailData" style={{ all: "initial", backgroundColor: "white", overflow: "auto", flex: "1" }} dangerouslySetInnerHTML={{ __html: message.content }} />
-
-              <div style={{ height: "10px" }}></div>
-              <button onClick={backClicked}>Back</button>
-
             </>
+          ))
           }
         </div>
 
