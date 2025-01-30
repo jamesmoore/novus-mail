@@ -13,7 +13,7 @@ function Mail() {
     const [error, setError] = useState<string | null>(null);
     const [message, setMessage] = useState<MailMessage | null>(null);
     const navigate = useNavigate();
-    const { messageId } = useParams()
+    const { messageId } = useParams();
 
     useEffect(() => {
         if (messageId) {

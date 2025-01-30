@@ -9,17 +9,20 @@ import './style.css'
 import Mailbox from './Mailbox.tsx'
 import Manage from './Manage.tsx';
 import Mail from './Mail.tsx';
+import AddressContextProvider from './AddressContextProvider.tsx';
 
 // Renamed from root to app for css compatability
 createRoot(document.getElementById('app')!).render(
   <StrictMode>
     {/* <App /> */}
-    <Router>
-      <Routes>
-        <Route path="/" element={<Mailbox />} />
-        <Route path="/manage" element={<Manage />} />
-        <Route path="/mail/:messageId" element={<Mail/>} />    
-      </Routes>
-    </Router>
+    <AddressContextProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Mailbox />} />
+          <Route path="/manage" element={<Manage />} />
+          <Route path="/mail/:messageId" element={<Mail />} />
+        </Routes>
+      </Router>
+    </AddressContextProvider>
   </StrictMode>,
 )
