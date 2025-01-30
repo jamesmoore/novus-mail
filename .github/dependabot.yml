@@ -22,7 +22,7 @@ updates:
     versioning-strategy: increase
 
   - package-ecosystem: "npm"
-    directory: "/front"
+    directory: "/front-react"
     schedule:
       interval: "daily"
     versioning-strategy: increase
