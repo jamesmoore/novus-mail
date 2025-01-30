@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import DialogConf from './DialogConf';
 import { isEnterKeyUp, isLeftMouseClick } from './Events';
 import { useNavigate } from 'react-router-dom';
 import { Address, AddressesResponse } from './models/addresses-response';
+import AddressContext from './AddressContext';
 
 interface Mail {
   id: string;
@@ -23,7 +24,7 @@ function Mailbox() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [domainName, setDomainName] = useState('...');
-  const [selectedAddress, setSelectedAddress] = useState('');
+  const { selectedAddress, setSelectedAddress } = useContext(AddressContext);
   const [page, setPage] = useState(1);
   const [mails, setMails] = useState<Mail[]>([]);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
@@ -115,7 +116,9 @@ function Mailbox() {
         setAddresses(data.addresses);
         setLoading(false);
         if (data.addresses.length > 0) {
-          setSelectedAddress(data.addresses[data.addresses.length - 1].addr);
+          if (selectedAddress === '' || data.addresses.every(p => p.addr !== selectedAddress)) {
+            setSelectedAddress(data.addresses[data.addresses.length - 1].addr);
+          }
           setRefreshInterval(data.refreshInterval);
         }
       })
