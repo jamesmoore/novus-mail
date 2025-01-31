@@ -1,47 +1,18 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom'
-
-interface MailMessage {
-    sender: string;
-    subject: string;
-    content: string;
-}
+import { fetchMail } from './api-client';
+import { useQuery } from '@tanstack/react-query';
 
 function Mail() {
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [message, setMessage] = useState<MailMessage | null>(null);
     const navigate = useNavigate();
     const { messageId } = useParams();
 
-    useEffect(() => {
-        if (messageId) {
-            getMail(messageId);
+    const { data: message, isLoading: loading, error } = useQuery(
+        {
+            queryKey: ["mail", messageId],
+            queryFn: () => messageId ? fetchMail(messageId) : undefined,
         }
-    }, [messageId])
-
-    async function getMail(id: string) {
-        fetch('/mailData', {
-            method: 'POST',
-            body: JSON.stringify(
-                {
-                    id: id,
-                }
-            ),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
-            .then(response => response.json())
-            .then((message: MailMessage) => {
-                setMessage(message);
-                setLoading(false);
-            })
-            .catch(error => {
-                setError('Failed to fetch message ' + error);
-            });
-    }
+    );
 
     async function backClicked() {
         navigate(-1);
@@ -52,7 +23,7 @@ function Mail() {
     }
 
     if (error) {
-        return <div className="error">{error}</div>;
+        return <div className="error">{error.message}</div>;
     }
 
     return (
