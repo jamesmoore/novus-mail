@@ -1,74 +1,46 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AddressesResponse, Address } from './models/addresses-response';
 import DialogAlert from './DialogAlert';
 import DialogConf from './DialogConf';
+import { fetchAddress, fetchDomain, addAddress as apiAddAddress, deleteAddress as apiDeleteAddress } from './api-client';
+import { useQuery } from '@tanstack/react-query';
 
 function Manage() {
     const [newAddressText, setNewAddressText] = useState('');
-    const [hostName, setHostName] = useState('...');
-    const [error, setError] = useState<string | null>(null);
     const [selectedAddress, setSelectedAddress] = useState('');
-    const [addresses, setAddresses] = useState<Address[]>([]);
     const navigate = useNavigate();
-
     const [alertText, setAlertText] = useState<string | null>(null);
     const [alertVisible, setAlertVisible] = useState(false);
-
     const [deleteConfirm, setdeleteConfirm] = useState(false);
 
-    useEffect(() => {
-        fetch('/domain', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
-            .then(response => response.text())
-            .then((data: string) => {
-                setHostName('@' + data);
-            })
-            .catch(error => {
-                setError('Failed to fetch domain ' + error);
-            });
-    }, []);
+    const { data: domainName } = useQuery(
+        {
+            queryKey: ["domain"],
+            queryFn: fetchDomain
+        }
+    );
 
-    useEffect(refreshAddresses, []);
+    const { data: addressesResponse, error, refetch: refreshAddresses } = useQuery(
+        {
+            queryKey: ["addresses"],
+            queryFn: fetchAddress
+        }
+    )
 
-    function refreshAddresses() {
-        fetch('/addresses', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
-            .then(response => response.json())
-            .then((data: AddressesResponse) => {
-                setAddresses(data.addresses);
-                if (data.addresses.length > 0) {
-                    setSelectedAddress(data.addresses[data.addresses.length - 1].addr);
-                }
-            })
-            .catch(error => {
-                setError('Failed to fetch addresses ' + error);
-            });
-    }
+    useEffect(
+        () => {
+            if (addressesResponse && addressesResponse.addresses.length > 0) {
+                const addresses = addressesResponse.addresses;
+                setSelectedAddress(addresses[addresses.length - 1].addr);
+            }
+        },
+        [addressesResponse]
+    );
 
     function addAddress() {
         const regex = /^(?!\.)(?!.*\.\.)(?!.*\.$)[A-Za-z0-9!#$%&'*+/=?^_`{|}~.-]{1,64}$/;
         if (regex.test(newAddressText)) {
-            fetch('/addAddress', {
-                method: 'POST',
-                body: JSON.stringify(
-                    {
-                        address: newAddressText,
-                    }
-                ),
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-                .then(response => response.text())
+            apiAddAddress(newAddressText)
                 .then((data: string) => {
                     if (data == "exist") {
                         setAlertText("address already exist");
@@ -92,16 +64,7 @@ function Manage() {
     }
 
     function deleteYes() {
-        fetch('/deleteaddress', {
-            method: 'POST',
-            body: JSON.stringify({
-                address: selectedAddress,
-            }),
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-            .then(response => response.text())
+        apiDeleteAddress(selectedAddress)
             .then((data: string) => {
                 if (data === 'done') {
                     setdeleteConfirm(false);
@@ -119,7 +82,7 @@ function Manage() {
     }
 
     if (error) {
-        return <div className="error">{error}</div>;
+        return <div className="error">{error.message}</div>;
     }
 
     return (
@@ -131,7 +94,7 @@ function Manage() {
                 <span>New mail address</span>
                 <div className="adaptWidthSmall" style={{ display: "flex", flexWrap: "wrap" }}>
                     <input type="text" onChange={event => setNewAddressText(event.target.value)} value={newAddressText} placeholder="New address" style={{ flex: 1 }} />
-                    <span>{hostName}</span>
+                    <span>@{domainName}</span>
                 </div>
                 <button onClick={addAddress} className="adaptWidthSmall">Add this address</button>
 
@@ -141,17 +104,17 @@ function Manage() {
                 <span>Manage addresses</span>
                 <div className="adaptWidthSmall" style={{ display: "flex", flexWrap: "wrap" }}>
                     <select value={selectedAddress} style={{ flex: "1" }}>
-                        {addresses.map((address, index) => (
+                        {addressesResponse && addressesResponse.addresses.map((address, index) => (
                             <option key={index} value={address.addr}>
                                 {address.addr}
                             </option>
                         ))}
                     </select>
-                    <span>{hostName}</span>
+                    <span>@{domainName}</span>
                 </div>
 
                 {/*Delete selected address*/}
-                <button disabled={addresses.length == 0} onClick={deleteAddress} className="adaptWidthSmall">Delete this address</button>
+                <button disabled={addressesResponse === undefined || addressesResponse.addresses.length == 0} onClick={deleteAddress} className="adaptWidthSmall">Delete this address</button>
                 <div style={{ flex: "1" }}></div>
 
                 <button onClick={() => { navigate('/'); }} className="adaptWidthSmall" style={{ justifyContent: "flex-end" }}>Back</button>

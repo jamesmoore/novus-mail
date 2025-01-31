@@ -2,14 +2,9 @@ import { useState, useEffect, useContext } from 'react';
 import DialogConf from './DialogConf';
 import { isEnterKeyUp, isLeftMouseClick } from './Events';
 import { useNavigate } from 'react-router-dom';
-import { Address, AddressesResponse } from './models/addresses-response';
 import AddressContext from './AddressContext';
-
-interface Mail {
-  id: string;
-  sender: string;
-  subject: string;
-}
+import { useQuery } from '@tanstack/react-query';
+import { fetchAddress, fetchDomain, fetchMails, deleteMail } from './api-client';
 
 const handleCopy = async (text: string) => {
   try {
@@ -20,16 +15,11 @@ const handleCopy = async (text: string) => {
 };
 
 function Mailbox() {
-  const [addresses, setAddresses] = useState<Address[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [domainName, setDomainName] = useState('...');
   const { selectedAddress, setSelectedAddress } = useContext(AddressContext);
   const [page, setPage] = useState(1);
-  const [mails, setMails] = useState<Mail[]>([]);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteItemKey, setDeleteItemKey] = useState<string | null>(null);
-  const [refreshInterval, setRefreshInterval] = useState<number | null>(null);
   const navigate = useNavigate();
 
   async function copyClicked() {
@@ -51,34 +41,24 @@ function Mailbox() {
   async function deleteClicked(e: React.MouseEvent<HTMLDivElement>, itemKey: string) {
     e.stopPropagation();
     if (isLeftMouseClick(e)) {
-      await deleteMail(itemKey);
+      await deleteMailEvent(itemKey);
     }
   }
 
   async function deleteKeyUp(e: React.KeyboardEvent<HTMLDivElement>, itemKey: string) {
     e.stopPropagation();
     if (isEnterKeyUp(e)) {
-      await deleteMail(itemKey);
+      await deleteMailEvent(itemKey);
     }
   }
 
-  async function deleteMail(itemKey: string) {
+  async function deleteMailEvent(itemKey: string) {
     setDeleteItemKey(itemKey);
     setDeleteConfirm(true);
   }
 
   async function deleteYes() {
-    await fetch('/deleteMail', {
-      method: 'POST',
-      body: JSON.stringify(
-        {
-          id: deleteItemKey,
-        }
-      ),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
+    deleteMail(deleteItemKey!)
       .then(() => {
         setDeleteConfirm(false);
         refreshMails();
@@ -99,92 +79,50 @@ function Mailbox() {
   }
 
   async function nextPage() {
-    if (mails.length > 0) {
+    if (mails && mails.length > 0) {
       setPage(page + 1);
     }
   }
 
-  useEffect(() => {
-    fetch('/addresses', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then(response => response.json())
-      .then((data: AddressesResponse) => {
-        setAddresses(data.addresses);
-        setLoading(false);
-        if (data.addresses.length > 0) {
-          if (selectedAddress === '' || data.addresses.every(p => p.addr !== selectedAddress)) {
-            setSelectedAddress(data.addresses[data.addresses.length - 1].addr);
-          }
-          setRefreshInterval(data.refreshInterval);
-        }
-      })
-      .catch(error => {
-        setError('Failed to fetch addresses ' + error);
-        setLoading(false);
-      });
-  }, []);
+  const { data: domainName } = useQuery(
+    {
+      queryKey: ["domain"],
+      queryFn: fetchDomain
+    }
+  );
 
-  useEffect(() => {
-    fetch('/domain', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then(response => response.text())
-      .then((data: string) => {
-        setDomainName('@' + data);
-      })
-      .catch(error => {
-        setError('Failed to fetch domain ' + error);
-      });
-  }, []);
+  const { data: addressesResponse, isLoading: addressIsLoading } = useQuery(
+    {
+      queryKey: ["addresses"],
+      queryFn: fetchAddress
+    }
+  )
+
+  useEffect(
+    () => {
+      if (addressesResponse && addressesResponse.addresses.length > 0) {
+        const addresses = addressesResponse.addresses;
+        if (selectedAddress === '' || addresses.every(p => p.addr !== selectedAddress)) {
+          setSelectedAddress(addresses[addresses.length - 1].addr);
+        }
+      }
+    },
+    [addressesResponse]
+  );
 
   useEffect(() => {
     setPage(1);
   }, [selectedAddress]);
 
-  useEffect(
-    refreshMails,
-    [selectedAddress, page]
+  const { data: mails, isLoading: mailsLoading, refetch: refreshMails } = useQuery(
+    {
+      queryKey: ["mail", selectedAddress, page],
+      queryFn: () => fetchMails(selectedAddress, page),
+      refetchInterval: addressesResponse ? addressesResponse?.refreshInterval * 1000 : false,
+    }
   );
 
-  useEffect(() => {
-    if (refreshInterval != null) {
-      const interval = setInterval(refreshMails, refreshInterval * 1000);
-      return () => {
-        clearInterval(interval);
-      };
-    }
-  }, [refreshInterval, selectedAddress]);
-
-  function refreshMails() {
-    fetch('/mails', {
-      method: 'POST',
-      body: JSON.stringify(
-        {
-          addr: selectedAddress,
-          page: page
-        }
-      ),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then(response => response.json())
-      .then((data: Mail[]) => {
-        setMails(data);
-      })
-      .catch(error => {
-        setError('Failed to fetch mails ' + error);
-      });
-  }
-
-  if (loading) {
+  if (addressIsLoading) {
     return <div>Loading...</div>;
   }
 
@@ -205,18 +143,19 @@ function Mailbox() {
               setSelectedAddress(event.target.value);
             }}
           >
-            {addresses.map((address, index) => (
+            {addressesResponse && addressesResponse.addresses.map((address, index) => (
               <option key={index} value={address.addr}>
                 {address.addr}
               </option>
             ))}
           </select>
-          <span>{domainName}</span>
+          <span>@{domainName}</span>
           <button onKeyUp={copyClicked} onClick={copyClicked} style={{ marginLeft: "10px", paddingTop: "0px", paddingBottom: "0px" }}>Copy</button>
         </div>
 
         <div id="mailList" className="fillWidth">
-          {mails.map((mail) => (
+          {mailsLoading && (<>Loading...</>)}
+          {mails && mails.map((mail) => (
             <>
               <div key={mail.id} onKeyUp={(e) => mailKeyUp(e, mail.id)} onClick={(e) => mailClicked(e, mail.id)} role="button" tabIndex={1} className="clickable" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }} >
                 <div>

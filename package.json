@@ -9,6 +9,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@tanstack/react-query": "^5.66.0",
     "better-sqlite3": "^11.8.1",
     "express": "^4.21.2",
     "mailparser": "^3.7.2",
