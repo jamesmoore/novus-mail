@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DialogAlert from './DialogAlert';
-import DialogConf from './DialogConf';
 import { fetchAddress, fetchDomain, addAddress as apiAddAddress, deleteAddress as apiDeleteAddress } from './api-client';
 import { useQuery } from '@tanstack/react-query';
+import { Button, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, MenuItem, Paper, Select, TextField, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 
 function Manage() {
     const [newAddressText, setNewAddressText] = useState('');
@@ -82,48 +82,107 @@ function Manage() {
     }
 
     if (error) {
-        return <div className="error">{error.message}</div>;
+        return <div>{error.message}</div>;
     }
 
     return (
-        <main>
-            <div className="adaptWidth flexCenterCol fillHeight gap">
-                <div></div>
+        <Grid container flexDirection='column' height='100vh'>
+            <Container sx={{ display: "flex", flexDirection: "column", flex: "1 0 auto" }}>
+                <Grid container direction="column" justifyContent="center" alignItems="center" >
+                    <Grid>
+                        <Typography sx={{ m: 1 }} variant="h5" gutterBottom >New mail address</Typography>
+                    </Grid>
+                    <Grid container direction="row" justifyContent="center" alignItems="center" flex="0 0 auto">
+                        <FormControl>
+                            <TextField type="text" onChange={event => setNewAddressText(event.target.value)} value={newAddressText} placeholder="New address" style={{ flex: 1 }} />
+                        </FormControl>
+                        <FormControl sx={{ m: 1 }}>
+                            @{domainName}
+                        </FormControl>
+                    </Grid>
+                    <Grid >
+                        <Button sx={{ m: 1 }} variant="contained" onClick={addAddress}>Add this address</Button>
+                    </Grid>
+                </Grid>
+                <Grid container direction="column" justifyContent="center" alignItems="center" >
+                    {/*List of existing addresses*/}
+                    <Grid sx={{ m: 1 }}>
+                        <Typography variant="h5" gutterBottom>Manage addresses</Typography>
+                    </Grid>
+                    <Grid container direction="row" justifyContent="center" alignItems="center" >
+                        <FormControl sx={{ minWidth: 210 }}>
+                            <Select value={selectedAddress}>
+                                {addressesResponse && addressesResponse.addresses.map((address, index) => (
+                                    <MenuItem key={index} value={address.addr}>
+                                        {address.addr}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <FormControl sx={{ m: 1 }}>
+                            @{domainName}
+                        </FormControl>
+                    </Grid>
+                    {/*Delete selected address*/}
+                    <Button sx={{ m: 1 }} variant="contained" disabled={addressesResponse === undefined || addressesResponse.addresses.length == 0} onClick={deleteAddress}>Delete this address</Button>
+                </Grid>
 
-                {/*New mails*/}
-                <span>New mail address</span>
-                <div className="adaptWidthSmall" style={{ display: "flex", flexWrap: "wrap" }}>
-                    <input type="text" onChange={event => setNewAddressText(event.target.value)} value={newAddressText} placeholder="New address" style={{ flex: 1 }} />
-                    <span>@{domainName}</span>
-                </div>
-                <button onClick={addAddress} className="adaptWidthSmall">Add this address</button>
+                <Dialog
+                    open={deleteConfirm}
+                    onClose={deleteNo}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    <DialogTitle id="alert-dialog-title">
+                        Confirm
+                    </DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                            delete this address ?
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={deleteNo}>No</Button>
+                        <Button onClick={deleteYes} autoFocus>
+                            Yes
+                        </Button>
+                    </DialogActions>
+                </Dialog>
 
-                <div style={{ height: "30px" }}></div>
+                <Dialog
+                    open={alertVisible}
+                    onClose={alertOk}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    <DialogTitle id="alert-dialog-title">
+                        Alert
+                    </DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                            {alertText}
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={alertOk} autoFocus>
+                            Ok
+                        </Button>
+                    </DialogActions>
+                </Dialog>
 
-                {/*List of existing addresses*/}
-                <span>Manage addresses</span>
-                <div className="adaptWidthSmall" style={{ display: "flex", flexWrap: "wrap" }}>
-                    <select value={selectedAddress} style={{ flex: "1" }}>
-                        {addressesResponse && addressesResponse.addresses.map((address, index) => (
-                            <option key={index} value={address.addr}>
-                                {address.addr}
-                            </option>
-                        ))}
-                    </select>
-                    <span>@{domainName}</span>
-                </div>
+            </Container>
 
-                {/*Delete selected address*/}
-                <button disabled={addressesResponse === undefined || addressesResponse.addresses.length == 0} onClick={deleteAddress} className="adaptWidthSmall">Delete this address</button>
-                <div style={{ flex: "1" }}></div>
-
-                <button onClick={() => { navigate('/'); }} className="adaptWidthSmall" style={{ justifyContent: "flex-end" }}>Back</button>
-
-                <div></div>
-            </div>
-            <DialogAlert text={alertText ?? "..."} visible={alertVisible} onOk={alertOk}></DialogAlert>
-            <DialogConf visible={deleteConfirm} text="delete this address ?" onNo={deleteNo} onYes={deleteYes} ></DialogConf>
-        </main >
+            <Paper sx={{ p: 1, flex: "0 0 auto" }} elevation={3}>
+                <Grid
+                    container
+                    direction="row"
+                    justifyContent="left"
+                    alignItems="center"
+                >
+                    <Button onClick={() => { navigate('/'); }}>Back</Button>
+                </Grid>
+            </Paper>
+        </Grid>
     );
 }
 

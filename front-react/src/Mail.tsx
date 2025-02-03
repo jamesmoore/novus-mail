@@ -2,6 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom'
 import { fetchMail } from './api-client';
 import { useQuery } from '@tanstack/react-query';
+import { Button, Container, Paper } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import applyEmailTemplate from './email-wrapper';
 
 function Mail() {
     const navigate = useNavigate();
@@ -27,40 +30,31 @@ function Mail() {
     }
 
     return (
-        <main>
-            <div className="adaptWidth flexCenterCol fillHeight gap">
-
-                <div></div>
-
-                <div id="mailList" className="fillWidth">
-                    {message &&
-                        <>
+        <Grid container flexDirection='column' height='100vh'  >
+            <Container sx={{ display: 'flex', flexDirection: 'column', flex: "1 0 auto" }}>
+                {message &&
+                    <>
+                        <Paper sx={{ p: 1, mt: 1, mb: 1 }} elevation={3}>
                             <span>{message.sender}</span>
                             <div></div>
                             <span>{message.subject}</span>
+                        </Paper>
+                        <Paper sx={{ flexGrow: 1, flexShrink: 1, overflow: "auto", p: 1, display: "flex", flexDirection: "column" }} elevation={3}>
+                            <iframe
+                                height="100%"
+                                srcDoc={applyEmailTemplate(message.content)}
+                                style={{ border: "none", backgroundColor: "white", borderRadius: "4px", }}
+                                sandbox="allow-popups allow-popups-to-escape-sandbox"
+                            ></iframe>
+                        </Paper>
+                    </>}
+            </Container >
 
-                            {/* hr size inside flex is 0, gotta wrap with div, not sure why */}
-                            <div>
-                                <hr />
-                            </div>
-
-                            <div id="mailData" style={{ all: "initial", backgroundColor: "white", overflow: "auto", flex: "1" }} dangerouslySetInnerHTML={{ __html: message.content }} />
-
-                            <div style={{ height: "10px" }}></div>
-                            <button onClick={backClicked}>Back</button>
-
-                        </>}
-                </div>
-
-                <button onClick={() => { navigate('/manage'); }} className="adaptWidthSmall">Manage addresses</button>
-
-                {/* Put a div so that there will be a gap from the flex at the top of the page */}
-                <div></div>
-
-            </div >
-
-            {/* <DialogConf visible={deleteConfirm} text="delete?" onNo={deleteNo} onYes={deleteYes} ></DialogConf> */}
-        </main >
+            <Paper sx={{ p: 1, flex: "0 0 auto" }} elevation={3}>
+                <Button onClick={backClicked}>Back</Button>
+                <Button onClick={() => { navigate('/manage'); }} className="adaptWidthSmall">Manage addresses</Button>
+            </Paper>
+        </Grid>
     );
 }
 
