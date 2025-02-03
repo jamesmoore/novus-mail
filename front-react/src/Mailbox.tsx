@@ -164,7 +164,7 @@ function Mailbox() {
           </FormControl>
         </Grid>
 
-        <Grid container flex="1 0 auto" flexDirection='column'>
+        <Grid flex="1 0 auto">
           {mailsLoading && (<>Loading...</>)}
           {mails && mails.map((mail) => (
             <Paper sx={{ mt: 1, mb: 1, "&:hover": { cursor: "pointer" } }} elevation={3} tabIndex={1} role="button" onKeyUp={(e) => mailKeyUp(e, mail.id)} onClick={(e) => mailClicked(e, mail.id)}>
