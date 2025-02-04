@@ -41,6 +41,9 @@ let mod = {
 								break;
 
 							}
+							else {
+								console.log("No address matched for " + recipient.address);
+							}
 
 						}
 
