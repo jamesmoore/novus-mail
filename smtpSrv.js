@@ -42,7 +42,10 @@ let mod = {
 
 							}
 							else {
-								console.log("No address matched for " + recipient.address);
+								console.log("No address matched for: " + recipient.address);
+								for(let rcptTo of _session.envelope.rcptTo) {
+									console.log("rcptTo.address: " + rcptTo.address);
+								}
 							}
 
 						}
