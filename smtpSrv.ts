@@ -1,14 +1,14 @@
 "use strict";
 import { SMTPServerOptions, SMTPServer as ssrv } from 'smtp-server'
 import { AddressObject, simpleParser } from 'mailparser'
-import fs from 'fs'
-import path from 'path'
+import { readFileSync, readdirSync } from 'fs';
+import { extname } from 'path'
 import h from './helper'
-import BetterSqlite3 from 'better-sqlite3';
+import { Database } from 'better-sqlite3';
 
 let mod = {
 
-	start: function(db : BetterSqlite3.Database, port: number){
+	start: function(db : Database, port: number){
 
 		const opt: SMTPServerOptions = {
 
@@ -83,13 +83,13 @@ let mod = {
 		try {
 
 			//automatically detect public / private key
-			const files = fs.readdirSync("./data");
+			const files = readdirSync("./data");
 			for(let fileName of files){
 
-				let ext = path.extname(fileName);
+				let ext = extname(fileName);
 				if(ext != ".db" && ext != ".json"){
 
-					let content = fs.readFileSync("./data/" + fileName, 'utf8');
+					let content = readFileSync("./data/" + fileName, 'utf8');
 					if(content.includes("PRIVATE KEY")){
 						opt.key = content;
 					}

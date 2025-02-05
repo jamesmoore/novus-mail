@@ -1,25 +1,25 @@
 "use strict";
-import fs from 'fs'
-import path from 'path'
-import crypto from 'crypto'
+import { readdirSync, readFileSync } from 'fs'
+import { extname } from 'path'
+import { X509Certificate } from 'crypto'
 
 let mod = {
 
-	getDomainName: function(){
+	getDomainName: function () {
 
 		let cert = "";
 
 		try {
 
-			const files = fs.readdirSync("./data");
-			for(let fileName of files){
+			const files = readdirSync("./data");
+			for (let fileName of files) {
 
-				let ext = path.extname(fileName);
-				if(ext != ".db" && ext != ".json"){
+				let ext = extname(fileName);
+				if (ext != ".db" && ext != ".json") {
 
-					let content = fs.readFileSync("./data/" + fileName, 'utf8');
+					let content = readFileSync("./data/" + fileName, 'utf8');
 
-					if(content.includes("BEGIN CERTIFICATE")){
+					if (content.includes("BEGIN CERTIFICATE")) {
 						cert = content;
 					}
 
@@ -34,13 +34,13 @@ let mod = {
 
 		}
 
-		if(cert){
+		if (cert) {
 
-			let extract = new crypto.X509Certificate(cert).subject;
+			let extract = new X509Certificate(cert).subject;
 			let res = extract.match(/CN=(?:\*\.)?([^\s\/]+)/);
 			return res ? res[1] || "" : "";
 
-		}else{
+		} else {
 
 			return "";
 

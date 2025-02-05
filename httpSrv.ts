@@ -1,10 +1,10 @@
 "use strict";
 import express from 'express'
 import config from './config'
-import path from 'path'
+import { join } from 'path'
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import BetterSqlite3 from 'better-sqlite3';
+import { Database } from 'better-sqlite3';
 
 // const __filename = fileURLToPath(import.meta.url);
 // const __dirname = dirname(__filename);
@@ -12,7 +12,7 @@ const staticContentPath = './front-react/dist';
 
 let mod = {
 
-	start: function (db: BetterSqlite3.Database, domainName: string, port: number) {
+	start: function (db: Database, domainName: string, port: number) {
 
 		const app = express();
 
@@ -161,7 +161,7 @@ let mod = {
 
 		// catch-all handler for react router
 		app.get('*', (_req, res) => {
-			res.sendFile(path.join(__dirname, staticContentPath, 'index.html'), function (err) {
+			res.sendFile(join(__dirname, staticContentPath, 'index.html'), function (err) {
 				if (err) {
 					res.status(500).send(err)
 				}

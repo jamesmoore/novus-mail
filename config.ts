@@ -1,5 +1,5 @@
 "use strict";
-import fs from 'fs'
+import { readFileSync } from 'fs';
 
 let mod = {
 
@@ -15,7 +15,7 @@ let mod = {
 
 		try {
 
-            const data = fs.readFileSync('./data/config.json', 'utf8');
+            const data = readFileSync('./data/config.json', 'utf8');
             this.configs = JSON.parse(data);
 
         } catch (err) {
