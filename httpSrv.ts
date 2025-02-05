@@ -1,13 +1,13 @@
 "use strict";
 import express from 'express'
-import config from './config'
+import config from './config.js'
 import { join } from 'path'
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { Database } from 'better-sqlite3';
 
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = dirname(__filename);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const staticContentPath = './front-react/dist';
 
 let mod = {

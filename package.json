@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "dev": "node --watch -r ts-node/register ./main.ts",
-    "build": "tsc -m nodenext ./main.ts"
+    "dev": "node --loader ts-node/esm --watch -r ts-node/register ./main.ts",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
@@ -15,7 +15,7 @@
     "mailparser": "^3.7.2",
     "smtp-server": "^3.13.6"
   },
-  "type": "commonjs",
+  "type": "module",
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.12",
     "@types/express": "^5.0.0",

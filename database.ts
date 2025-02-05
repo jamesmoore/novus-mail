@@ -1,5 +1,5 @@
 "use strict"
-import DatabaseConstructor from "better-sqlite3";
+import Database from "better-sqlite3";
 
 let database = {
 
@@ -7,7 +7,7 @@ let database = {
 
 		try {
 
-			const db = DatabaseConstructor('./data/data.db');
+			const db = Database('./data/data.db');
 			db.exec("CREATE TABLE IF NOT EXISTS address (addr TEXT NOT NULL)");
 			let res = db.prepare("SELECT COUNT(*) as count FROM address").get();
 

@@ -1,9 +1,9 @@
 "use strict";
-import smtpSrv from './smtpSrv'
-import httpSrv from './httpSrv'
-import config from './config'
-import domain from './domain'
-import database from './database'
+import smtpSrv from './smtpSrv.js'
+import httpSrv from './httpSrv.js'
+import config from './config.js'
+import domain from './domain.js'
+import database from './database.js'
 
 config.init();
 let db = database.init();
