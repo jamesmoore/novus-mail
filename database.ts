@@ -1,4 +1,4 @@
-"use strict";
+"use strict"
 import sqlite3 from 'better-sqlite3';
 
 let database = {
@@ -11,7 +11,7 @@ let database = {
 			db.exec("CREATE TABLE IF NOT EXISTS address (addr TEXT NOT NULL)");
 			let res = db.prepare("SELECT COUNT(*) as count FROM address").get();
 
-			if (res.count == 0){
+			if ((res as any).count == 0){
 
 				//generate random username
 				const letters = 'abcdefghijklmnopqrstuvwxyz';

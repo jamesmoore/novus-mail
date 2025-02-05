@@ -1,15 +1,16 @@
 "use strict";
-import { SMTPServer as ssrv } from 'smtp-server'
-import { simpleParser } from 'mailparser'
+import { SMTPServerOptions, SMTPServer as ssrv } from 'smtp-server'
+import { AddressObject, simpleParser } from 'mailparser'
 import fs from 'fs'
 import path from 'path'
-import h from './helper.js'
+import h from './helper'
+import BetterSqlite3 from 'better-sqlite3';
 
 let mod = {
 
-	start: function(db , port){
+	start: function(db : BetterSqlite3.Database, port: number){
 
-		let opt = {
+		const opt: SMTPServerOptions = {
 
 			async onData(stream, _session, callback) {
 
@@ -17,7 +18,7 @@ let mod = {
 
 					const mail = await simpleParser(stream);
 
-					let sender = mail.from.value[0].address || mail.from.value[0].name;
+					let sender = mail.from?.value[0].address || mail.from?.value[0].name;
 					let subject = mail.subject;
 					let content;
 
@@ -29,12 +30,13 @@ let mod = {
 
 					try {
 
-						for (let recipient of mail.to.value){
+						const mailToAddresses = (mail.to as AddressObject).value.filter(p => p.address).map(p => p.address!);
+						for (let recipient of mailToAddresses){
 
-							var recipientName = recipient.address.substring(0, recipient.address.lastIndexOf("@"));
+							var recipientName = recipient.substring(0, recipient.lastIndexOf("@"));
 							let res = db.prepare("SELECT COUNT(*) as count FROM address WHERE addr = ?").all(recipientName);
 
-							if (res[0].count > 0) {
+							if ((res[0] as any).count > 0) {
 
 								let id = h.randomID();
 								db.prepare("INSERT INTO mail (id, recipient, sender, subject, content) VALUES (?, ?, ?, ?, ?)").run(id, recipientName, sender, subject, content);
@@ -42,7 +44,7 @@ let mod = {
 
 							}
 							else {
-								console.log("No address matched for: " + recipient.address);
+								console.log("No address matched for: " + recipient);
 								for(let rcptTo of _session.envelope.rcptTo) {
 									console.log("rcptTo.address: " + rcptTo.address);
 								}

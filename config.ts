@@ -5,9 +5,9 @@ let mod = {
 
 	configs: {},
 
-	getConfig: function(key){
+	getConfig: function(key: string){
 
-		return this.configs[key];
+		return (this.configs as any)[key] as string;
 
 	},
 
