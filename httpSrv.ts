@@ -1,9 +1,10 @@
 "use strict";
 import express from 'express'
 import config from './config.js'
-import path from 'path'
+import { join } from 'path'
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { Database } from 'better-sqlite3';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -11,7 +12,7 @@ const staticContentPath = './front-react/dist';
 
 let mod = {
 
-	start: function (db, domainName, port) {
+	start: function (db: Database, domainName: string, port: number) {
 
 		const app = express();
 
@@ -27,7 +28,7 @@ let mod = {
 		app.get('/', (_req, res) => {
 
 			res.redirect('/index.html');
-			
+
 		})
 
 		let refreshInterval = config.getConfig("MailRefreshInterval");
@@ -51,15 +52,15 @@ let mod = {
 
 			if (domainName) {
 
-				return res.status(200).send(domainName);
+				res.status(200).send(domainName);
 
 			} else {
 
-				return res.status(200).send(req.headers.host.split(':')[0]);
+				res.status(200).send(req.headers.host?.split(':')[0] || 'unknown');
 
 			}
 
-		})
+		});
 
 		app.post('/addAddress', (req, res) => {
 
@@ -70,18 +71,17 @@ let mod = {
 				let rows = db.prepare("SELECT addr FROM address WHERE addr = ?").all(json.address);
 				if (rows.length > 0) {
 
-					return res.status(200).send("exist");
+					res.status(200).send("exist");
 
 				}
 
 				db.prepare("INSERT INTO address (addr) VALUES (?)").run(json.address);
-				return res.status(200).send("done");
+				res.status(200).send("done");
 
 			} catch (err) {
 
 				console.log("DB add addresses fail")
 				console.log(err)
-
 			}
 
 		})
@@ -95,17 +95,15 @@ let mod = {
 				db.prepare("DELETE FROM address WHERE addr = ?").run(json.address);
 				db.prepare("DELETE FROM mail WHERE recipient = ?").run(json.address);
 
-				return res.status(200).send("done");
+				res.status(200).send("done");
 
 			} catch (err) {
 
 				console.log("DB delete address fail")
 				console.log(err)
-
 			}
 
 		})
-
 
 		app.post('/mails', (req, res) => {
 
@@ -163,7 +161,7 @@ let mod = {
 
 		// catch-all handler for react router
 		app.get('*', (_req, res) => {
-			res.sendFile(path.join(__dirname, staticContentPath, 'index.html'), function (err) {
+			res.sendFile(join(__dirname, staticContentPath, 'index.html'), (err) => {
 				if (err) {
 					res.status(500).send(err)
 				}

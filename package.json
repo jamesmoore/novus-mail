@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "dev": "nodemon main.js"
+    "dev": "node --loader ts-node/esm --watch -r ts-node/register ./main.ts",
+    "build": "tsc",
+    "bundle": "ncc build main.js"
   },
   "author": "",
   "license": "ISC",
@@ -16,6 +18,14 @@
   },
   "type": "module",
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "@vercel/ncc": "^0.38.3",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/express": "^5.0.0",
+    "@types/mailparser": "^3.4.5",
+    "@types/node": "^22.13.1",
+    "@types/smtp-server": "^3.5.10",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
   }
 }

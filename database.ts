@@ -1,17 +1,17 @@
-"use strict";
-import sqlite3 from 'better-sqlite3';
+"use strict"
+import Database from 'better-sqlite3';
 
 let database = {
 
-	init: function(){
+	init: function () {
 
 		try {
 
-			const db = new sqlite3('./data/data.db');
+			const db = Database('./data/data.db');
 			db.exec("CREATE TABLE IF NOT EXISTS address (addr TEXT NOT NULL)");
 			let res = db.prepare("SELECT COUNT(*) as count FROM address").get();
 
-			if (res.count == 0){
+			if ((res as any).count == 0) {
 
 				//generate random username
 				const letters = 'abcdefghijklmnopqrstuvwxyz';
@@ -31,7 +31,7 @@ let database = {
 
 			return db;
 
-		} catch(err) {
+		} catch (err) {
 
 			console.log("DB init fail")
 			console.log(err);
