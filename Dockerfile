@@ -1,4 +1,4 @@
-FROM alpine:latest as build
+FROM alpine:latest AS build
 
 RUN apk add --no-cache nodejs npm
 
@@ -18,7 +18,7 @@ RUN rm -rf node_modules
 
 WORKDIR /app
 
-FROM alpine:latest as runtime
+FROM alpine:latest AS runtime
 
 RUN apk add --no-cache nodejs
 
