@@ -161,7 +161,7 @@ let mod = {
 
 		// catch-all handler for react router
 		app.get('*', (_req, res) => {
-			res.sendFile(join(__dirname, staticContentPath, 'index.html'), function (err) {
+			res.sendFile(join(__dirname, staticContentPath, 'index.html'), (err) => {
 				if (err) {
 					res.status(500).send(err)
 				}

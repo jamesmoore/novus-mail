@@ -2,8 +2,8 @@
 import { SMTPServerOptions, SMTPServer as ssrv } from 'smtp-server'
 import { AddressObject, simpleParser } from 'mailparser'
 import { readFileSync, readdirSync } from 'fs';
-import { extname } from 'path'
-import h from './helper.js'
+import { extname } from 'path';
+import h from './helper.js';
 import { Database } from 'better-sqlite3';
 
 let mod = {

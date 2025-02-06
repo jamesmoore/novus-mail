@@ -1,5 +1,5 @@
 "use strict"
-import Database from "better-sqlite3";
+import Database from 'better-sqlite3';
 
 let database = {
 
