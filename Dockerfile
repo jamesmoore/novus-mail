@@ -28,4 +28,4 @@ COPY --from=build /app/dist .
 COPY --from=build /app/data ./data
 COPY --from=build /app/front-react/dist ./front-react/dist
 
-CMD ["node", "main.js"]
+CMD ["node", "index.js"]
