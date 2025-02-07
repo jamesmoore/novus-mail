@@ -1,7 +1,7 @@
 "use strict";
 import { readFileSync } from 'fs';
 
-let mod = {
+const mod = {
 
 	configs: {},
 

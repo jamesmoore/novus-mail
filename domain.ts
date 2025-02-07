@@ -3,7 +3,7 @@ import { readdirSync, readFileSync } from 'fs'
 import { extname } from 'path'
 import { X509Certificate } from 'crypto'
 
-let mod = {
+const mod = {
 
 	getDomainName: function () {
 
@@ -12,12 +12,12 @@ let mod = {
 		try {
 
 			const files = readdirSync("./data");
-			for (let fileName of files) {
+			for (const fileName of files) {
 
-				let ext = extname(fileName);
+				const ext = extname(fileName);
 				if (ext != ".db" && ext != ".json") {
 
-					let content = readFileSync("./data/" + fileName, 'utf8');
+					const content = readFileSync("./data/" + fileName, 'utf8');
 
 					if (content.includes("BEGIN CERTIFICATE")) {
 						cert = content;
@@ -36,8 +36,8 @@ let mod = {
 
 		if (cert) {
 
-			let extract = new X509Certificate(cert).subject;
-			let res = extract.match(/CN=(?:\*\.)?([^\s\/]+)/);
+			const extract = new X509Certificate(cert).subject;
+			const res = extract.match(/CN=(?:\*\.)?([^\s\/]+)/);
 			return res ? res[1] || "" : "";
 
 		} else {

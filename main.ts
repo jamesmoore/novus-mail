@@ -6,8 +6,8 @@ import domain from './domain.js'
 import database from './database.js'
 
 config.init();
-let db = database.init();
-let domainName = domain.getDomainName();
+const db = database.init();
+const domainName = domain.getDomainName();
 
 smtpSrv.start(db, 25);
 httpSrv.start(db, domainName, 80);

@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const staticContentPath = './front-react/dist';
 
-let mod = {
+const mod = {
 
 	start: function (db: Database, domainName: string, port: number) {
 
@@ -31,12 +31,12 @@ let mod = {
 
 		})
 
-		let refreshInterval = config.getConfig("MailRefreshInterval");
+		const refreshInterval = config.getConfig("MailRefreshInterval");
 		app.post('/addresses', (_req, res) => {
 
 			try {
 
-				let rows = db.prepare("SELECT addr FROM address").all();
+				const rows = db.prepare("SELECT addr FROM address").all();
 				res.json({ addresses: rows, refreshInterval: refreshInterval });
 
 			} catch (err) {
@@ -68,7 +68,7 @@ let mod = {
 
 			try {
 
-				let rows = db.prepare("SELECT addr FROM address WHERE addr = ?").all(json.address);
+				const rows = db.prepare("SELECT addr FROM address WHERE addr = ?").all(json.address);
 				if (rows.length > 0) {
 
 					res.status(200).send("exist");
@@ -111,7 +111,7 @@ let mod = {
 
 			try {
 
-				let rows = db.prepare("SELECT id, sender, subject FROM mail WHERE recipient = @recipient ORDER BY id DESC LIMIT @mailCount OFFSET (@page-1)*@mailCount").all({ recipient: json.addr, page: json.page, mailCount: config.getConfig('MailCountPerPage') });
+				const rows = db.prepare("SELECT id, sender, subject FROM mail WHERE recipient = @recipient ORDER BY id DESC LIMIT @mailCount OFFSET (@page-1)*@mailCount").all({ recipient: json.addr, page: json.page, mailCount: config.getConfig('MailCountPerPage') });
 				res.json(rows);
 
 			} catch (err) {
@@ -129,7 +129,7 @@ let mod = {
 
 			try {
 
-				let rows = db.prepare("SELECT sender, subject, content FROM mail WHERE id = ?").all(json.id);
+				const rows = db.prepare("SELECT sender, subject, content FROM mail WHERE id = ?").all(json.id);
 				res.json(rows[0])
 
 			} catch (err) {

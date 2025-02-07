@@ -1,7 +1,7 @@
 "use strict";
 const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-let helper = {
+const helper = {
 
 	randomID: function(){
 			

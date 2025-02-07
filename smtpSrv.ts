@@ -6,7 +6,7 @@ import { extname } from 'path';
 import h from './helper.js';
 import { Database } from 'better-sqlite3';
 
-let mod = {
+const mod = {
 
 	start: function(db : Database, port: number){
 
@@ -18,34 +18,28 @@ let mod = {
 
 					const mail = await simpleParser(stream);
 
-					let sender = mail.from?.value[0].address || mail.from?.value[0].name;
-					let subject = mail.subject;
-					let content;
-
-					if(mail.html){
-						content = mail.html;
-					}else{
-						content = mail.textAsHtml;
-					}
+					const sender = mail.from?.value[0].address || mail.from?.value[0].name;
+					const subject = mail.subject;
+					const content = mail.html ?  mail.html : mail.textAsHtml;
 
 					try {
 
 						const mailToAddresses = (mail.to as AddressObject).value.filter(p => p.address).map(p => p.address!);
-						for (let recipient of mailToAddresses){
+						for (const recipient of mailToAddresses){
 
 							var recipientName = recipient.substring(0, recipient.lastIndexOf("@"));
-							let res = db.prepare("SELECT COUNT(*) as count FROM address WHERE addr = ?").all(recipientName);
+							const res = db.prepare("SELECT COUNT(*) as count FROM address WHERE addr = ?").all(recipientName);
 
 							if ((res[0] as any).count > 0) {
 
-								let id = h.randomID();
+								const id = h.randomID();
 								db.prepare("INSERT INTO mail (id, recipient, sender, subject, content) VALUES (?, ?, ?, ?, ?)").run(id, recipientName, sender, subject, content);
 								break;
 
 							}
 							else {
 								console.log("No address matched for: " + recipient);
-								for(let rcptTo of _session.envelope.rcptTo) {
+								for(const rcptTo of _session.envelope.rcptTo) {
 									console.log("rcptTo.address: " + rcptTo.address);
 								}
 							}
@@ -84,12 +78,12 @@ let mod = {
 
 			//automatically detect public / private key
 			const files = readdirSync("./data");
-			for(let fileName of files){
+			for(const fileName of files){
 
-				let ext = extname(fileName);
+				const ext = extname(fileName);
 				if(ext != ".db" && ext != ".json"){
 
-					let content = readFileSync("./data/" + fileName, 'utf8');
+					const content = readFileSync("./data/" + fileName, 'utf8');
 					if(content.includes("PRIVATE KEY")){
 						opt.key = content;
 					}

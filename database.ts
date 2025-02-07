@@ -1,7 +1,7 @@
 "use strict"
 import Database from 'better-sqlite3';
 
-let database = {
+const database = {
 
 	init: function () {
 
@@ -9,7 +9,7 @@ let database = {
 
 			const db = Database('./data/data.db');
 			db.exec("CREATE TABLE IF NOT EXISTS address (addr TEXT NOT NULL)");
-			let res = db.prepare("SELECT COUNT(*) as count FROM address").get();
+			const res = db.prepare("SELECT COUNT(*) as count FROM address").get();
 
 			if ((res as any).count == 0) {
 
