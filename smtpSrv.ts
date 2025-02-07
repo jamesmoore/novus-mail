@@ -20,12 +20,14 @@ const mod = {
 
 					const sender = mail.from?.value[0].address || mail.from?.value[0].name;
 					const subject = mail.subject;
-					const content = mail.html ?  mail.html : mail.textAsHtml;
+					const content = mail.html ? mail.html : mail.textAsHtml;
 
 					try {
 
 						const mailToAddresses = (mail.to as AddressObject).value.filter(p => p.address).map(p => p.address!);
-						for (const recipient of mailToAddresses){
+						const smtpRcptAddresses =  _session.envelope.rcptTo.map(p => p.address);
+
+						for (const recipient of mailToAddresses.concat(smtpRcptAddresses)){
 
 							var recipientName = recipient.substring(0, recipient.lastIndexOf("@"));
 							const res = db.prepare("SELECT COUNT(*) as count FROM address WHERE addr = ?").all(recipientName);
