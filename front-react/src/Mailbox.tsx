@@ -2,7 +2,7 @@ import { useState, useEffect, useContext, ChangeEvent } from 'react';
 import { isEnterKeyUp, isLeftMouseClick } from './Events';
 import { useNavigate } from 'react-router-dom';
 import AddressContext from './AddressContext';
-import { AppBar, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Drawer, Fab, FormControl, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Pagination, Paper, Select, Toolbar, Tooltip, Typography } from '@mui/material';
+import { AppBar, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Drawer, Fab, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Pagination, Paper, Toolbar, Tooltip, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import { useQuery } from '@tanstack/react-query';
@@ -12,7 +12,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 
 import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
+import DraftsIcon from '@mui/icons-material/Drafts';
 
 const handleCopy = async (text: string) => {
   try {
@@ -51,9 +51,6 @@ function Mailbox() {
       setMobileOpen(!mobileOpen);
     }
   };
-
-
-
 
   async function copyClicked() {
     await handleCopy(selectedAddress + domainName);
@@ -165,35 +162,26 @@ function Mailbox() {
       <Toolbar />
       <Divider />
       <List>
-        {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
+        {addressesResponse?.addresses.map((address, _index) => (
+          <ListItem key={address.addr} disablePadding>
+            <ListItemButton
+              onClick={(_e) => {
+                setSelectedAddress(address.addr);
+                handleDrawerToggle();
+              }}
+              selected={address.addr === selectedAddress}
+            >
               <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                {address.addr === selectedAddress ? <DraftsIcon /> : <MailIcon />}
               </ListItemIcon>
-              <ListItemText primary={text} />
+              <ListItemText primary={address.addr} />
             </ListItemButton>
           </ListItem>
         ))}
       </List>
       <Divider />
-      <List>
-        {['All mail', 'Trash', 'Spam'].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
     </div>
   );
-
-
-
 
   return (
     <Box sx={{ display: 'flex', height: "100dvh" }}>
@@ -215,8 +203,13 @@ function Mailbox() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            Responsive drawer
+            {selectedAddress}@{domainName}
           </Typography>
+          <Tooltip title="Copy">
+            <IconButton onClick={copyClicked}>
+              <ContentCopy />
+            </IconButton>
+          </Tooltip>
         </Toolbar>
       </AppBar>
       <Box
@@ -224,7 +217,6 @@ function Mailbox() {
         sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
         aria-label="mailbox folders"
       >
-        {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
         <Drawer
           //container={container}
           variant="temporary"
@@ -253,51 +245,20 @@ function Mailbox() {
         </Drawer>
       </Box>
 
-
-
       <Box
-        // sx={{ flex: "1 1 auto", flexDirection: 'column', display: "flex", p: 1 }}
         sx={{
           display: "flex",
           flexDirection: "column",
-          //flexGrow: 1,
           flex: "1 1 auto",
-          p: 1,
-          width: { 
-            xs: "100%", 
-            sm: `calc(100% - ${drawerWidth}px)` }
+          width: {
+            xs: "100%",
+            sm: `calc(100% - ${drawerWidth}px)`
+          }
         }}
       >
-        <Grid
-          container
-          direction="row" justifyContent="center" alignItems="center" flex="0 0 auto"
-        >
-          <FormControl sx={{ m: 1, minWidth: 180 }}>
-            <Select value={selectedAddress} fullWidth={false}
-              onChange={(event) => {
-                setSelectedAddress(event.target.value);
-              }}
-            >
-              {addressesResponse && addressesResponse.addresses.map((address, index) => (
-                <MenuItem key={index} value={address.addr}>
-                  {address.addr}
-                </MenuItem >
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl sx={{ m: 1 }} >
-            @{domainName}
-          </FormControl>
-          <FormControl sx={{ m: 1 }} >
-            <Tooltip title="Copy">
-              <IconButton onClick={copyClicked}>
-                <ContentCopy />
-              </IconButton>
-            </Tooltip>
-          </FormControl>
-        </Grid>
 
-        <Grid flex="1 0 auto">
+        <Toolbar />
+        <Grid flex="1 0 auto" paddingLeft={1} paddingRight={1}>
           {mailsLoading && (<>Loading...</>)}
           {mails && mails.map((mail) => (
             <Paper sx={{ mt: 1, mb: 1, "&:hover": { cursor: "pointer" } }} elevation={3} tabIndex={1} role="button" onKeyUp={(e) => mailKeyUp(e, mail.id)} onClick={(e) => mailClicked(e, mail.id)}>
