@@ -2,13 +2,17 @@ import { useState, useEffect, useContext, ChangeEvent } from 'react';
 import { isEnterKeyUp, isLeftMouseClick } from './Events';
 import { useNavigate } from 'react-router-dom';
 import AddressContext from './AddressContext';
-import { Button, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Fab, FormControl, IconButton, MenuItem, Pagination, Paper, Select, Tooltip } from '@mui/material';
+import { AppBar, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Drawer, Fab, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Pagination, Paper, Toolbar, Tooltip, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAddress, fetchDomain, fetchMails, deleteMail } from './api-client';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SettingsIcon from '@mui/icons-material/Settings';
+
+import MailIcon from '@mui/icons-material/Mail';
+import MenuIcon from '@mui/icons-material/Menu';
+import DraftsIcon from '@mui/icons-material/Drafts';
 
 const handleCopy = async (text: string) => {
   try {
@@ -26,6 +30,27 @@ function Mailbox() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteItemKey, setDeleteItemKey] = useState<string | null>(null);
   const navigate = useNavigate();
+
+
+  const drawerWidth = 240;
+
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+
+  const handleDrawerClose = () => {
+    setIsClosing(true);
+    setMobileOpen(false);
+  };
+
+  const handleDrawerTransitionEnd = () => {
+    setIsClosing(false);
+  };
+
+  const handleDrawerToggle = () => {
+    if (!isClosing) {
+      setMobileOpen(!mobileOpen);
+    }
+  };
 
   async function copyClicked() {
     await handleCopy(selectedAddress + domainName);
@@ -132,39 +157,108 @@ function Mailbox() {
     return <div className="error">{error}</div>;
   }
 
-  return (
-    <Grid container flexDirection='column' height={'100vh'}>
-      <Container sx={{ display: 'flex', flexDirection: 'column', flex: "1 0 auto" }}>
-        <Grid
-          container
-          direction="row" justifyContent="center" alignItems="center" flex="0 0 auto"
-        >
-          <FormControl sx={{ m: 1, minWidth: 180 }}>
-            <Select value={selectedAddress} fullWidth={false}
-              onChange={(event) => {
-                setSelectedAddress(event.target.value);
+  const drawer = (
+    <div>
+      <Toolbar />
+      <Divider />
+      <List>
+        {addressesResponse?.addresses.map((address, _index) => (
+          <ListItem key={address.addr} disablePadding>
+            <ListItemButton
+              onClick={(_e) => {
+                setSelectedAddress(address.addr);
+                handleDrawerToggle();
               }}
+              selected={address.addr === selectedAddress}
             >
-              {addressesResponse && addressesResponse.addresses.map((address, index) => (
-                <MenuItem key={index} value={address.addr}>
-                  {address.addr}
-                </MenuItem >
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl sx={{ m: 1 }} >
-            @{domainName}
-          </FormControl>
-          <FormControl sx={{ m: 1 }} >
-            <Tooltip title="Copy">
-              <IconButton onClick={copyClicked}>
-                <ContentCopy />
-              </IconButton>
-            </Tooltip>
-          </FormControl>
-        </Grid>
+              <ListItemIcon>
+                {address.addr === selectedAddress ? <DraftsIcon /> : <MailIcon />}
+              </ListItemIcon>
+              <ListItemText primary={address.addr} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+      <Divider />
+    </div>
+  );
 
-        <Grid flex="1 0 auto">
+  return (
+    <Box sx={{ display: 'flex', height: "100dvh" }}>
+      <AppBar
+        position="fixed"
+        sx={{
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          ml: { sm: `${drawerWidth}px` },
+        }}
+      >
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ mr: 2, display: { sm: 'none' } }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" noWrap component="div">
+            {selectedAddress}@{domainName}
+          </Typography>
+          <Tooltip title="Copy">
+            <IconButton onClick={copyClicked}>
+              <ContentCopy />
+            </IconButton>
+          </Tooltip>
+        </Toolbar>
+      </AppBar>
+      <Box
+        component="nav"
+        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        aria-label="mailbox folders"
+      >
+        <Drawer
+          //container={container}
+          variant="temporary"
+          open={mobileOpen}
+          onTransitionEnd={handleDrawerTransitionEnd}
+          onClose={handleDrawerClose}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
+          sx={{
+            display: { xs: 'block', sm: 'none' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+          }}
+        >
+          {drawer}
+        </Drawer>
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: 'none', sm: 'block' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+          }}
+          open
+        >
+          {drawer}
+        </Drawer>
+      </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          flex: "1 1 auto",
+          width: {
+            xs: "100%",
+            sm: `calc(100% - ${drawerWidth}px)`
+          }
+        }}
+      >
+
+        <Toolbar />
+        <Grid flex="1 0 auto" paddingLeft={1} paddingRight={1}>
           {mailsLoading && (<>Loading...</>)}
           {mails && mails.map((mail) => (
             <Paper sx={{ mt: 1, mb: 1, "&:hover": { cursor: "pointer" } }} elevation={3} tabIndex={1} role="button" onKeyUp={(e) => mailKeyUp(e, mail.id)} onClick={(e) => mailClicked(e, mail.id)}>
@@ -193,13 +287,14 @@ function Mailbox() {
           ))
           }
         </Grid>
-      </Container >
 
-      <Paper sx={{ p: 1, flex: "0 0 auto" }} elevation={3}>
-        <Grid container direction="row" justifyContent="center" alignItems="center">
-          <Pagination count={pageCount} page={page} onChange={handlePageChange} />
-        </Grid>
-      </Paper>
+        <Paper sx={{ p: 1, flex: "0 0 auto" }} elevation={3}>
+          <Grid container direction="row" justifyContent="center" alignItems="center">
+            <Pagination count={pageCount} page={page} onChange={handlePageChange} />
+          </Grid>
+        </Paper>
+
+      </Box >
 
       <Fab size="small" sx={{
         position: 'absolute',
@@ -231,7 +326,7 @@ function Mailbox() {
         </DialogActions>
       </Dialog>
 
-    </Grid>
+    </Box>
   );
 }
 
