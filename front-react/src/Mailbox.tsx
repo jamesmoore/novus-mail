@@ -173,7 +173,13 @@ function Mailbox() {
                   <Grid size={{ xs: 12, md: 4 }} >
                     {mail.sender}
                   </Grid>
-                  <Grid>
+                  <Grid
+                    size={{ md: 8 }}
+                    sx={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}>
                     {mail.subject}
                   </Grid>
                 </Grid>
