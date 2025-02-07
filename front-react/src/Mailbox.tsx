@@ -2,13 +2,17 @@ import { useState, useEffect, useContext, ChangeEvent } from 'react';
 import { isEnterKeyUp, isLeftMouseClick } from './Events';
 import { useNavigate } from 'react-router-dom';
 import AddressContext from './AddressContext';
-import { Button, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Fab, FormControl, IconButton, MenuItem, Pagination, Paper, Select, Tooltip } from '@mui/material';
+import { AppBar, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Drawer, Fab, FormControl, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Pagination, Paper, Select, Toolbar, Tooltip, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAddress, fetchDomain, fetchMails, deleteMail } from './api-client';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SettingsIcon from '@mui/icons-material/Settings';
+
+import MailIcon from '@mui/icons-material/Mail';
+import MenuIcon from '@mui/icons-material/Menu';
+import InboxIcon from '@mui/icons-material/MoveToInbox';
 
 const handleCopy = async (text: string) => {
   try {
@@ -26,6 +30,30 @@ function Mailbox() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteItemKey, setDeleteItemKey] = useState<string | null>(null);
   const navigate = useNavigate();
+
+
+  const drawerWidth = 240;
+
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+
+  const handleDrawerClose = () => {
+    setIsClosing(true);
+    setMobileOpen(false);
+  };
+
+  const handleDrawerTransitionEnd = () => {
+    setIsClosing(false);
+  };
+
+  const handleDrawerToggle = () => {
+    if (!isClosing) {
+      setMobileOpen(!mobileOpen);
+    }
+  };
+
+
+
 
   async function copyClicked() {
     await handleCopy(selectedAddress + domainName);
@@ -132,9 +160,114 @@ function Mailbox() {
     return <div className="error">{error}</div>;
   }
 
+  const drawer = (
+    <div>
+      <Toolbar />
+      <Divider />
+      <List>
+        {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
+          <ListItem key={text} disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+              </ListItemIcon>
+              <ListItemText primary={text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+      <Divider />
+      <List>
+        {['All mail', 'Trash', 'Spam'].map((text, index) => (
+          <ListItem key={text} disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+              </ListItemIcon>
+              <ListItemText primary={text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+    </div>
+  );
+
+
+
+
   return (
-    <Grid container flexDirection='column' height={'100vh'}>
-      <Container sx={{ display: 'flex', flexDirection: 'column', flex: "1 0 auto" }}>
+    <Box sx={{ display: 'flex', height: "100dvh" }}>
+      <AppBar
+        position="fixed"
+        sx={{
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          ml: { sm: `${drawerWidth}px` },
+        }}
+      >
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ mr: 2, display: { sm: 'none' } }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" noWrap component="div">
+            Responsive drawer
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <Box
+        component="nav"
+        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        aria-label="mailbox folders"
+      >
+        {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
+        <Drawer
+          //container={container}
+          variant="temporary"
+          open={mobileOpen}
+          onTransitionEnd={handleDrawerTransitionEnd}
+          onClose={handleDrawerClose}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
+          sx={{
+            display: { xs: 'block', sm: 'none' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+          }}
+        >
+          {drawer}
+        </Drawer>
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: 'none', sm: 'block' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+          }}
+          open
+        >
+          {drawer}
+        </Drawer>
+      </Box>
+
+
+
+      <Box
+        // sx={{ flex: "1 1 auto", flexDirection: 'column', display: "flex", p: 1 }}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          //flexGrow: 1,
+          flex: "1 1 auto",
+          p: 1,
+          width: { 
+            xs: "100%", 
+            sm: `calc(100% - ${drawerWidth}px)` }
+        }}
+      >
         <Grid
           container
           direction="row" justifyContent="center" alignItems="center" flex="0 0 auto"
@@ -193,13 +326,14 @@ function Mailbox() {
           ))
           }
         </Grid>
-      </Container >
 
-      <Paper sx={{ p: 1, flex: "0 0 auto" }} elevation={3}>
-        <Grid container direction="row" justifyContent="center" alignItems="center">
-          <Pagination count={pageCount} page={page} onChange={handlePageChange} />
-        </Grid>
-      </Paper>
+        <Paper sx={{ p: 1, flex: "0 0 auto" }} elevation={3}>
+          <Grid container direction="row" justifyContent="center" alignItems="center">
+            <Pagination count={pageCount} page={page} onChange={handlePageChange} />
+          </Grid>
+        </Paper>
+
+      </Box >
 
       <Fab size="small" sx={{
         position: 'absolute',
@@ -231,7 +365,7 @@ function Mailbox() {
         </DialogActions>
       </Dialog>
 
-    </Grid>
+    </Box>
   );
 }
 
