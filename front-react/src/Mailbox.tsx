@@ -167,7 +167,9 @@ function Mailbox() {
             <ListItemButton
               onClick={(_e) => {
                 setSelectedAddress(address.addr);
-                handleDrawerToggle();
+                if (mobileOpen) {
+                  handleDrawerToggle();
+                }
               }}
               selected={address.addr === selectedAddress}
             >
