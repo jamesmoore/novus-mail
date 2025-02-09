@@ -6,8 +6,11 @@ const defaultHeaders = {
     'Content-Type': 'application/json',
 };
 
+/** To support local development - add this env variable to the file `.env.development.local`, which should be located alongside package.json  */
+const BaseUrl = import.meta.env.VITE_API_BASE_URL;
+
 const fetchDomain = async () => {
-    const response = await fetch("/domain", {
+    const response = await fetch(`${BaseUrl}/domain`, {
         method: 'POST',
         headers: defaultHeaders,
     });
@@ -15,7 +18,7 @@ const fetchDomain = async () => {
 };
 
 const fetchAddress = async () => {
-    const response = await fetch('/addresses', {
+    const response = await fetch(`${BaseUrl}/addresses`, {
         method: 'POST',
         headers: defaultHeaders,
     });
@@ -23,7 +26,7 @@ const fetchAddress = async () => {
 };
 
 const addAddress = async (newAddressText: string) => {
-    const response = await fetch('/addAddress', {
+    const response = await fetch(`${BaseUrl}/addAddress`, {
         method: 'POST',
         body: JSON.stringify(
             {
@@ -36,7 +39,7 @@ const addAddress = async (newAddressText: string) => {
 }
 
 const deleteAddress = async (selectedAddress: string) => {
-    const response = await fetch('/deleteaddress', {
+    const response = await fetch(`${BaseUrl}/deleteaddress`, {
         method: 'POST',
         body: JSON.stringify({
             address: selectedAddress,
@@ -47,7 +50,7 @@ const deleteAddress = async (selectedAddress: string) => {
 }
 
 const fetchMails = async (selectedAddress: string, page: number) => {
-    const response = await fetch('/mails', {
+    const response = await fetch(`${BaseUrl}/mails`, {
         method: 'POST',
         body: JSON.stringify(
             {
@@ -61,7 +64,7 @@ const fetchMails = async (selectedAddress: string, page: number) => {
 };
 
 const fetchMail = async (id: string) => {
-    const response = await fetch('/mailData', {
+    const response = await fetch(`${BaseUrl}/mailData`, {
         method: 'POST',
         body: JSON.stringify(
             {
@@ -74,7 +77,7 @@ const fetchMail = async (id: string) => {
 }
 
 const deleteMail = async (deleteItemKey: string) => {
-    await fetch('/deleteMail', {
+    await fetch(`${BaseUrl}/deleteMail`, {
         method: 'POST',
         body: JSON.stringify(
             {

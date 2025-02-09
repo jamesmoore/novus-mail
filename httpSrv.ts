@@ -5,6 +5,7 @@ import { join } from 'path'
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { Database } from 'better-sqlite3';
+import cors from 'cors';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -24,6 +25,11 @@ const mod = {
 		});
 
 		app.use(express.static(staticContentPath));
+
+		if (process.env.CORS_ALLOW_ALL_ORIGINS == "true") {
+			console.info("CORS: Allowing all origins");
+			app.use(cors());
+		}
 
 		app.get('/', (_req, res) => {
 
