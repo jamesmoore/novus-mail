@@ -7,7 +7,7 @@ const defaultHeaders = {
 };
 
 /** To support local development - add this env variable to the file `.env.development.local`, which should be located alongside package.json  */
-const BaseUrl = import.meta.env.VITE_API_BASE_URL;
+const BaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
 
 const fetchDomain = async () => {
     const response = await fetch(`${BaseUrl}/domain`, {
