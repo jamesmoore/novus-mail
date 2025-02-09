@@ -41,11 +41,7 @@ const mod = {
 							}
 							else {
 								console.log("No address matched for: " + recipient);
-								for(const rcptTo of _session.envelope.rcptTo) {
-									console.log("rcptTo.address: " + rcptTo.address);
-								}
 							}
-
 						}
 
 					} catch (err) {
