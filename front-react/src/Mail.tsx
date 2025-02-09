@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Button, Container, Paper } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import applyEmailTemplate from './email-wrapper';
-import MailboxItem from './MailBoxItem';
+import MailboxItem from './MailboxItem';
 
 function Mail() {
     const navigate = useNavigate();

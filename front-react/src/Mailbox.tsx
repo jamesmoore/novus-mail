@@ -12,7 +12,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
 import DraftsIcon from '@mui/icons-material/Drafts';
-import MailboxItem from './MailBoxItem';
+import MailboxItem from './MailboxItem';
 
 const handleCopy = async (text: string) => {
   try {
