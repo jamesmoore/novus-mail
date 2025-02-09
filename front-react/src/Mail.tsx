@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom'
-import { fetchMail } from './api-client';
+import { deleteMail, fetchMail } from './api-client';
 import { useQuery } from '@tanstack/react-query';
 import { Button, Container, Paper } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import applyEmailTemplate from './email-wrapper';
+import MailboxItem from './MailBoxItem';
 
 function Mail() {
     const navigate = useNavigate();
@@ -21,6 +22,16 @@ function Mail() {
         navigate(-1);
     }
 
+    async function onMailItemDelete(itemKey: string) {
+        deleteMail(itemKey)
+            .then(() => {
+                navigate(-1);
+            })
+            .catch(error => {
+                console.error('Failed to delete mail ' + error);
+            });
+    }
+
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -34,11 +45,7 @@ function Mail() {
             <Container sx={{ display: 'flex', flexDirection: 'column', flex: "1 0 auto" }}>
                 {message &&
                     <>
-                        <Paper sx={{ p: 1, mt: 1, mb: 1 }} elevation={3}>
-                            <span>{message.sender}</span>
-                            <div></div>
-                            <span>{message.subject}</span>
-                        </Paper>
+                        <MailboxItem mail={{ id: messageId!, sender: message.sender, subject: message.subject }} onDelete={onMailItemDelete} />
                         <Paper sx={{ flexGrow: 1, flexShrink: 1, overflow: "auto", p: 1, display: "flex", flexDirection: "column" }} elevation={3}>
                             <iframe
                                 height="100%"

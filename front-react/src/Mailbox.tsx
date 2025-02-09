@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext, ChangeEvent } from 'react';
-import { isEnterKeyUp, isLeftMouseClick } from './Events';
 import { useNavigate } from 'react-router-dom';
 import AddressContext from './AddressContext';
 import { AppBar, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Drawer, Fab, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Pagination, Paper, Toolbar, Tooltip, Typography } from '@mui/material';
@@ -7,12 +6,13 @@ import Grid from '@mui/material/Grid2';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAddress, fetchDomain, fetchMails, deleteMail } from './api-client';
-import DeleteIcon from '@mui/icons-material/Delete';
+
 import SettingsIcon from '@mui/icons-material/Settings';
 
 import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
 import DraftsIcon from '@mui/icons-material/Drafts';
+import MailboxItem from './MailBoxItem';
 
 const handleCopy = async (text: string) => {
   try {
@@ -57,30 +57,12 @@ function Mailbox() {
 
   }
 
-  async function mailClicked(e: React.MouseEvent<HTMLDivElement>, itemKey: string) {
-    if (isLeftMouseClick(e)) {
-      navigate('/mail/' + itemKey);
-    }
+  async function onMailItemSelect(itemKey: string) {
+    navigate('/mail/' + itemKey);
   }
 
-  async function mailKeyUp(e: React.KeyboardEvent<HTMLDivElement>, itemKey: string) {
-    if (isEnterKeyUp(e)) {
-      navigate('/mail/' + itemKey);
-    }
-  }
-
-  async function deleteClicked(e: React.MouseEvent<HTMLButtonElement>, itemKey: string) {
-    e.stopPropagation();
-    if (isLeftMouseClick(e)) {
-      await deleteMailEvent(itemKey);
-    }
-  }
-
-  async function deleteKeyUp(e: React.KeyboardEvent<HTMLButtonElement>, itemKey: string) {
-    e.stopPropagation();
-    if (isEnterKeyUp(e)) {
-      await deleteMailEvent(itemKey);
-    }
+  async function onMailItemDelete(itemKey: string) {
+    deleteMailEvent(itemKey);
   }
 
   async function deleteMailEvent(itemKey: string) {
@@ -263,29 +245,7 @@ function Mailbox() {
         <Grid flex="1 0 auto" paddingLeft={1} paddingRight={1}>
           {mailsLoading && (<>Loading...</>)}
           {mails && mails.map((mail) => (
-            <Paper sx={{ mt: 1, mb: 1, "&:hover": { cursor: "pointer" } }} elevation={3} tabIndex={1} role="button" onKeyUp={(e) => mailKeyUp(e, mail.id)} onClick={(e) => mailClicked(e, mail.id)}>
-              <Grid container sx={{ ml: 1 }}>
-                <Grid container size={11} key={mail.id} alignItems='center'>
-                  <Grid size={{ xs: 12, md: 4 }} >
-                    {mail.sender}
-                  </Grid>
-                  <Grid
-                    size={{ md: 8 }}
-                    sx={{
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}>
-                    {mail.subject}
-                  </Grid>
-                </Grid>
-                <Grid container size={1} justifyContent='right' alignItems='center'>
-                  <IconButton color="error" aria-label="delete" onKeyUp={(e) => deleteKeyUp(e, mail.id)} onClick={(e) => deleteClicked(e, mail.id)} >
-                    <DeleteIcon />
-                  </IconButton>
-                </Grid>
-              </Grid>
-            </Paper>
+            <MailboxItem mail={mail} onDelete={onMailItemDelete} onSelect={onMailItemSelect} />
           ))
           }
         </Grid>
