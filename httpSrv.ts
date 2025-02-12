@@ -44,6 +44,8 @@ const mod = {
 
 		})
 
+		// app.use(function(req,res,next){setTimeout(next,1000)});
+
 		const refreshInterval = config.getConfig("MailRefreshInterval");
 		app.post('/addresses', (_req, res) => {
 
@@ -123,7 +125,6 @@ const mod = {
 			const json = req.body;
 
 			try {
-
 				const perPage = Number(config.getConfig('MailCountPerPage'));
 
 				const directionDursorId = (json.cursorId as string) || 'lt';

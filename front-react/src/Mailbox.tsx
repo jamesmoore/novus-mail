@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AddressContext from './AddressContext';
-import { AppBar, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Tooltip, Typography } from '@mui/material';
+import { AppBar, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Tooltip, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import { InfiniteData, useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -325,29 +325,13 @@ function Mailbox() {
           )
           }
 
-          <Box flex="0 0 auto" display="flex" justifyContent={'center'}>
-            <button
-              ref={ref}
-              onClick={() => fetchNextPage()}
-              disabled={!hasNextPage || isFetchingNextPage}
-            >
-              {isFetchingNextPage
-                ? 'Loading more...'
-                : hasNextPage
-                  ? 'Load Newer'
-                  : 'Nothing more to load'}
-            </button>
+          <Box ref={ref} mt={3} mb={3} flex="0 0 auto" display="flex" justifyContent={'center'}>
+            {isFetching && !isFetchingNextPage && <CircularProgress color="primary" />}
+            {isFetchingNextPage && <CircularProgress />}
+            {!hasNextPage && !isFetching && <Divider component="div" sx={{ width: "100%" }}><Typography variant='body1'>No more mail</Typography></Divider>}
           </Box>
-          <Box flex="0 0 auto" display="flex" justifyContent={'center'}>
-            {isFetching && !isFetchingNextPage
-              ? 'Background Updating...'
-              : null}
-          </Box>
-
         </Grid>
-
-
-      </Box >
+      </Box>
 
       <Dialog
         open={deleteConfirm}
