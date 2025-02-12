@@ -1,10 +1,10 @@
-import { useState, useEffect, useContext, ChangeEvent } from 'react';
+import { useState, useEffect, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AddressContext from './AddressContext';
-import { AppBar, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Drawer, Fab, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Pagination, Paper, Toolbar, Tooltip, Typography } from '@mui/material';
+import { AppBar, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Tooltip, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import ContentCopy from '@mui/icons-material/ContentCopy';
-import { useQuery } from '@tanstack/react-query';
+import { InfiniteData, useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchAddress, fetchDomain, fetchMails, deleteMail } from './api-client';
 
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -13,6 +13,8 @@ import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
 import DraftsIcon from '@mui/icons-material/Drafts';
 import MailboxItem from './MailboxItem';
+import { useInView } from 'react-intersection-observer';
+import { MailResponse } from './models/mail-response';
 
 const handleCopy = async (text: string) => {
   try {
@@ -23,14 +25,12 @@ const handleCopy = async (text: string) => {
 };
 
 function Mailbox() {
-  const [error, setError] = useState<string | null>(null);
   const { selectedAddress, setSelectedAddress } = useContext(AddressContext);
-  const [page, setPage] = useState(1);
-  const [pageCount, setPageCount] = useState(1);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteItemKey, setDeleteItemKey] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  const { ref, inView } = useInView();
 
   const drawerWidth = 240;
 
@@ -54,7 +54,6 @@ function Mailbox() {
 
   async function copyClicked() {
     await handleCopy(selectedAddress + domainName);
-
   }
 
   async function onMailItemSelect(itemKey: string) {
@@ -70,24 +69,42 @@ function Mailbox() {
     setDeleteConfirm(true);
   }
 
+  const queryClient = useQueryClient();
+
+  const queryKey = useMemo(() => ['mail', selectedAddress], [selectedAddress]);
+
   async function deleteYes() {
-    deleteMail(deleteItemKey!)
-      .then(() => {
-        setDeleteConfirm(false);
-        refreshMails();
-      })
-      .catch(error => {
-        setError('Failed to delete mail ' + error);
-      });
+    try {
+      await deleteMail(deleteItemKey!);
+      setDeleteConfirm(false);
+
+      const newPagesArray =
+        mails?.pages.map((page) =>
+        ({
+          data: page.data.filter((mail) => mail.id !== deleteItemKey),
+          previousId: page.previousId,
+          nextId: page.nextId
+        } as MailResponse)
+        ) ?? [];
+
+      queryClient.setQueryData(queryKey, (data: InfiniteData<MailResponse, string[]>) =>
+      (
+        {
+          pages: newPagesArray,
+          pageParams: data.pageParams,
+        }
+      )
+      );
+    }
+    catch (error) {
+      console.error('Failed to delete mail ' + error);
+    };
   }
 
   async function deleteNo() {
     setDeleteConfirm(false);
   }
 
-  function handlePageChange(_: ChangeEvent<unknown>, page: number): void {
-    setPage(page);
-  }
 
   const { data: domainName } = useQuery(
     {
@@ -112,31 +129,64 @@ function Mailbox() {
         }
       }
     },
-    [addressesResponse]
+    [addressesResponse, selectedAddress, setSelectedAddress]
   );
 
-  useEffect(() => {
-    setPage(1);
-  }, [selectedAddress]);
+  const {
+    data: mails,
+    error,
+    isFetching,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+    refetch,
+    isRefetching
+  } = useInfiniteQuery({
+    queryKey: queryKey,
+    queryFn: async ({
+      pageParam,
+    }): Promise<MailResponse> => fetchMails(selectedAddress, pageParam),
+    initialPageParam: '',
+    getPreviousPageParam: (firstPage) => firstPage.previousId,
+    getNextPageParam: (lastPage) => lastPage.nextId,
+    enabled: !!selectedAddress,
+  });
 
-  const { data: mails, isLoading: mailsLoading, refetch: refreshMails } = useQuery(
-    {
-      queryKey: ["mail", selectedAddress, page],
-      queryFn: () => fetchMails(selectedAddress, page),
-      refetchInterval: addressesResponse ? addressesResponse?.refreshInterval * 1000 : false,
+  useEffect(() => {
+
+    const newMailCheck = () => {
+      if (mails && mails.pages.length > 0 && mails.pages[0].previousId) {
+        const previousId = mails.pages[0].previousId;
+        fetchMails(selectedAddress, previousId).then(
+          (p) => {
+            if (p.data.length > 0) {
+              refetch();
+            }
+          }
+        );
+      }
+    };
+
+    if (addressesResponse?.refreshInterval) {
+      const interval = setInterval(newMailCheck, addressesResponse?.refreshInterval * 1000);
+      return () => {
+        clearInterval(interval);
+      };
     }
-  );
+  }, [addressesResponse?.refreshInterval, selectedAddress, mails, refetch]);
 
   useEffect(() => {
-    setPageCount(mails ? mails.length > 0 ? page + 1 : page : 1);
-  }, [mails]);
+    if (inView) {
+      fetchNextPage()
+    }
+  }, [fetchNextPage, inView])
 
   if (addressIsLoading) {
     return <div>Loading...</div>;
   }
 
   if (error) {
-    return <div className="error">{error}</div>;
+    return <div className="error">{error.message}</div>;
   }
 
   const drawer = (
@@ -164,6 +214,14 @@ function Mailbox() {
         ))}
       </List>
       <Divider />
+      <ListItem disablePadding>
+        <ListItemButton onClick={(_e) => { navigate('/manage'); }}>
+          <ListItemIcon>
+            <SettingsIcon />
+          </ListItemIcon>
+          <ListItemText primary={"Settings"} />
+        </ListItemButton>
+      </ListItem>
     </div>
   );
 
@@ -237,34 +295,29 @@ function Mailbox() {
           width: {
             xs: "100%",
             sm: `calc(100% - ${drawerWidth}px)`
-          }
+          },
         }}
       >
 
         <Toolbar />
         <Grid flex="1 0 auto" paddingLeft={1} paddingRight={1}>
-          {mailsLoading && (<>Loading...</>)}
-          {mails && mails.map((mail) => (
-            <MailboxItem mail={mail} onDelete={onMailItemDelete} onSelect={onMailItemSelect} />
-          ))
+          {isFetching && !isRefetching && (<>Loading...</>)}
+          {mails && mails.pages && mails.pages.map((mailPage) => {
+            return mailPage.data.map((mail) =>
+            (
+              <MailboxItem key={mail.id} mail={mail} onDelete={onMailItemDelete} onSelect={onMailItemSelect} />
+            ))
           }
+          )
+          }
+
+          <Box ref={ref} mt={3} mb={3} flex="0 0 auto" display="flex" justifyContent={'center'}>
+            {isFetching && !isFetchingNextPage && <CircularProgress color="primary" />}
+            {isFetchingNextPage && <CircularProgress />}
+            {!hasNextPage && !isFetching && <Divider component="div" sx={{ width: "100%" }}><Typography variant='body1'>No more mail</Typography></Divider>}
+          </Box>
         </Grid>
-
-        <Paper sx={{ p: 1, flex: "0 0 auto" }} elevation={3}>
-          <Grid container direction="row" justifyContent="center" alignItems="center">
-            <Pagination count={pageCount} page={page} onChange={handlePageChange} />
-          </Grid>
-        </Paper>
-
-      </Box >
-
-      <Fab size="small" sx={{
-        position: 'absolute',
-        bottom: 48 + 16,
-        right: 16,
-      }} onClick={() => { navigate('/manage'); }}>
-        <SettingsIcon />
-      </Fab>
+      </Box>
 
       <Dialog
         open={deleteConfirm}

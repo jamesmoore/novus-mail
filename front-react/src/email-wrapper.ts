@@ -6,6 +6,9 @@ const applyEmailTemplate = (contents: string ) => {
         <html><head>
         <meta http-equiv="Content-Security-Policy" content="script-src 'none'">
         <base target="_blank">
+        <style>
+            body { font: 16px sans-serif; }
+        </style>
         </head>
         <body>${contents}</body>
         </html>

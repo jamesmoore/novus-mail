@@ -1,4 +1,4 @@
 {
-	"MailCountPerPage" : 10,
+	"MailCountPerPage" : 50,
 	"MailRefreshInterval" : 3
 }

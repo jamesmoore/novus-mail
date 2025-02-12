@@ -1,6 +1,6 @@
 import { AddressesResponse } from "./models/addresses-response";
-import { Mail } from "./models/mail";
 import { MailMessage } from "./models/mail-message";
+import { MailResponse } from "./models/mail-response";
 
 const defaultHeaders = {
     'Content-Type': 'application/json',
@@ -49,18 +49,18 @@ const deleteAddress = async (selectedAddress: string) => {
     return response.text();
 }
 
-const fetchMails = async (selectedAddress: string, page: number) => {
+const fetchMails = async (selectedAddress: string, cursorId: string) => {
     const response = await fetch(`${BaseUrl}/mails`, {
         method: 'POST',
         body: JSON.stringify(
             {
                 addr: selectedAddress,
-                page: page
+                cursorId: cursorId
             }
         ),
         headers: defaultHeaders,
     });
-    return response.json() as Promise<Mail[]>;
+    return response.json() as Promise<MailResponse>;
 };
 
 const fetchMail = async (id: string) => {

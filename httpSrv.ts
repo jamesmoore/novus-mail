@@ -11,6 +11,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const staticContentPath = './front-react/dist';
 
+interface Mail {
+	id: string;
+	sender: string;
+	subject: string;
+}
+
+
 const mod = {
 
 	start: function (db: Database, domainName: string, port: number) {
@@ -36,6 +43,8 @@ const mod = {
 			res.redirect('/index.html');
 
 		})
+
+		// app.use(function(req,res,next){setTimeout(next,1000)});
 
 		const refreshInterval = config.getConfig("MailRefreshInterval");
 		app.post('/addresses', (_req, res) => {
@@ -116,9 +125,41 @@ const mod = {
 			const json = req.body;
 
 			try {
+				const perPage = Number(config.getConfig('MailCountPerPage'));
 
-				const rows = db.prepare("SELECT id, sender, subject FROM mail WHERE recipient = @recipient ORDER BY id DESC LIMIT @mailCount OFFSET (@page-1)*@mailCount").all({ recipient: json.addr, page: json.page, mailCount: config.getConfig('MailCountPerPage') });
-				res.json(rows);
+				const directionDursorId = (json.cursorId as string) || 'lt';
+				const direction = directionDursorId.substring(0, 2);
+				const cursorId = directionDursorId.substring(2);
+
+				const params = {
+					recipient: json.addr,
+					cursorId: cursorId,
+					mailCount: perPage
+				};
+
+				const comparisonOperator = direction === 'lt' ? '<' : '>';
+				const whereClause = cursorId ? `AND Id ${comparisonOperator} @cursorId` : '';
+				const sortOrder = direction === 'lt' ? 'DESC' : 'ASC';
+
+				const sql = `
+				  SELECT id, sender, subject 
+				  FROM mail 
+				  WHERE recipient = @recipient ${whereClause}
+				  ORDER BY id ${sortOrder} 
+				  LIMIT @mailCount
+				`;
+
+				var rows = db.prepare(sql).all(params) as Mail[];
+
+				if (direction === 'gt') {
+					rows = rows.sort((a, b) => b.id > a.id ? 1 : -1);
+				}
+
+				res.json({
+					data: rows,
+					nextId: (rows.length === 0 || rows.length < perPage) ? null : 'lt' + rows[rows.length - 1].id,
+					previousId: rows.length === 0 ? null : 'gt' + rows[0].id,
+				});
 
 			} catch (err) {
 
