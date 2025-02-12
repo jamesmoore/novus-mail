@@ -133,15 +133,12 @@ function Mailbox() {
   );
 
   const {
-    status,
     data: mails,
     error,
     isFetching,
     isFetchingNextPage,
-    isFetchingPreviousPage,
     fetchNextPage,
     hasNextPage,
-    hasPreviousPage,
     refetch,
     isRefetching
   } = useInfiniteQuery({
@@ -225,17 +222,6 @@ function Mailbox() {
           <ListItemText primary={"Settings"} />
         </ListItemButton>
       </ListItem>
-
-
-      <Divider />
-      <small>
-        Status: {status} <br />
-        IsFetchingPreviousPage: {isFetchingPreviousPage} <br />
-        hasPreviousPage: {hasPreviousPage} <br />
-        inView: {inView ? "true" : "false"}<br />
-        isClosing: {isClosing ? "true" : "false"}<br />
-        mobileOpen: {mobileOpen ? "true" : "false"}<br />
-      </small>
     </div>
   );
 
