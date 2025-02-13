@@ -35,7 +35,7 @@ const mod = {
 							if ((res[0] as any).count > 0) {
 
 								const id = h.randomID();
-								db.prepare("INSERT INTO mail (id, recipient, sender, subject, content) VALUES (?, ?, ?, ?, ?)").run(id, recipientName, sender, subject, content);
+								db.prepare("INSERT INTO mail (id, recipient, sender, subject, content, read, received) VALUES (?, ?, ?, ?, ?, ?, ?)").run(id, recipientName, sender, subject, content, 0, mail.date?.getTime() ?? 0);
 								break;
 
 							}

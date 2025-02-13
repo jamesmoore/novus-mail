@@ -29,6 +29,19 @@ const database = {
 
 			db.exec("CREATE TABLE IF NOT EXISTS mail (id TEXT NOT NULL, recipient TEXT NOT NULL, sender TEXT NOT NULL, subject TEXT NOT NULL, content TEXT NOT NULL)");
 
+
+			try {
+				db.exec("ALTER TABLE mail ADD COLUMN read INTEGER default 0");
+			} catch (e) {
+				console.log("read column already exists");
+			}
+
+			try {
+				db.exec("ALTER TABLE mail ADD COLUMN received INTEGER default 0");
+			} catch (e) {
+				console.log("received column already exists");
+			}
+
 			return db;
 
 		} catch (err) {

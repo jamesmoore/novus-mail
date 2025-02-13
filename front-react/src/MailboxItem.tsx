@@ -1,13 +1,18 @@
-import { IconButton, Paper } from "@mui/material";
+import { IconButton, Paper, Tooltip, Typography } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import Grid from '@mui/material/Grid2';
 import { Mail } from "./models/mail";
 import { isEnterKeyUp, isLeftMouseClick } from "./Events";
+import humanizeDuration from "humanize-duration";
 
 interface MailboxItemProps {
     mail: Mail;
     onSelect?: (id: string) => void;
     onDelete?: (id: string) => void;
+}
+
+function timeSince(timeStamp: number) {
+    return humanizeDuration(new Date().getTime() - timeStamp, { largest: 1, round: true });
 }
 
 function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
@@ -45,16 +50,26 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
             <Grid container sx={{ ml: 1 }}>
                 <Grid container size={11} key={mail.id} alignItems='center'>
                     <Grid size={{ xs: 12, md: 4 }} >
-                        {mail.sender}
+                        <Typography>{mail.sender}</Typography>
                     </Grid>
                     <Grid
-                        size={{ md: 8 }}
+                        size={{ xs: 12, md: 7 }}
                         sx={{
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                         }}>
-                        {mail.subject}
+                        <Typography>{mail.subject}</Typography>
+                    </Grid>
+                    <Grid container
+                        size={{ md: 1 }}
+                        justifyContent='right'
+                         >
+                        {mail.received !== 0 &&
+                            <Tooltip title={new Date(mail.received).toLocaleString()}>
+                                <Typography>{timeSince(mail.received)}</Typography>
+                            </Tooltip>
+                        }
                     </Grid>
                 </Grid>
                 <Grid container size={1} justifyContent='right' alignItems='center'>

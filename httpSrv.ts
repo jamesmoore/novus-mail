@@ -15,6 +15,8 @@ interface Mail {
 	id: string;
 	sender: string;
 	subject: string;
+	read: boolean;
+	received: number;
 }
 
 
@@ -142,7 +144,7 @@ const mod = {
 				const sortOrder = direction === 'lt' ? 'DESC' : 'ASC';
 
 				const sql = `
-				  SELECT id, sender, subject 
+				  SELECT id, sender, subject, read, received 
 				  FROM mail 
 				  WHERE recipient = @recipient ${whereClause}
 				  ORDER BY id ${sortOrder} 
@@ -176,7 +178,7 @@ const mod = {
 
 			try {
 
-				const rows = db.prepare("SELECT sender, subject, content FROM mail WHERE id = ?").all(json.id);
+				const rows = db.prepare("SELECT sender, subject, content, read, received FROM mail WHERE id = ?").all(json.id);
 				res.json(rows[0])
 
 			} catch (err) {
