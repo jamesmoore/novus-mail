@@ -5,7 +5,7 @@ import { AppBar, Box, Button, CircularProgress, Dialog, DialogActions, DialogCon
 import Grid from '@mui/material/Grid2';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import { InfiniteData, useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchAddress, fetchDomain, fetchMails, deleteMail } from './api-client';
+import { fetchAddress, fetchDomain, fetchMails, deleteMail, readMail } from './api-client';
 
 import SettingsIcon from '@mui/icons-material/Settings';
 
@@ -15,6 +15,7 @@ import DraftsIcon from '@mui/icons-material/Drafts';
 import MailboxItem from './MailboxItem';
 import { useInView } from 'react-intersection-observer';
 import { MailResponse } from './models/mail-response';
+import { Mail } from './models/mail';
 
 const handleCopy = async (text: string) => {
   try {
@@ -56,8 +57,10 @@ function Mailbox() {
     await handleCopy(selectedAddress + domainName);
   }
 
-  async function onMailItemSelect(itemKey: string) {
-    navigate('/mail/' + itemKey);
+  async function onMailItemSelect(mail: Mail) {
+    await readMail(mail.id);
+    mail.read = true;
+    navigate('/mail/' + mail.id);
   }
 
   async function onMailItemDelete(itemKey: string) {
@@ -305,7 +308,7 @@ function Mailbox() {
           {mails && mails.pages && mails.pages.map((mailPage) => {
             return mailPage.data.map((mail) =>
             (
-              <MailboxItem key={mail.id} mail={mail} onDelete={onMailItemDelete} onSelect={onMailItemSelect} />
+              <MailboxItem key={mail.id} mail={mail} onDelete={onMailItemDelete} onSelect={() => onMailItemSelect(mail)} />
             ))
           }
           )

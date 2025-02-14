@@ -45,7 +45,13 @@ function Mail() {
             <Container sx={{ display: 'flex', flexDirection: 'column', flex: "1 0 auto" }}>
                 {message &&
                     <>
-                        <MailboxItem mail={{ id: messageId!, sender: message.sender, subject: message.subject }} onDelete={onMailItemDelete} />
+                        <MailboxItem mail={{
+                            id: messageId!,
+                            sender: message.sender,
+                            subject: message.subject,
+                            read: message.read,
+                            received: message.received,
+                        }} onDelete={onMailItemDelete} />
                         <Paper sx={{ flexGrow: 1, flexShrink: 1, overflow: "auto", p: 1, display: "flex", flexDirection: "column" }} elevation={3}>
                             <iframe
                                 height="100%"
