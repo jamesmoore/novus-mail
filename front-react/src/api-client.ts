@@ -88,6 +88,18 @@ const deleteMail = async (deleteItemKey: string) => {
     })
 };
 
+const readMail = async (id: string) => {
+    await fetch(`${BaseUrl}/readMail`, {
+        method: 'POST',
+        body: JSON.stringify(
+            {
+                id: id,
+            }
+        ),
+        headers: defaultHeaders,
+    })
+};
+
 export {
     fetchDomain,
     fetchAddress,
@@ -95,5 +107,6 @@ export {
     deleteAddress,
     fetchMails,
     fetchMail,
-    deleteMail
+    deleteMail,
+    readMail,
 };

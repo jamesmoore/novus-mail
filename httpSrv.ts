@@ -208,6 +208,19 @@ const mod = {
 
 		})
 
+		app.post('/readMail', (req, res) => {
+
+			const json = req.body;
+
+			try {
+				db.prepare("UPDATE mail SET read = 1 where id = ?").run(json.id);
+				res.status(200).send();
+			} catch (err) {
+				console.error("DB update mail fail")
+				console.error(err)
+			}
+		})
+
 		// catch-all handler for react router
 		app.get('*', (_req, res) => {
 			res.sendFile(join(__dirname, staticContentPath, 'index.html'), (err) => {
