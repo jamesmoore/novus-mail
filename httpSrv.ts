@@ -221,6 +221,22 @@ const mod = {
 			}
 		})
 
+		app.post('/unreadCounts', (req, res) => {
+
+			try {
+				const unread = db.prepare(`
+					SELECT recipient, count(*) as unread
+					from mail
+					where read = 0
+					group by recipient
+					`).all();
+				res.json(unread);
+			} catch (err) {
+				console.error("unread counts select fail");
+				console.error(err)
+			}
+		})
+
 		// catch-all handler for react router
 		app.get('*', (_req, res) => {
 			res.sendFile(join(__dirname, staticContentPath, 'index.html'), (err) => {
