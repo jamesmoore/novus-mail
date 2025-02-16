@@ -5,7 +5,7 @@ import { AppBar, Box, Button, CircularProgress, Dialog, DialogActions, DialogCon
 import Grid from '@mui/material/Grid2';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import { InfiniteData, useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchAddress, fetchDomain, fetchMails, deleteMail, readMail } from './api-client';
+import { fetchAddress, fetchDomain, fetchMails, deleteMail, readMail, fetchUnreadCounts } from './api-client';
 
 import SettingsIcon from '@mui/icons-material/Settings';
 
@@ -98,6 +98,8 @@ function Mailbox() {
         }
       )
       );
+
+      await refetchUnread();
     }
     catch (error) {
       console.error('Failed to delete mail ' + error);
@@ -120,6 +122,14 @@ function Mailbox() {
     {
       queryKey: ["addresses"],
       queryFn: fetchAddress
+    }
+  )
+
+  const { data: unreadCounts, refetch: refetchUnread } = useQuery(
+    {
+      queryKey: ["unread-counts"],
+      queryFn: fetchUnreadCounts,
+      refetchInterval: 10000,
     }
   )
 
@@ -212,6 +222,7 @@ function Mailbox() {
                 {address.addr === selectedAddress ? <DraftsIcon /> : <MailIcon />}
               </ListItemIcon>
               <ListItemText primary={address.addr} />
+              <ListItemText sx={{ ml: "auto", textAlign: "right" }} primary={unreadCounts?.filter(p => p.recipient === address.addr).at(0)?.unread} primaryTypographyProps={{ color: "primary" }} />
             </ListItemButton>
           </ListItem>
         ))}

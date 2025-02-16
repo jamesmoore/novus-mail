@@ -1,6 +1,7 @@
 import { AddressesResponse } from "./models/addresses-response";
 import { MailMessage } from "./models/mail-message";
 import { MailResponse } from "./models/mail-response";
+import { UnreadCount } from "./models/unread-count";
 
 const defaultHeaders = {
     'Content-Type': 'application/json',
@@ -100,6 +101,14 @@ const readMail = async (id: string) => {
     })
 };
 
+const fetchUnreadCounts = async () => {
+    const response = await fetch(`${BaseUrl}/unreadCounts`, {
+        method: 'POST',
+        headers: defaultHeaders,
+    });
+    return response.json() as Promise<UnreadCount[]>;
+};
+
 export {
     fetchDomain,
     fetchAddress,
@@ -109,4 +118,5 @@ export {
     fetchMail,
     deleteMail,
     readMail,
+    fetchUnreadCounts,
 };
