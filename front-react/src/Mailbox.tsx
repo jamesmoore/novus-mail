@@ -54,7 +54,7 @@ function Mailbox() {
   };
 
   async function copyClicked() {
-    await handleCopy(selectedAddress + domainName);
+    await handleCopy(getFullAddress());
   }
 
   async function onMailItemSelect(mail: Mail) {
@@ -75,6 +75,10 @@ function Mailbox() {
   const queryClient = useQueryClient();
 
   const queryKey = useMemo(() => ['mail', selectedAddress], [selectedAddress]);
+
+  function getFullAddress() {
+    return `${selectedAddress}@${domainName}`;
+  }
 
   async function deleteYes() {
     try {
@@ -259,7 +263,7 @@ function Mailbox() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            {selectedAddress}@{domainName}
+            {getFullAddress()}
           </Typography>
           <Tooltip title="Copy">
             <IconButton onClick={copyClicked}>
