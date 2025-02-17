@@ -1,38 +1,23 @@
-import { useState, useEffect, useContext, useMemo } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AddressContext from './AddressContext';
-import { AppBar, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Tooltip, Typography } from '@mui/material';
+import { AppBar, Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import ContentCopy from '@mui/icons-material/ContentCopy';
-import { InfiniteData, useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchAddress, fetchDomain, fetchMails, deleteMail, readMail, fetchUnreadCounts } from './api-client';
+import { useQuery } from '@tanstack/react-query';
+import { fetchAddress, fetchUnreadCounts } from './api-client';
 
 import SettingsIcon from '@mui/icons-material/Settings';
 
 import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
 import DraftsIcon from '@mui/icons-material/Drafts';
-import MailboxItem from './MailboxItem';
-import { useInView } from 'react-intersection-observer';
-import { MailResponse } from './models/mail-response';
-import { Mail } from './models/mail';
-
-const handleCopy = async (text: string) => {
-  try {
-    await navigator.clipboard.writeText(text);
-  } catch (err) {
-    console.error('Failed to copy:', err);
-  }
-};
+import MailboxItems from './MailboxItems';
+import TopBarAddress from './TopBarAddress';
 
 function Mailbox() {
   const { selectedAddress, setSelectedAddress } = useContext(AddressContext);
-  const [deleteConfirm, setDeleteConfirm] = useState(false);
-  const [deleteItemKey, setDeleteItemKey] = useState<string | null>(null);
+
   const navigate = useNavigate();
-
-  const { ref, inView } = useInView();
-
   const drawerWidth = 240;
 
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -52,75 +37,6 @@ function Mailbox() {
       setMobileOpen(!mobileOpen);
     }
   };
-
-  async function copyClicked() {
-    await handleCopy(getFullAddress());
-  }
-
-  async function onMailItemSelect(mail: Mail) {
-    await readMail(mail.id);
-    mail.read = true;
-    navigate('/mail/' + mail.id);
-  }
-
-  async function onMailItemDelete(itemKey: string) {
-    deleteMailEvent(itemKey);
-  }
-
-  async function deleteMailEvent(itemKey: string) {
-    setDeleteItemKey(itemKey);
-    setDeleteConfirm(true);
-  }
-
-  const queryClient = useQueryClient();
-
-  const queryKey = useMemo(() => ['mail', selectedAddress], [selectedAddress]);
-
-  function getFullAddress() {
-    return `${selectedAddress}@${domainName}`;
-  }
-
-  async function deleteYes() {
-    try {
-      await deleteMail(deleteItemKey!);
-      setDeleteConfirm(false);
-
-      const newPagesArray =
-        mails?.pages.map((page) =>
-        ({
-          data: page.data.filter((mail) => mail.id !== deleteItemKey),
-          previousId: page.previousId,
-          nextId: page.nextId
-        } as MailResponse)
-        ) ?? [];
-
-      queryClient.setQueryData(queryKey, (data: InfiniteData<MailResponse, string[]>) =>
-      (
-        {
-          pages: newPagesArray,
-          pageParams: data.pageParams,
-        }
-      )
-      );
-
-      await refetchUnread();
-    }
-    catch (error) {
-      console.error('Failed to delete mail ' + error);
-    };
-  }
-
-  async function deleteNo() {
-    setDeleteConfirm(false);
-  }
-
-
-  const { data: domainName } = useQuery(
-    {
-      queryKey: ["domain"],
-      queryFn: fetchDomain
-    }
-  );
 
   const { data: addressesResponse, isLoading: addressIsLoading } = useQuery(
     {
@@ -149,61 +65,8 @@ function Mailbox() {
     [addressesResponse, selectedAddress, setSelectedAddress]
   );
 
-  const {
-    data: mails,
-    error,
-    isFetching,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-    refetch,
-    isRefetching
-  } = useInfiniteQuery({
-    queryKey: queryKey,
-    queryFn: async ({
-      pageParam,
-    }): Promise<MailResponse> => fetchMails(selectedAddress, pageParam),
-    initialPageParam: '',
-    getPreviousPageParam: (firstPage) => firstPage.previousId,
-    getNextPageParam: (lastPage) => lastPage.nextId,
-    enabled: !!selectedAddress,
-  });
-
-  useEffect(() => {
-
-    const newMailCheck = () => {
-      if (mails && mails.pages.length > 0 && mails.pages[0].previousId) {
-        const previousId = mails.pages[0].previousId;
-        fetchMails(selectedAddress, previousId).then(
-          (p) => {
-            if (p.data.length > 0) {
-              refetch();
-            }
-          }
-        );
-      }
-    };
-
-    if (addressesResponse?.refreshInterval) {
-      const interval = setInterval(newMailCheck, addressesResponse?.refreshInterval * 1000);
-      return () => {
-        clearInterval(interval);
-      };
-    }
-  }, [addressesResponse?.refreshInterval, selectedAddress, mails, refetch]);
-
-  useEffect(() => {
-    if (inView) {
-      fetchNextPage()
-    }
-  }, [fetchNextPage, inView])
-
   if (addressIsLoading) {
     return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div className="error">{error.message}</div>;
   }
 
   const drawer = (
@@ -222,7 +85,7 @@ function Mailbox() {
               }}
               selected={address.addr === selectedAddress}
             >
-              <ListItemIcon sx={{ minWidth: '40px'}}>
+              <ListItemIcon sx={{ minWidth: '40px' }}>
                 {address.addr === selectedAddress ? <DraftsIcon /> : <MailIcon />}
               </ListItemIcon>
               <ListItemText primary={address.addr} sx={{ mr: 1, overflow: 'hidden', textOverflow: 'ellipsis' }} />
@@ -234,7 +97,7 @@ function Mailbox() {
       <Divider />
       <ListItem disablePadding>
         <ListItemButton onClick={(_e) => { navigate('/manage'); }}>
-          <ListItemIcon sx={{ minWidth: '40px'}}>
+          <ListItemIcon sx={{ minWidth: '40px' }}>
             <SettingsIcon />
           </ListItemIcon>
           <ListItemText primary={"Settings"} />
@@ -262,14 +125,9 @@ function Mailbox() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            {getFullAddress()}
-          </Typography>
-          <Tooltip title="Copy">
-            <IconButton onClick={copyClicked}>
-              <ContentCopy />
-            </IconButton>
-          </Tooltip>
+
+          <TopBarAddress/>
+
         </Toolbar>
       </AppBar>
       <Box
@@ -319,45 +177,11 @@ function Mailbox() {
 
         <Toolbar />
         <Grid flex="1 0 auto" paddingLeft={1} paddingRight={1}>
-          {isFetching && !isRefetching && (<>Loading...</>)}
-          {mails && mails.pages && mails.pages.map((mailPage) => {
-            return mailPage.data.map((mail) =>
-            (
-              <MailboxItem key={mail.id} mail={mail} onDelete={onMailItemDelete} onSelect={() => onMailItemSelect(mail)} />
-            ))
-          }
-          )
-          }
-
-          <Box ref={ref} mt={3} mb={3} flex="0 0 auto" display="flex" justifyContent={'center'}>
-            {isFetching && !isFetchingNextPage && <CircularProgress color="primary" />}
-            {isFetchingNextPage && <CircularProgress />}
-            {!hasNextPage && !isFetching && <Divider component="div" sx={{ width: "100%" }}><Typography variant='body1'>No more mail</Typography></Divider>}
-          </Box>
+          <MailboxItems refreshInterval={addressesResponse?.refreshInterval} onRefreshUnread={async () => { await refetchUnread(); }} />
         </Grid>
       </Box>
 
-      <Dialog
-        open={deleteConfirm}
-        onClose={deleteNo}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          Confirm
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            delete?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={deleteNo}>No</Button>
-          <Button onClick={deleteYes} autoFocus>
-            Yes
-          </Button>
-        </DialogActions>
-      </Dialog>
+
 
     </Box>
   );
