@@ -33,6 +33,9 @@ function Manage() {
                 const addresses = addressesResponse.addresses;
                 setSelectedAddress(addresses[addresses.length - 1].addr);
             }
+            else {
+                setSelectedAddress('');
+            }
         },
         [addressesResponse]
     );
@@ -64,6 +67,7 @@ function Manage() {
     }
 
     function deleteYes() {
+        setSelectedAddress('');
         apiDeleteAddress(selectedAddress)
             .then((data: string) => {
                 if (data === 'done') {
@@ -104,28 +108,30 @@ function Manage() {
                         <Button sx={{ m: 1 }} variant="contained" onClick={addAddress}>Add this address</Button>
                     </Grid>
                 </Grid>
-                <Grid container direction="column" justifyContent="center" alignItems="center" >
-                    {/*List of existing addresses*/}
-                    <Grid sx={{ m: 1 }}>
-                        <Typography variant="h5" gutterBottom>Manage addresses</Typography>
+                {(addressesResponse?.addresses?.length ?? 0) > 0 &&
+                    <Grid container direction="column" justifyContent="center" alignItems="center" >
+                        {/*List of existing addresses*/}
+                        <Grid sx={{ m: 1 }}>
+                            <Typography variant="h5" gutterBottom>Manage addresses</Typography>
+                        </Grid>
+                        <Grid container direction="row" justifyContent="center" alignItems="center" >
+                            <FormControl sx={{ minWidth: 210 }}>
+                                <Select value={selectedAddress} onChange={(e) => setSelectedAddress(e.target.value)}>
+                                    {addressesResponse && addressesResponse.addresses.map((address, index) => (
+                                        <MenuItem key={index} value={address.addr} >
+                                            {address.addr}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            <FormControl sx={{ m: 1 }}>
+                                @{domainName}
+                            </FormControl>
+                        </Grid>
+                        {/*Delete selected address*/}
+                        <Button sx={{ m: 1 }} variant="contained" disabled={addressesResponse === undefined || addressesResponse.addresses.length == 0} onClick={deleteAddress}>Delete this address</Button>
                     </Grid>
-                    <Grid container direction="row" justifyContent="center" alignItems="center" >
-                        <FormControl sx={{ minWidth: 210 }}>
-                            <Select value={selectedAddress}>
-                                {addressesResponse && addressesResponse.addresses.map((address, index) => (
-                                    <MenuItem key={index} value={address.addr}>
-                                        {address.addr}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                        <FormControl sx={{ m: 1 }}>
-                            @{domainName}
-                        </FormControl>
-                    </Grid>
-                    {/*Delete selected address*/}
-                    <Button sx={{ m: 1 }} variant="contained" disabled={addressesResponse === undefined || addressesResponse.addresses.length == 0} onClick={deleteAddress}>Delete this address</Button>
-                </Grid>
+                }
 
                 <Dialog
                     open={deleteConfirm}
