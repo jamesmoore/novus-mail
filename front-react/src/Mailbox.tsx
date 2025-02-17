@@ -222,10 +222,10 @@ function Mailbox() {
               }}
               selected={address.addr === selectedAddress}
             >
-              <ListItemIcon>
+              <ListItemIcon sx={{ minWidth: '40px'}}>
                 {address.addr === selectedAddress ? <DraftsIcon /> : <MailIcon />}
               </ListItemIcon>
-              <ListItemText primary={address.addr} />
+              <ListItemText primary={address.addr} sx={{ mr: 1, overflow: 'hidden', textOverflow: 'ellipsis' }} />
               <ListItemText sx={{ ml: "auto", textAlign: "right" }} primary={unreadCounts?.filter(p => p.recipient === address.addr).at(0)?.unread} primaryTypographyProps={{ color: "primary" }} />
             </ListItemButton>
           </ListItem>
@@ -234,7 +234,7 @@ function Mailbox() {
       <Divider />
       <ListItem disablePadding>
         <ListItemButton onClick={(_e) => { navigate('/manage'); }}>
-          <ListItemIcon>
+          <ListItemIcon sx={{ minWidth: '40px'}}>
             <SettingsIcon />
           </ListItemIcon>
           <ListItemText primary={"Settings"} />
