@@ -18,13 +18,14 @@ const mod = {
 
 					const mail = await simpleParser(stream);
 
-					const sender = mail.from?.value[0].address || mail.from?.value[0].name;
-					const subject = mail.subject;
+					const senderAddress = mail.from?.value?.at(0);
+					const sender = senderAddress?.address ?? senderAddress?.name ?? 'unknown sender';
+					const subject = mail.subject  ?? 'No Subject';
 					const content = mail.html ? mail.html : mail.textAsHtml;
 
 					try {
 
-						const mailToAddresses = (mail.to as AddressObject).value.filter(p => p.address).map(p => p.address!);
+						const mailToAddresses = (mail.to as AddressObject)?.value?.filter(p => p.address).map(p => p.address!) ?? [];
 						const smtpRcptAddresses =  _session.envelope.rcptTo.map(p => p.address);
 
 						for (const recipient of mailToAddresses.concat(smtpRcptAddresses)){
