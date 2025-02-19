@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom'
 import { deleteMail, fetchMail } from './api-client';
 import { useQuery } from '@tanstack/react-query';
-import { Button, Container, Paper } from '@mui/material';
+import { Paper } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import applyEmailTemplate from './email-wrapper';
 import MailboxItem from './MailboxItem';
@@ -17,10 +17,6 @@ function Mail() {
             queryFn: () => messageId ? fetchMail(messageId) : undefined,
         }
     );
-
-    async function backClicked() {
-        navigate(-1);
-    }
 
     async function onMailItemDelete(itemKey: string) {
         deleteMail(itemKey)
@@ -41,10 +37,10 @@ function Mail() {
     }
 
     return (
-        <Grid container flexDirection='column' height='100vh'  >
-            <Container sx={{ display: 'flex', flexDirection: 'column', flex: "1 0 auto" }}>
-                {message &&
-                    <>
+        <>
+            {message &&
+                <Grid display="flex" flexDirection="column" height="100%">
+                    <Grid flex="0 0 auto">
                         <MailboxItem mail={{
                             id: messageId!,
                             sender: message.sender,
@@ -52,22 +48,18 @@ function Mail() {
                             read: message.read,
                             received: message.received,
                         }} onDelete={onMailItemDelete} />
-                        <Paper sx={{ flexGrow: 1, flexShrink: 1, overflow: "auto", p: 1, display: "flex", flexDirection: "column" }} elevation={3}>
-                            <iframe
-                                height="100%"
-                                srcDoc={applyEmailTemplate(message.content)}
-                                style={{ border: "none", backgroundColor: "white", borderRadius: "4px", }}
-                                sandbox="allow-popups allow-popups-to-escape-sandbox"
-                            ></iframe>
-                        </Paper>
-                    </>}
-            </Container >
-
-            <Paper sx={{ p: 1, flex: "0 0 auto" }} elevation={3}>
-                <Button onClick={backClicked}>Back</Button>
-                <Button onClick={() => { navigate('/manage'); }} className="adaptWidthSmall">Manage addresses</Button>
-            </Paper>
-        </Grid>
+                    </Grid>
+                    <Paper sx={{ mb: 1, flexGrow: 1, flexShrink: 1, display: "flex", flexDirection: "column", height: "100%" }} >
+                        <iframe
+                            height="100%"
+                            srcDoc={applyEmailTemplate(message.content)}
+                            style={{ border: "none", backgroundColor: "white", borderRadius: "4px", }}
+                            sandbox="allow-popups allow-popups-to-escape-sandbox"
+                        ></iframe>
+                    </Paper>
+                </Grid>
+            }
+        </>
     );
 }
 
