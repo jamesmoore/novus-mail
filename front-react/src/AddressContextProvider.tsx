@@ -1,7 +1,7 @@
-import React, { ReactNode, useState } from 'react';
+import { FC, ReactNode, useState } from 'react';
 import AddressContext from './AddressContext';
 
-const AddressContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+const AddressContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [selectedAddress, setAddressState] = useState('');
 
   const setSelectedAddress = (newAddress: string) => {
