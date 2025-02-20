@@ -237,6 +237,15 @@ const mod = {
 			}
 		})
 
+		app.post('/status', (req, res) => {
+			const unread = db.prepare('SELECT count(*) as unread from mail where read = 0').get();
+			const addresses = db.prepare('SELECT count(*) as addresses from address').get();
+			res.json({
+				unread: (unread as any).unread,
+				addresses: (addresses as any).addresses,
+			});
+		});
+
 		// catch-all handler for react router
 		app.get('*', (_req, res) => {
 			res.sendFile(join(__dirname, staticContentPath, 'index.html'), (err) => {
