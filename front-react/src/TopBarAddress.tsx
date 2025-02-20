@@ -1,7 +1,6 @@
 import ContentCopy from "@mui/icons-material/ContentCopy";
 import { IconButton, Tooltip, Typography } from "@mui/material";
-import { fetchDomain } from "./api-client";
-import { useQuery } from "@tanstack/react-query";
+import useDomain from "./useDomain";
 import { useContext } from "react";
 import AddressContext from "./AddressContext";
 
@@ -14,6 +13,9 @@ const handleCopy = async (text: string) => {
 };
 
 function TopBarAddress() {
+
+    const { data: domainName } = useDomain();
+
     const { selectedAddress } = useContext(AddressContext);
 
     async function copyClicked() {
@@ -23,13 +25,6 @@ function TopBarAddress() {
     function getFullAddress() {
         return `${selectedAddress}@${domainName}`;
     }
-
-    const { data: domainName } = useQuery(
-        {
-            queryKey: ["domain"],
-            queryFn: fetchDomain
-        }
-    );
 
     return (
         <>

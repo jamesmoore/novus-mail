@@ -5,7 +5,7 @@ const useAddressResponse = () => useQuery(
     {
       queryKey: ["addresses"],
       queryFn: fetchAddress,
-      staleTime: 5 * 1000,
+      staleTime: 900 * 1000,
     }
   )
 
