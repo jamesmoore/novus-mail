@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import CssBaseline from '@mui/material/CssBaseline';
 
 // import './index.css'
@@ -38,6 +38,7 @@ createRoot(document.getElementById('app')!).render(
               <Route path="/manage" element={<Layout bodyChildren={<Manage />} topBarChildren={<TopBarAddress />} />} />
               <Route path="/mail/:messageId" element={<Layout bodyChildren={<Mail />} topBarChildren={<TopBarAddress />} />} />
               <Route path="/inbox/:address" element={<Layout bodyChildren={<Mailbox />} topBarChildren={<TopBarAddress />} />} />
+              <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </Router>
         </AddressContextProvider>

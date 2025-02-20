@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import AddressContext from './AddressContext';
 import { AppBar, Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
 import Grid from '@mui/material/Grid2';
@@ -19,6 +19,7 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
   const { selectedAddress, setSelectedAddress } = useContext(AddressContext);
 
   const navigate = useNavigate();
+  const { address: urlAddressSegment } = useParams();
   const drawerWidth = 240;
 
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -46,13 +47,18 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
   useEffect(
     () => {
       if (addressesResponse && addressesResponse.addresses.length > 0) {
-        const addresses = addressesResponse.addresses;
-        if (selectedAddress === '' || addresses.every(p => p.addr !== selectedAddress)) {
-          setSelectedAddress(addresses[addresses.length - 1].addr);
+        const addresses = addressesResponse.addresses.map(p => p.addr);
+
+        // Initialize selected address from URL segment, or if none present, default to last.
+        if (urlAddressSegment && addresses.includes(urlAddressSegment)) {
+          setSelectedAddress(urlAddressSegment);
+        }
+        else if (selectedAddress === '' || addresses.includes(selectedAddress) === false) {
+          setSelectedAddress(addresses.at(-1)!);
         }
       }
     },
-    [addressesResponse, selectedAddress, setSelectedAddress]
+    [urlAddressSegment, addressesResponse, selectedAddress, setSelectedAddress]
   );
 
   if (addressIsLoading) {
