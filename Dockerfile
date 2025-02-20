@@ -13,6 +13,7 @@ RUN npm run bundle
 WORKDIR front-react
 
 RUN npm install
+RUN npm run lint
 RUN npm run build
 
 WORKDIR /app
