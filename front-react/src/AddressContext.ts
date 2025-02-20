@@ -1,11 +1,11 @@
-import React from 'react';
+import { createContext } from 'react';
 
 export type AddressContextType = {
   selectedAddress: string;
   setSelectedAddress: (address: string) => void;
 };
 
-const AddressContext = React.createContext<AddressContextType>({
+const AddressContext = createContext<AddressContextType>({
   selectedAddress: '',
   setSelectedAddress: () => { }
 });
