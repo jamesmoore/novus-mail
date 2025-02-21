@@ -8,7 +8,7 @@ import { Database } from 'better-sqlite3';
 
 const mod = {
 
-	start: function(db : Database, port: number){
+	start: function (db: Database, port: number) {
 
 		const opt: SMTPServerOptions = {
 
@@ -20,20 +20,20 @@ const mod = {
 
 					const senderAddress = mail.from?.value?.at(0);
 					const sender = senderAddress?.address ?? senderAddress?.name ?? 'unknown sender';
-					const subject = mail.subject  ?? 'No Subject';
+					const subject = mail.subject ?? 'No Subject';
 					const content = mail.html ? mail.html : mail.textAsHtml;
 
 					try {
 
 						const mailToAddresses = (mail.to as AddressObject)?.value?.filter(p => p.address).map(p => p.address!) ?? [];
-						const smtpRcptAddresses =  _session.envelope.rcptTo.map(p => p.address);
+						const smtpRcptAddresses = _session.envelope.rcptTo.map(p => p.address);
 
-						for (const recipient of mailToAddresses.concat(smtpRcptAddresses)){
+						for (const recipient of mailToAddresses.concat(smtpRcptAddresses)) {
 
-							var recipientName = recipient.substring(0, recipient.lastIndexOf("@"));
+							const recipientName = recipient.substring(0, recipient.lastIndexOf("@"));
 							const res = db.prepare("SELECT COUNT(*) as count FROM address WHERE addr = ?").all(recipientName);
 
-							if ((res[0] as any).count > 0) {
+							if ((res[0] as { count: number }).count > 0) {
 
 								const id = h.randomID();
 								db.prepare("INSERT INTO mail (id, recipient, sender, subject, content, read, received) VALUES (?, ?, ?, ?, ?, ?, ?)").run(id, recipientName, sender, subject, content, 0, mail.date?.getTime() ?? 0);
@@ -49,7 +49,7 @@ const mod = {
 
 						console.log("Inbound email error");
 						console.log(err);
-					
+
 					}
 
 				} catch (err) {
@@ -67,7 +67,7 @@ const mod = {
 
 			onConnect(_session, callback) {
 
-				return callback();	
+				return callback();
 
 			},
 
@@ -77,17 +77,17 @@ const mod = {
 
 			//automatically detect public / private key
 			const files = readdirSync("./data");
-			for(const fileName of files){
+			for (const fileName of files) {
 
 				const ext = extname(fileName);
-				if(ext != ".db" && ext != ".json"){
+				if (ext != ".db" && ext != ".json") {
 
 					const content = readFileSync("./data/" + fileName, 'utf8');
-					if(content.includes("PRIVATE KEY")){
+					if (content.includes("PRIVATE KEY")) {
 						opt.key = content;
 					}
 
-					if(content.includes("BEGIN CERTIFICATE")){
+					if (content.includes("BEGIN CERTIFICATE")) {
 						opt.cert = content;
 					}
 
@@ -101,7 +101,7 @@ const mod = {
 			console.log(err);
 
 		}
-			
+
 		const server = new ssrv(opt);
 		server.on('error', (err) => {
 

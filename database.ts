@@ -11,7 +11,7 @@ const database = {
 			db.exec("CREATE TABLE IF NOT EXISTS address (addr TEXT NOT NULL)");
 			const res = db.prepare("SELECT COUNT(*) as count FROM address").get();
 
-			if ((res as any).count == 0) {
+			if ((res as { count: number }).count == 0) {
 
 				//generate random username
 				const letters = 'abcdefghijklmnopqrstuvwxyz';
@@ -32,13 +32,13 @@ const database = {
 
 			try {
 				db.exec("ALTER TABLE mail ADD COLUMN read INTEGER default 0");
-			} catch (e) {
+			} catch {
 				console.log("read column already exists");
 			}
 
 			try {
 				db.exec("ALTER TABLE mail ADD COLUMN received INTEGER default 0");
-			} catch (e) {
+			} catch {
 				console.log("received column already exists");
 			}
 
