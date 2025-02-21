@@ -86,7 +86,7 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
                 {address.addr === selectedAddress ? <DraftsIcon /> : <MailIcon />}
               </ListItemIcon>
               <ListItemText primary={address.addr} sx={{ mr: 1, overflow: 'hidden', textOverflow: 'ellipsis' }} />
-              <ListItemText sx={{ ml: "auto", textAlign: "right" }} primary={unreadCounts?.filter(p => p.recipient === address.addr).at(0)?.unread} primaryTypographyProps={{ color: "primary" }} />
+              <ListItemText sx={{ ml: "auto", textAlign: "right" }} primary={unreadCounts?.filter(p => p.recipient === address.addr).at(0)?.unread} slotProps={{ primary: { color: "primary" } }} />
             </ListItemButton>
           </ListItem>
         ))}

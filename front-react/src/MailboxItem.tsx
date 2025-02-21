@@ -45,7 +45,12 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
 
     const cursor = onSelect ? "pointer" : "default";
     const fontWeight = mail.read ? 400 : 700;
-    const style = { fontWeight: fontWeight };
+    const style = {
+        fontWeight: fontWeight,
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+    };
 
     return (
         <Paper sx={{ mt: 1, mb: 1, "&:hover": { cursor: cursor } }} elevation={1} tabIndex={1} role="button" onKeyUp={(e) => mailKeyUp(e, mail.id)} onClick={(e) => mailClicked(e, mail.id)}>
@@ -55,12 +60,7 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
                         <Typography sx={style}>{mail.sender}</Typography>
                     </Grid>
                     <Grid
-                        size={{ xs: 24, md: 13 }}
-                        sx={{
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                        }}>
+                        size={{ xs: 24, md: 13 }}>
                         <Typography sx={style} color={mail.read ? "textPrimary" : "primary"}>{mail.subject}</Typography>
                     </Grid>
                     <Grid container
