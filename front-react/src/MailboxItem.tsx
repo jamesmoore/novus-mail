@@ -57,18 +57,20 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
     };
 
     return (
-        <Paper sx={{ 
-            mt: 1, 
-            mb: 1, 
-            "&:hover": { cursor: cursor } }} 
+        <Paper
+            sx={{
+                mt: 1,
+                mb: 1,
+                "&:hover": { cursor: cursor }
+            }}
             elevation={hover ? 3 : 1}
-            tabIndex={1} 
-            role="button" 
-            onKeyUp={(e) => mailKeyUp(e, mail.id)} 
+            tabIndex={1}
+            role="button"
+            onKeyUp={(e) => mailKeyUp(e, mail.id)}
             onClick={(e) => mailClicked(e, mail.id)}
-            onMouseEnter={() => { setHover(true); }}
-            onMouseLeave={() => { setHover(false); }}
-            >
+            onPointerEnter={() => { setHover(true); }}
+            onPointerLeave={() => { setHover(false); }}
+        >
             <Grid container columns={24} sx={{ ml: 1 }}>
                 <Grid container size={{ xs: 22, md: 23 }} key={mail.id} alignItems='center'>
                     <Grid size={{ xs: 24, md: 8 }} >
@@ -91,9 +93,9 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
                     </Grid>
                 </Grid>
                 <Grid container size={{ xs: 2, md: 1 }} justifyContent='right' alignItems='center'>
-                <IconButton aria-label="delete" onKeyUp={(e) => deleteKeyUp(e, mail.id)} onClick={(e) => deleteClicked(e, mail.id)} >
-                        {!hover && <DeleteOutlineIcon color="action" opacity={0.3}/>}
-                        {hover && <DeleteIcon color="error"/>}
+                    <IconButton aria-label="delete" onKeyUp={(e) => deleteKeyUp(e, mail.id)} onClick={(e) => deleteClicked(e, mail.id)} >
+                        {!hover && <DeleteOutlineIcon color="action" opacity={0.3} />}
+                        {hover && <DeleteIcon color="error" />}
                     </IconButton>
                 </Grid>
             </Grid>
