@@ -4,4 +4,5 @@ node_modules
 *.db
 dist
 /*.js
+!eslint.config.js
 .vs

@@ -37,7 +37,7 @@ const mod = {
 		if (cert) {
 
 			const extract = new X509Certificate(cert).subject;
-			const res = extract.match(/CN=(?:\*\.)?([^\s\/]+)/);
+			const res = extract.match(/CN=(?:\*\.)?([^\s/]+)/);
 			return res ? res[1] || "" : "";
 
 		} else {

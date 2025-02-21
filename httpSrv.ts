@@ -151,7 +151,7 @@ const mod = {
 				  LIMIT @mailCount
 				`;
 
-				var rows = db.prepare(sql).all(params) as Mail[];
+				let rows = db.prepare(sql).all(params) as Mail[];
 
 				if (direction === 'gt') {
 					rows = rows.sort((a, b) => b.id > a.id ? 1 : -1);
@@ -241,8 +241,8 @@ const mod = {
 			const unread = db.prepare('SELECT count(*) as unread from mail where read = 0').get();
 			const addresses = db.prepare('SELECT count(*) as addresses from address').get();
 			res.json({
-				unread: (unread as any).unread,
-				addresses: (addresses as any).addresses,
+				unread: (unread as { unread: number }).unread,
+				addresses: (addresses as { addresses: number }).addresses,
 			});
 		});
 
