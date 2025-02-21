@@ -1,9 +1,11 @@
 import { IconButton, Paper, Tooltip, Typography } from "@mui/material";
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Grid from '@mui/material/Grid2';
 import { Mail } from "./models/mail";
 import { isEnterKeyUp, isLeftMouseClick } from "./Events";
 import humanizeDuration from "humanize-duration";
+import { useState } from "react";
 
 interface MailboxItemProps {
     mail: Mail;
@@ -16,6 +18,8 @@ function timeSince(timeStamp: number) {
 }
 
 function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
+
+    const [hover, setHover] = useState(false);
 
     async function mailClicked(e: React.MouseEvent<HTMLDivElement>, itemKey: string) {
         if (isLeftMouseClick(e) && onSelect) {
@@ -53,7 +57,18 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
     };
 
     return (
-        <Paper sx={{ mt: 1, mb: 1, "&:hover": { cursor: cursor } }} elevation={1} tabIndex={1} role="button" onKeyUp={(e) => mailKeyUp(e, mail.id)} onClick={(e) => mailClicked(e, mail.id)}>
+        <Paper sx={{ 
+            mt: 1, 
+            mb: 1, 
+            "&:hover": { cursor: cursor } }} 
+            elevation={hover ? 3 : 1}
+            tabIndex={1} 
+            role="button" 
+            onKeyUp={(e) => mailKeyUp(e, mail.id)} 
+            onClick={(e) => mailClicked(e, mail.id)}
+            onMouseEnter={() => { setHover(true); }}
+            onMouseLeave={() => { setHover(false); }}
+            >
             <Grid container columns={24} sx={{ ml: 1 }}>
                 <Grid container size={{ xs: 22, md: 23 }} key={mail.id} alignItems='center'>
                     <Grid size={{ xs: 24, md: 8 }} >
@@ -76,8 +91,9 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
                     </Grid>
                 </Grid>
                 <Grid container size={{ xs: 2, md: 1 }} justifyContent='right' alignItems='center'>
-                    <IconButton color="error" aria-label="delete" onKeyUp={(e) => deleteKeyUp(e, mail.id)} onClick={(e) => deleteClicked(e, mail.id)} >
-                        <DeleteIcon />
+                <IconButton aria-label="delete" onKeyUp={(e) => deleteKeyUp(e, mail.id)} onClick={(e) => deleteClicked(e, mail.id)} >
+                        {!hover && <DeleteOutlineIcon color="action" opacity={0.3}/>}
+                        {hover && <DeleteIcon color="error"/>}
                     </IconButton>
                 </Grid>
             </Grid>
