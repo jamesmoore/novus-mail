@@ -70,30 +70,30 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
       <Toolbar />
       <Divider />
       <List>
-        {addressesResponse?.addresses.map((address, _index) => (
-          <ListItem key={address.addr} disablePadding>
+        {addressesResponse?.addresses.map(p => p.addr).map((address) => (
+          <ListItem key={address} disablePadding>
             <ListItemButton
-              onClick={(_e) => {
-                setSelectedAddress(address.addr);
+              onClick={() => {
+                setSelectedAddress(address);
                 if (mobileOpen) {
                   handleDrawerToggle();
                 }
-                navigate('/inbox/' + address.addr);
+                navigate('/inbox/' + address);
               }}
-              selected={address.addr === selectedAddress}
+              selected={address === selectedAddress}
             >
               <ListItemIcon sx={{ minWidth: '40px' }}>
-                {address.addr === selectedAddress ? <DraftsIcon /> : <MailIcon />}
+                {address === selectedAddress ? <DraftsIcon /> : <MailIcon />}
               </ListItemIcon>
-              <ListItemText primary={address.addr} sx={{ mr: 1, overflow: 'hidden', textOverflow: 'ellipsis' }} />
-              <ListItemText sx={{ ml: "auto", textAlign: "right" }} primary={unreadCounts?.filter(p => p.recipient === address.addr).at(0)?.unread} slotProps={{ primary: { color: "primary" } }} />
+              <ListItemText primary={address} sx={{ mr: 1, overflow: 'hidden', textOverflow: 'ellipsis' }} />
+              <ListItemText sx={{ ml: "auto", textAlign: "right" }} primary={unreadCounts?.filter(p => p.recipient === address).at(0)?.unread} slotProps={{ primary: { color: "primary" } }} />
             </ListItemButton>
           </ListItem>
         ))}
       </List>
       <Divider />
       <ListItem disablePadding>
-        <ListItemButton onClick={(_e) => { navigate('/manage'); }}>
+        <ListItemButton onClick={() => { navigate('/manage'); }}>
           <ListItemIcon sx={{ minWidth: '40px' }}>
             <SettingsIcon />
           </ListItemIcon>
