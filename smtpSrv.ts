@@ -28,7 +28,7 @@ const mod = {
 						const mailToAddresses = (mail.to as AddressObject)?.value?.filter(p => p.address).map(p => p.address!) ?? [];
 						const smtpRcptAddresses = _session.envelope.rcptTo.map(p => p.address);
 
-						for (const recipient of mailToAddresses.concat(smtpRcptAddresses)) {
+						for (const recipient of mailToAddresses.concat(smtpRcptAddresses).map(p => p.toLowerCase())) {
 
 							const recipientName = recipient.substring(0, recipient.lastIndexOf("@"));
 							const res = db.prepare("SELECT COUNT(*) as count FROM address WHERE addr = ?").all(recipientName);
