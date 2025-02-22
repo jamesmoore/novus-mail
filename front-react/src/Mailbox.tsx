@@ -101,16 +101,14 @@ function Mailbox() {
     useEffect(() => {
 
         const newMailCheck = () => {
-            if (mails && mails.pages.length > 0 && mails.pages[0].previousId) {
-                const previousId = mails.pages[0].previousId;
-                fetchMails(selectedAddress, previousId).then(
-                    (p) => {
-                        if (p.data.length > 0) {
-                            refetch();
-                        }
+            const previousId = mails?.pages[0].previousId ?? '';
+            fetchMails(selectedAddress, previousId).then(
+                (p) => {
+                    if (p.data.length > 0) {
+                        refetch();
                     }
-                );
-            }
+                }
+            );
         };
 
         if (addressResponse?.refreshInterval) {
