@@ -93,7 +93,12 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
       </List>
       <Divider />
       <ListItem disablePadding>
-        <ListItemButton onClick={() => { navigate('/manage'); }}>
+        <ListItemButton onClick={() => {
+          if (mobileOpen) {
+            handleDrawerToggle();
+          }
+          navigate('/manage');
+        }}>
           <ListItemIcon sx={{ minWidth: '40px' }}>
             <SettingsIcon />
           </ListItemIcon>
