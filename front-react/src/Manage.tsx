@@ -1,13 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { addAddress as apiAddAddress, deleteAddress as apiDeleteAddress } from './api-client';
-import { Button, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, MenuItem, Select, TextField, Typography } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, IconButton, Paper, TextField, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import useAddressResponse from './useAddressResponse';
 import useDomain from './useDomain';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
 
 function Manage() {
     const [newAddressText, setNewAddressText] = useState('');
     const [selectedAddress, setSelectedAddress] = useState('');
+    const [deleteAddress, setDeleteAddress] = useState('');
     const [alertText, setAlertText] = useState<string | null>(null);
     const [alertVisible, setAlertVisible] = useState(false);
     const [deleteConfirm, setdeleteConfirm] = useState(false);
@@ -15,19 +19,6 @@ function Manage() {
     const { data: domainName } = useDomain();
 
     const { data: addressesResponse, error, refetch: refreshAddresses } = useAddressResponse();
-
-    useEffect(
-        () => {
-            if (addressesResponse && addressesResponse.addresses.length > 0) {
-                const addresses = addressesResponse.addresses;
-                setSelectedAddress(addresses[addresses.length - 1].addr);
-            }
-            else {
-                setSelectedAddress('');
-            }
-        },
-        [addressesResponse]
-    );
 
     function addAddress() {
         const regex = /^(?!\.)(?!.*\.\.)(?!.*\.$)[A-Za-z0-9!#$%&'*+/=?^_`{|}~.-]{1,64}$/;
@@ -51,15 +42,16 @@ function Manage() {
         }
     }
 
-    function deleteAddress() {
+    function deleteClicked(addr: string) {
+        setDeleteAddress(addr);
         setdeleteConfirm(true);
     }
 
     function deleteYes() {
-        setSelectedAddress('');
-        apiDeleteAddress(selectedAddress)
+        apiDeleteAddress(deleteAddress)
             .then((data: string) => {
                 if (data === 'done') {
+                    setDeleteAddress('');
                     setdeleteConfirm(false);
                     refreshAddresses();
                 }
@@ -79,46 +71,62 @@ function Manage() {
     }
 
     return (
-        <Container sx={{ display: "flex", flexDirection: "column", flex: "1 0 auto" }}>
-            <Grid container direction="column" justifyContent="center" alignItems="center" >
-                <Grid>
-                    <Typography sx={{ m: 1 }} variant="h5" gutterBottom >New mail address</Typography>
+        <>
+            <Paper >
+                <Grid container m={1} p={1}>
+                    <Grid mt={2} mb={2} size={{ xs: 12, md: 3 }}>
+                        <Typography>New address</Typography>
+                    </Grid>
+                    <Grid container size={{ xs: 12, md: 9 }} flexDirection={'row'}>
+                        <Grid container direction="row" alignItems={'center'} flex="0 0 auto" size={{ xs: 12, md: 10 }}>
+                            <FormControl>
+                                <TextField type="text" onChange={event => setNewAddressText(event.target.value)} value={newAddressText} placeholder="New address" style={{ flex: 1 }} />
+                            </FormControl>
+                            <FormControl sx={{ m: 1 }}>
+                                @{domainName}
+                            </FormControl>
+                        </Grid>
+                        <Grid display={'flex'} size={{ xs: 12, md: 2 }} justifyContent={'right'} sx={{
+                            mt: { xs: 2, md: 0 }
+                        }}>
+                            <Button fullWidth={true} onClick={addAddress} startIcon={<AddIcon />} >Add</Button>
+                        </Grid>
+                    </Grid>
                 </Grid>
-                <Grid container direction="row" justifyContent="center" alignItems="center" flex="0 0 auto">
-                    <FormControl>
-                        <TextField type="text" onChange={event => setNewAddressText(event.target.value)} value={newAddressText} placeholder="New address" style={{ flex: 1 }} />
-                    </FormControl>
-                    <FormControl sx={{ m: 1 }}>
-                        @{domainName}
-                    </FormControl>
-                </Grid>
-                <Grid >
-                    <Button sx={{ m: 1 }} variant="contained" onClick={addAddress}>Add this address</Button>
-                </Grid>
-            </Grid>
+            </Paper>
             {(addressesResponse?.addresses?.length ?? 0) > 0 &&
-                <Grid container direction="column" justifyContent="center" alignItems="center" >
-                    {/*List of existing addresses*/}
-                    <Grid sx={{ m: 1 }}>
-                        <Typography variant="h5" gutterBottom>Manage addresses</Typography>
+                <Paper>
+                    <Grid container m={1} p={1} >
+                        <Grid container mt={2} mb={2} size={{ xs: 12, md: 3 }} >
+                            <Typography>Manage addresses</Typography>
+                        </Grid>
+                        <Grid container size={{ xs: 12, md: 9 }} flexDirection={'column'}>
+                            {
+                                addressesResponse && addressesResponse.addresses.map((address) => address.addr).map((address) => (
+                                    <Grid
+                                        container
+                                        pt={1}
+                                        pb={1}
+                                        flexDirection={'row'}
+                                        onPointerEnter={() => { setSelectedAddress(address) }}
+                                        onPointerLeave={() => { setSelectedAddress('') }}
+                                    >
+                                        <Grid display={'flex'} size={{ xs: 10 }} alignItems={'center'}>
+                                            <Typography component={'span'}>{address}</Typography>
+                                            <Typography component={'span'} sx={{ opacity: 0.3 }}>@{domainName}</Typography>
+                                        </Grid>
+                                        <Grid display={'flex'} size={{ xs: 2 }} justifyContent={'right'} >
+                                            <IconButton aria-label="delete" onClick={() => deleteClicked(address)} >
+                                                {!(selectedAddress === address) && <DeleteOutlineIcon color="action" opacity={0.3} />}
+                                                {selectedAddress === address && <DeleteIcon color="error" />}
+                                            </IconButton>
+                                        </Grid>
+                                    </Grid>
+                                ))
+                            }
+                        </Grid>
                     </Grid>
-                    <Grid container direction="row" justifyContent="center" alignItems="center" >
-                        <FormControl sx={{ minWidth: 210 }}>
-                            <Select value={selectedAddress} onChange={(e) => setSelectedAddress(e.target.value)}>
-                                {addressesResponse && addressesResponse.addresses.map((address, index) => (
-                                    <MenuItem key={index} value={address.addr} >
-                                        {address.addr}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                        <FormControl sx={{ m: 1 }}>
-                            @{domainName}
-                        </FormControl>
-                    </Grid>
-                    {/*Delete selected address*/}
-                    <Button sx={{ m: 1 }} variant="contained" disabled={addressesResponse === undefined || addressesResponse.addresses.length == 0} onClick={deleteAddress}>Delete this address</Button>
-                </Grid>
+                </Paper>
             }
 
             <Dialog
@@ -164,7 +172,7 @@ function Manage() {
                 </DialogActions>
             </Dialog>
 
-        </Container>
+        </>
     );
 }
 
