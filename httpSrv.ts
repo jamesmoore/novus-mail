@@ -85,14 +85,15 @@ const mod = {
 
 			try {
 
-				const rows = db.prepare("SELECT addr FROM address WHERE addr = ?").all(json.address);
+				const address = json.address.toLowerCase();
+				const rows = db.prepare("SELECT addr FROM address WHERE addr = ?").all(address);
 				if (rows.length > 0) {
 
 					res.status(200).send("exist");
 
 				}
 
-				db.prepare("INSERT INTO address (addr) VALUES (?)").run(json.address);
+				db.prepare("INSERT INTO address (addr) VALUES (?)").run(address);
 				res.status(200).send("done");
 
 			} catch (err) {
