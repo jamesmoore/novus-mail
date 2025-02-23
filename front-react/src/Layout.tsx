@@ -1,6 +1,5 @@
-import { useState, useEffect, useContext, ReactNode } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import AddressContext from './AddressContext';
+import { useState, ReactNode } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { AppBar, Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import useAddressResponse from './useAddressResponse';
@@ -16,14 +15,15 @@ export interface LayoutProps {
 }
 
 function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
-  const { selectedAddress, setSelectedAddress } = useContext(AddressContext);
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { address: urlAddressSegment } = useParams();
   const drawerWidth = 240;
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+
 
   const handleDrawerClose = () => {
     setIsClosing(true);
@@ -44,23 +44,6 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
 
   const { data: unreadCounts } = useUnreadCounts();
 
-  useEffect(
-    () => {
-      if (addressesResponse && addressesResponse.addresses.length > 0) {
-        const addresses = addressesResponse.addresses.map(p => p.addr);
-
-        // Initialize selected address from URL segment, or if none present, default to last.
-        if (urlAddressSegment && addresses.includes(urlAddressSegment)) {
-          setSelectedAddress(urlAddressSegment);
-        }
-        else if (selectedAddress === '' || addresses.includes(selectedAddress) === false) {
-          setSelectedAddress(addresses.at(-1)!);
-        }
-      }
-    },
-    [urlAddressSegment, addressesResponse, selectedAddress, setSelectedAddress]
-  );
-
   if (addressIsLoading) {
     return <div>Loading...</div>;
   }
@@ -74,16 +57,15 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
           <ListItem key={address} disablePadding>
             <ListItemButton
               onClick={() => {
-                setSelectedAddress(address);
                 if (mobileOpen) {
                   handleDrawerToggle();
                 }
                 navigate('/inbox/' + address);
               }}
-              selected={address === selectedAddress}
+              selected={address === urlAddressSegment}
             >
               <ListItemIcon sx={{ minWidth: '40px' }}>
-                {address === selectedAddress ? <DraftsIcon /> : <MailIcon />}
+                {address === urlAddressSegment ? <DraftsIcon /> : <MailIcon />}
               </ListItemIcon>
               <ListItemText primary={address} sx={{ mr: 1, overflow: 'hidden', textOverflow: 'ellipsis' }} />
               <ListItemText sx={{ ml: "auto", textAlign: "right" }} primary={unreadCounts?.filter(p => p.recipient === address).at(0)?.unread} slotProps={{ primary: { color: "primary" } }} />
@@ -98,11 +80,13 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
             handleDrawerToggle();
           }
           navigate('/manage');
-        }}>
+        }}
+          selected={location.pathname === '/manage'}
+        >
           <ListItemIcon sx={{ minWidth: '40px' }}>
             <SettingsIcon />
           </ListItemIcon>
-          <ListItemText primary={"Settings"} />
+          <ListItemText primary={"Settings"}/>
         </ListItemButton>
       </ListItem>
     </div>
