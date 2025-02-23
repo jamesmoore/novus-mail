@@ -1,8 +1,7 @@
 import ContentCopy from "@mui/icons-material/ContentCopy";
 import { IconButton, Tooltip, Typography } from "@mui/material";
 import useDomain from "./useDomain";
-import { useContext } from "react";
-import AddressContext from "./AddressContext";
+import { useParams } from "react-router-dom";
 
 const handleCopy = async (text: string) => {
     try {
@@ -15,8 +14,7 @@ const handleCopy = async (text: string) => {
 function TopBarAddress() {
 
     const { data: domainName } = useDomain();
-
-    const { selectedAddress } = useContext(AddressContext);
+    const { address: selectedAddress } = useParams();
 
     async function copyClicked() {
         await handleCopy(getFullAddress());

@@ -4,16 +4,14 @@ import { InfiniteData, useInfiniteQuery, useQueryClient } from "@tanstack/react-
 import { MailResponse } from "./models/mail-response";
 import { deleteMail, fetchMails, readMail } from "./api-client";
 import { Mail } from "./models/mail";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import { useNavigate } from "react-router-dom";
-import AddressContext from "./AddressContext";
+import { useNavigate, useParams } from "react-router-dom";
 import useAddressResponse from "./useAddressResponse";
 import useUnreadCounts from "./useUnreadCounts";
 
 function Mailbox() {
-    const { selectedAddress } = useContext(AddressContext);
-
+    const { address: selectedAddress } = useParams();
     const navigate = useNavigate();
     const [deleteConfirm, setDeleteConfirm] = useState(false);
     const [deleteItemKey, setDeleteItemKey] = useState<string | null>(null);
@@ -56,7 +54,7 @@ function Mailbox() {
         queryKey: queryKey,
         queryFn: async ({
             pageParam,
-        }): Promise<MailResponse> => fetchMails(selectedAddress, pageParam),
+        }): Promise<MailResponse> => fetchMails(selectedAddress!, pageParam),
         initialPageParam: '',
         getPreviousPageParam: (firstPage) => firstPage.previousId,
         getNextPageParam: (lastPage) => lastPage.nextId,
@@ -102,7 +100,7 @@ function Mailbox() {
 
         const newMailCheck = () => {
             const previousId = mails?.pages[0].previousId ?? '';
-            fetchMails(selectedAddress, previousId).then(
+            fetchMails(selectedAddress!, previousId).then(
                 (p) => {
                     if (p.data.length > 0) {
                         refetch();

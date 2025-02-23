@@ -10,7 +10,6 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Layout from './Layout.tsx'
 import Manage from './Manage.tsx';
 import Mail from './Mail.tsx';
-import AddressContextProvider from './AddressContextProvider.tsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient();
@@ -31,17 +30,15 @@ createRoot(document.getElementById('app')!).render(
       <CssBaseline />
       <QueryClientProvider client={queryClient}>
         {/* <App /> */}
-        <AddressContextProvider>
-          <Router>
-            <Routes>
-              <Route path="/" element={<Layout bodyChildren={<Mailbox />} topBarChildren={<TopBarAddress />} />} />
-              <Route path="/manage" element={<Layout bodyChildren={<Manage />} topBarChildren={<TopBarAddress />} />} />
-              <Route path="/mail/:messageId" element={<Layout bodyChildren={<Mail />} topBarChildren={<TopBarAddress />} />} />
-              <Route path="/inbox/:address" element={<Layout bodyChildren={<Mailbox />} topBarChildren={<TopBarAddress />} />} />
-              <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
-          </Router>
-        </AddressContextProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Layout bodyChildren={<Mailbox />} topBarChildren={<TopBarAddress />} />} />
+            <Route path="/manage" element={<Layout bodyChildren={<Manage />} topBarChildren={<></>} />} />
+            <Route path="/mail/:messageId" element={<Layout bodyChildren={<Mail />} topBarChildren={<TopBarAddress />} />} />
+            <Route path="/inbox/:address" element={<Layout bodyChildren={<Mailbox />} topBarChildren={<TopBarAddress />} />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </Router>
       </QueryClientProvider>
     </ThemeProvider>
   </StrictMode>,
