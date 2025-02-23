@@ -25,6 +25,7 @@ function TopBarAddress() {
     }
 
     return (
+        selectedAddress &&
         <>
             <Typography variant="h6" noWrap component="div">
                 {getFullAddress()}

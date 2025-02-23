@@ -41,6 +41,15 @@ function Mailbox() {
 
     const { refetch: refetchUnread } = useUnreadCounts();
 
+    useEffect(() => {
+        if (!selectedAddress) {
+            const address = addressResponse?.addresses[0]?.addr;
+            if (address) {
+                navigate('/inbox/' + address);
+            }
+        }
+    }, [selectedAddress, addressResponse])
+
     const {
         data: mails,
         error,

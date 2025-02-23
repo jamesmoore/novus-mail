@@ -104,6 +104,7 @@ function Manage() {
                             {
                                 addressesResponse && addressesResponse.addresses.map((address) => address.addr).map((address) => (
                                     <Grid
+                                        key={address}
                                         container
                                         pt={1}
                                         pb={1}
