@@ -1,14 +1,13 @@
 import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Typography } from "@mui/material"
 import MailboxItem from "./MailboxItem"
-import { InfiniteData, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { MailResponse } from "./models/mail-response";
 import { deleteMail, fetchMails, readMail } from "./api-client";
 import { Mail } from "./models/mail";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { useNavigate, useParams } from "react-router-dom";
 import useAddressResponse from "./useAddressResponse";
 import useUnreadCounts from "./useUnreadCounts";
+import useMailItems from "./useMailItems";
 
 function Mailbox() {
     const { address: selectedAddress } = useParams();
@@ -17,10 +16,6 @@ function Mailbox() {
     const [deleteItemKey, setDeleteItemKey] = useState<string | null>(null);
 
     const { ref, inView } = useInView();
-
-    const queryClient = useQueryClient();
-
-    const queryKey = useMemo(() => ['mail', selectedAddress], [selectedAddress]);
 
     const { data: addressResponse } = useAddressResponse();
 
@@ -58,41 +53,15 @@ function Mailbox() {
         fetchNextPage,
         hasNextPage,
         refetch,
-        isRefetching
-    } = useInfiniteQuery({
-        queryKey: queryKey,
-        queryFn: async ({
-            pageParam,
-        }): Promise<MailResponse> => fetchMails(selectedAddress!, pageParam),
-        initialPageParam: '',
-        getPreviousPageParam: (firstPage) => firstPage.previousId,
-        getNextPageParam: (lastPage) => lastPage.nextId,
-        enabled: !!selectedAddress,
-    });
+        isRefetching,
+        
+    } = useMailItems(selectedAddress);
 
     async function deleteYes() {
         try {
             await deleteMail(deleteItemKey!);
             setDeleteConfirm(false);
-
-            const newPagesArray =
-                mails?.pages.map((page) =>
-                ({
-                    data: page.data.filter((mail) => mail.id !== deleteItemKey),
-                    previousId: page.previousId,
-                    nextId: page.nextId
-                } as MailResponse)
-                ) ?? [];
-
-            queryClient.setQueryData(queryKey, (data: InfiniteData<MailResponse, string[]>) =>
-            (
-                {
-                    pages: newPagesArray,
-                    pageParams: data.pageParams,
-                }
-            )
-            );
-
+            await refetch();
             await refetchUnread();
         }
         catch (error) {
@@ -103,7 +72,6 @@ function Mailbox() {
     async function deleteNo() {
         setDeleteConfirm(false);
     }
-
 
     useEffect(() => {
 
