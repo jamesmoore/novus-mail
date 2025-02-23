@@ -101,6 +101,18 @@ const readMail = async (id: string) => {
     })
 };
 
+const readAllMail = async (address: string) => {
+    await fetch(`${BaseUrl}/readAllMail`, {
+        method: 'POST',
+        body: JSON.stringify(
+            {
+                address: address,
+            }
+        ),
+        headers: defaultHeaders,
+    })
+};
+
 const fetchUnreadCounts = async () => {
     const response = await fetch(`${BaseUrl}/unreadCounts`, {
         method: 'POST',
@@ -119,4 +131,5 @@ export {
     deleteMail,
     readMail,
     fetchUnreadCounts,
+    readAllMail,
 };

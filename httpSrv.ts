@@ -58,8 +58,8 @@ const mod = {
 
 			} catch (err) {
 
-				console.log("DB get addresses fail")
-				console.log(err)
+				console.error("DB get addresses fail")
+				console.error(err)
 
 			}
 
@@ -98,8 +98,8 @@ const mod = {
 
 			} catch (err) {
 
-				console.log("DB add addresses fail")
-				console.log(err)
+				console.error("DB add addresses fail")
+				console.error(err)
 			}
 
 		})
@@ -117,8 +117,8 @@ const mod = {
 
 			} catch (err) {
 
-				console.log("DB delete address fail")
-				console.log(err)
+				console.error("DB delete address fail")
+				console.error(err)
 			}
 
 		})
@@ -166,8 +166,8 @@ const mod = {
 
 			} catch (err) {
 
-				console.log("DB get mails fail")
-				console.log(err)
+				console.error("DB get mails fail")
+				console.error(err)
 
 			}
 
@@ -184,8 +184,8 @@ const mod = {
 
 			} catch (err) {
 
-				console.log("DB get mail data fail")
-				console.log(err)
+				console.error("DB get mail data fail")
+				console.error(err)
 
 			}
 
@@ -202,8 +202,8 @@ const mod = {
 
 			} catch (err) {
 
-				console.log("DB delete mail fail")
-				console.log(err)
+				console.error("DB delete mail fail")
+				console.error(err)
 
 			}
 
@@ -218,6 +218,19 @@ const mod = {
 				res.status(200).send();
 			} catch (err) {
 				console.error("DB update mail fail")
+				console.error(err)
+			}
+		})
+
+		app.post('/readAllMail', (req, res) => {
+
+			const json = req.body;
+
+			try {
+				db.prepare("UPDATE mail SET read = 1 where recipient = ? and read = 0").run(json.address);
+				res.status(200).send();
+			} catch (err) {
+				console.error("DB read all mail fail")
 				console.error(err)
 			}
 		})
