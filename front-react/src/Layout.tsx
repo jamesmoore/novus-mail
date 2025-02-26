@@ -8,7 +8,7 @@ import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
 import DraftsIcon from '@mui/icons-material/Drafts';
 import useUnreadCounts from './useUnreadCounts';
-import { useWebSocketNotifier } from './useWebSocketNotifier';
+import { useWebSocketNotifier, WebSocketMessage } from './useWebSocketNotifier';
 import { useMailItems, useInvalidateMailItemsCache } from './useMailItems';
 
 export interface LayoutProps {
@@ -50,26 +50,39 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
 
   const { invalidate } = useInvalidateMailItemsCache();
 
-  useEffect(() => {
-    if (lastJsonMessage) {
-      console.log(lastJsonMessage);
-      if (lastJsonMessage.type === 'received') {
-        unreadRefetch();
-        if (urlAddressSegment === lastJsonMessage.value) {
-          refetch();
-        }
-        else if (lastJsonMessage.value) {
-          invalidate(lastJsonMessage.value);
-        }
-      }
-      else if (lastJsonMessage.type === 'connected') {
+  const [lastReceivedMessage, setLastReceivedMessage] = useState<WebSocketMessage | null>(null);
 
-      }
-      else {
-        console.error('Unhandled type: ' + lastJsonMessage.type);
-      }
+  useEffect(() => {
+    setLastReceivedMessage(lastJsonMessage);
+  },
+    [lastJsonMessage]
+  )
+
+  useEffect(() => {
+    if (!lastReceivedMessage) return;
+
+    console.log(lastReceivedMessage);
+
+    switch (lastReceivedMessage.type) {
+      case 'received':
+        unreadRefetch();
+        if (urlAddressSegment === lastReceivedMessage.value) {
+          refetch();
+        } else if (lastReceivedMessage.value) {
+          invalidate(lastReceivedMessage.value);
+        }
+        break;
+
+      case 'connected':
+        // Handle connected state if needed
+        break;
+
+      default:
+        console.error('Unhandled message type:', lastReceivedMessage.type);
     }
-  }, [lastJsonMessage])
+
+    setLastReceivedMessage(null);
+  }, [lastReceivedMessage, invalidate, unreadRefetch, refetch, urlAddressSegment, setLastReceivedMessage]);
 
 
   if (addressIsLoading) {

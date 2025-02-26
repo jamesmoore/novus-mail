@@ -20,9 +20,11 @@ function Mailbox() {
     const { data: addressResponse } = useAddressResponse();
 
     async function onMailItemSelect(mail: Mail) {
-        await readMail(mail.id);
-        mail.read = true;
-        refetchUnread();
+        if (!mail.read) {
+            await readMail(mail.id);
+            mail.read = true;
+            refetchUnread();
+        }
         navigate('/mail/' + mail.id);
     }
 
@@ -44,7 +46,7 @@ function Mailbox() {
                 navigate('/inbox/' + address);
             }
         }
-    }, [selectedAddress, addressResponse])
+    }, [selectedAddress, addressResponse, navigate])
 
     const {
         data: mails,

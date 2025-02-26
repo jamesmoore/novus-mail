@@ -16,7 +16,7 @@ const queryClient = new QueryClient();
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Mailbox from './Mailbox.tsx';
 import TopBarAddress from './TopBarAddress.tsx';
-import { WebSocketProvider } from './useWebSocketNotifier.tsx';
+import { WebSocketNotificationProvider } from './WebSocketNotificationProvider.tsx';
 
 const theme = createTheme({
   colorSchemes: {
@@ -29,7 +29,7 @@ createRoot(document.getElementById('app')!).render(
   <StrictMode>
     <ThemeProvider theme={theme} noSsr >
       <CssBaseline />
-      <WebSocketProvider>
+      <WebSocketNotificationProvider>
         <QueryClientProvider client={queryClient}>
           {/* <App /> */}
           <Router>
@@ -42,7 +42,7 @@ createRoot(document.getElementById('app')!).render(
             </Routes>
           </Router>
         </QueryClientProvider>
-      </WebSocketProvider>
+      </WebSocketNotificationProvider>
     </ThemeProvider>
   </StrictMode>,
 )

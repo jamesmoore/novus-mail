@@ -15,4 +15,4 @@ const notificationEventEmitter = new EventEmitter();
 
 smtpSrv.start(db, 25, notificationEventEmitter);
 const server = httpSrv.start(db, domainName, 80);
-const wss = new WebSocketNotifier(server, notificationEventEmitter);
+new WebSocketNotifier(server, notificationEventEmitter);
