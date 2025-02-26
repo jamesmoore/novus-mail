@@ -5,10 +5,11 @@ import { readFileSync, readdirSync } from 'fs';
 import { extname } from 'path';
 import h from './helper.js';
 import { Database } from 'better-sqlite3';
+import EventEmitter from 'events';
 
 const mod = {
 
-	start: function (db: Database, port: number) {
+	start: function (db: Database, port: number, notifier: EventEmitter) {
 
 		const opt: SMTPServerOptions = {
 
@@ -37,6 +38,7 @@ const mod = {
 
 								const id = h.randomID();
 								db.prepare("INSERT INTO mail (id, recipient, sender, subject, content, read, received) VALUES (?, ?, ?, ?, ?, ?, ?)").run(id, recipientName, sender, subject, content, 0, mail.date?.getTime() ?? 0);
+								notifier.emit('received', recipientName);
 								break;
 
 							}

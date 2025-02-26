@@ -6,6 +6,7 @@ import { Paper } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import applyEmailTemplate from './email-wrapper';
 import MailboxItem from './MailboxItem';
+import { useInvalidateMailItemsCache } from './useMailItems';
 
 function Mail() {
     const navigate = useNavigate();
@@ -18,9 +19,14 @@ function Mail() {
         }
     );
 
+    const { invalidate } = useInvalidateMailItemsCache();
+
     async function onMailItemDelete(itemKey: string) {
         deleteMail(itemKey)
             .then(() => {
+                if (message?.recipient) {
+                    invalidate(message.recipient);
+                }
                 navigate(-1);
             })
             .catch(error => {

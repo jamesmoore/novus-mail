@@ -1,14 +1,15 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchMails } from "./api-client";
 import { MailResponse } from "./models/mail-response";
-import { useMemo } from "react";
+
+const getUseMailItemsQueryKey = (selectedAddress: string) => {
+    return ['mail', selectedAddress];
+}
 
 const useMailItems = (selectedAddress?: string) => {
-    
-    const queryKey = useMemo(() => ['mail', selectedAddress], [selectedAddress]);
 
     return useInfiniteQuery({
-        queryKey: queryKey,
+        queryKey: getUseMailItemsQueryKey(selectedAddress!),
         queryFn: async ({
             pageParam,
         }): Promise<MailResponse> => fetchMails(selectedAddress!, pageParam),
@@ -16,8 +17,23 @@ const useMailItems = (selectedAddress?: string) => {
         getPreviousPageParam: (firstPage) => firstPage.previousId,
         getNextPageParam: (lastPage) => lastPage.nextId,
         enabled: !!selectedAddress,
+        staleTime: 300 * 1000,
     });
-
 }
 
-export default useMailItems;
+const useInvalidateMailItemsCache = () => {
+    const queryClient = useQueryClient();
+
+    const invalidate = (address: string) => {
+        const queryKey = getUseMailItemsQueryKey(address);
+        queryClient.invalidateQueries({ queryKey: queryKey });
+    }
+
+    return { invalidate };
+}
+
+export {
+    useMailItems,
+    useInvalidateMailItemsCache
+};
+

@@ -16,6 +16,7 @@ const queryClient = new QueryClient();
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Mailbox from './Mailbox.tsx';
 import TopBarAddress from './TopBarAddress.tsx';
+import { WebSocketProvider } from './useWebSocketNotifier.tsx';
 
 const theme = createTheme({
   colorSchemes: {
@@ -28,18 +29,20 @@ createRoot(document.getElementById('app')!).render(
   <StrictMode>
     <ThemeProvider theme={theme} noSsr >
       <CssBaseline />
-      <QueryClientProvider client={queryClient}>
-        {/* <App /> */}
-        <Router>
-          <Routes>
-            <Route path="/" element={<Layout bodyChildren={<Mailbox />} topBarChildren={<TopBarAddress />} />} />
-            <Route path="/manage" element={<Layout bodyChildren={<Manage />} topBarChildren={<></>} />} />
-            <Route path="/mail/:messageId" element={<Layout bodyChildren={<Mail />} topBarChildren={<TopBarAddress />} />} />
-            <Route path="/inbox/:address" element={<Layout bodyChildren={<Mailbox />} topBarChildren={<TopBarAddress />} />} />
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-        </Router>
-      </QueryClientProvider>
+      <WebSocketProvider>
+        <QueryClientProvider client={queryClient}>
+          {/* <App /> */}
+          <Router>
+            <Routes>
+              <Route path="/" element={<Layout bodyChildren={<Mailbox />} topBarChildren={<TopBarAddress />} />} />
+              <Route path="/manage" element={<Layout bodyChildren={<Manage />} topBarChildren={<></>} />} />
+              <Route path="/mail/:messageId" element={<Layout bodyChildren={<Mail />} topBarChildren={<TopBarAddress />} />} />
+              <Route path="/inbox/:address" element={<Layout bodyChildren={<Mailbox />} topBarChildren={<TopBarAddress />} />} />
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </Router>
+        </QueryClientProvider>
+      </WebSocketProvider>
     </ThemeProvider>
   </StrictMode>,
 )

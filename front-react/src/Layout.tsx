@@ -1,4 +1,4 @@
-import { useState, ReactNode } from 'react';
+import { useState, ReactNode, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { AppBar, Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
 import Grid from '@mui/material/Grid2';
@@ -8,6 +8,8 @@ import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
 import DraftsIcon from '@mui/icons-material/Drafts';
 import useUnreadCounts from './useUnreadCounts';
+import { useWebSocketNotifier } from './useWebSocketNotifier';
+import { useMailItems, useInvalidateMailItemsCache } from './useMailItems';
 
 export interface LayoutProps {
   bodyChildren?: ReactNode;
@@ -16,6 +18,8 @@ export interface LayoutProps {
 
 function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
 
+  const { lastJsonMessage } = useWebSocketNotifier();
+
   const navigate = useNavigate();
   const location = useLocation();
   const { address: urlAddressSegment } = useParams();
@@ -23,7 +27,7 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-
+  const { refetch } = useMailItems(urlAddressSegment);
 
   const handleDrawerClose = () => {
     setIsClosing(true);
@@ -42,7 +46,31 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
 
   const { data: addressesResponse, isLoading: addressIsLoading } = useAddressResponse();
 
-  const { data: unreadCounts } = useUnreadCounts();
+  const { refetch: unreadRefetch, data: unreadCounts } = useUnreadCounts();
+
+  const { invalidate } = useInvalidateMailItemsCache();
+
+  useEffect(() => {
+    if (lastJsonMessage) {
+      console.log(lastJsonMessage);
+      if (lastJsonMessage.type === 'received') {
+        unreadRefetch();
+        if (urlAddressSegment === lastJsonMessage.value) {
+          refetch();
+        }
+        else if (lastJsonMessage.value) {
+          invalidate(lastJsonMessage.value);
+        }
+      }
+      else if (lastJsonMessage.type === 'connected') {
+
+      }
+      else {
+        console.error('Unhandled type: ' + lastJsonMessage.type);
+      }
+    }
+  }, [lastJsonMessage])
+
 
   if (addressIsLoading) {
     return <div>Loading...</div>;
@@ -86,7 +114,7 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
           <ListItemIcon sx={{ minWidth: '40px' }}>
             <SettingsIcon />
           </ListItemIcon>
-          <ListItemText primary={"Settings"}/>
+          <ListItemText primary={"Settings"} />
         </ListItemButton>
       </ListItem>
     </div>

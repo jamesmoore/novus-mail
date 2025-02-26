@@ -179,7 +179,7 @@ const mod = {
 
 			try {
 
-				const rows = db.prepare("SELECT sender, subject, content, read, received FROM mail WHERE id = ?").all(json.id);
+				const rows = db.prepare("SELECT recipient, sender, subject, content, read, received FROM mail WHERE id = ?").all(json.id);
 				res.json(rows[0])
 
 			} catch (err) {
@@ -269,11 +269,12 @@ const mod = {
 			});
 		})
 
-		app.listen(port, () => {
+		const server = app.listen(port, () => {
 			console.log('http server listening at port: ' + port);
 		})
 
-	}
+		return server;
+	},
 
 }
 
