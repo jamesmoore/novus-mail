@@ -1,6 +1,6 @@
-import { useState, ReactNode, useEffect } from 'react';
+import { useState, ReactNode, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { AppBar, Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
+import { AppBar, Badge, Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import useAddressResponse from './useAddressResponse';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -82,32 +82,34 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
     setLastReceivedMessage(null);
   }, [lastReceivedMessage, invalidate, unreadRefetch, refetch, urlAddressSegment, setLastReceivedMessage]);
 
-
-  if (addressIsLoading) {
-    return <div>Loading...</div>;
-  }
+  const mailboxes = useMemo(() => addressesResponse?.addresses.map(p => p.addr).map((address) => ({
+    address,
+    unreadcount: unreadCounts?.filter(p => p.recipient === address).at(0)?.unread,
+    selected: address === urlAddressSegment
+  })) ?? [], [addressesResponse, unreadCounts, urlAddressSegment]);
 
   const drawer = (
     <>
       <Toolbar />
       <Divider />
       <List>
-        {addressesResponse?.addresses.map(p => p.addr).map((address) => (
-          <ListItem key={address} disablePadding>
+        {mailboxes.map((mailbox) => (
+          <ListItem key={mailbox.address} disablePadding>
             <ListItemButton
               onClick={() => {
                 if (mobileOpen) {
                   handleDrawerToggle();
                 }
-                navigate('/inbox/' + address);
+                navigate('/inbox/' + mailbox.address);
               }}
-              selected={address === urlAddressSegment}
+              selected={mailbox.selected}
             >
               <ListItemIcon sx={{ minWidth: '40px' }}>
-                {address === urlAddressSegment ? <DraftsIcon /> : <MailIcon />}
+                <Badge badgeContent={mailbox.unreadcount} color="primary">
+                  {mailbox.selected ? <DraftsIcon /> : <MailIcon />}
+                </Badge>
               </ListItemIcon>
-              <ListItemText primary={address} sx={{ mr: 1, overflow: 'hidden', textOverflow: 'ellipsis' }} />
-              <ListItemText sx={{ ml: "auto", textAlign: "right" }} primary={unreadCounts?.filter(p => p.recipient === address).at(0)?.unread} slotProps={{ primary: { color: "primary" } }} />
+              <ListItemText primary={mailbox.address} sx={{ mr: 1, overflow: 'hidden', textOverflow: 'ellipsis' }} />
             </ListItemButton>
           </ListItem>
         ))}
@@ -130,6 +132,10 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
       </ListItem>
     </>
   );
+
+  if (addressIsLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Box sx={{ display: 'flex', height: "100dvh" }}>
