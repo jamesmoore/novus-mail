@@ -12,4 +12,4 @@ jobs:
         package-name: 'novusmail'
         package-type: 'container'
         min-versions-to-keep: 10
-        delete-only-untagged-versions: 'true'
+        delete-only-untagged-versions: false
