@@ -17,6 +17,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Mailbox from './Mailbox.tsx';
 import TopBarAddress from './TopBarAddress.tsx';
 import { WebSocketNotificationProvider } from './WebSocketNotificationProvider.tsx';
+import TopBarSettings from './TopBarSettings.tsx';
 
 const theme = createTheme({
   colorSchemes: {
@@ -35,7 +36,7 @@ createRoot(document.getElementById('app')!).render(
           <Router>
             <Routes>
               <Route path="/" element={<Layout bodyChildren={<Mailbox />} topBarChildren={<TopBarAddress />} />} />
-              <Route path="/manage" element={<Layout bodyChildren={<Manage />} topBarChildren={<></>} />} />
+              <Route path="/manage" element={<Layout bodyChildren={<Manage />} topBarChildren={<TopBarSettings/>} />} />
               <Route path="/mail/:messageId" element={<Layout bodyChildren={<Mail />} topBarChildren={<TopBarAddress />} />} />
               <Route path="/inbox/:address" element={<Layout bodyChildren={<Mailbox />} topBarChildren={<TopBarAddress />} />} />
               <Route path="*" element={<Navigate to="/" />} />
