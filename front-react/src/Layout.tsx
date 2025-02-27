@@ -61,8 +61,6 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
   useEffect(() => {
     if (!lastReceivedMessage) return;
 
-    console.log(lastReceivedMessage);
-
     switch (lastReceivedMessage.type) {
       case 'received':
         unreadRefetch();
@@ -78,7 +76,7 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
         break;
 
       default:
-        console.error('Unhandled message type:', lastReceivedMessage.type);
+        console.error('Unhandled message type:', JSON.stringify(lastReceivedMessage));
     }
 
     setLastReceivedMessage(null);
@@ -90,7 +88,7 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
   }
 
   const drawer = (
-    <div>
+    <>
       <Toolbar />
       <Divider />
       <List>
@@ -130,7 +128,7 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
           <ListItemText primary={"Settings"} />
         </ListItemButton>
       </ListItem>
-    </div>
+    </>
   );
 
   return (

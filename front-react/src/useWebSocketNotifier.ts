@@ -1,10 +1,16 @@
 import { createContext, useContext } from 'react';
 import { WebSocketHook } from 'react-use-websocket/dist/lib/types';
 
-export interface WebSocketMessage {
-    type: 'received' | 'connected' | string,
+export type ConnectedWebSocketMessage = {
+    type: 'connected',
+};
+
+export type ReceivedWebSocketMessage = {
+    type: 'received',
     value: string
-}
+};
+
+export type WebSocketMessage = ReceivedWebSocketMessage | ConnectedWebSocketMessage;
 
 export const WebSocketContext = createContext(null as unknown as WebSocketHook<WebSocketMessage>);
 

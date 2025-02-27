@@ -1,6 +1,7 @@
 import { Server } from "http";
 import { EventEmitter } from "events";
 import WebSocket, { WebSocketServer } from 'ws';
+import { WebSocketMessage } from "./WebSocketMessage";
 
 class WebSocketNotifier {
     private wss: WebSocketServer;
@@ -11,24 +12,24 @@ class WebSocketNotifier {
         this.wss = new WebSocketServer({ server });
         this.notificationEmitter = notificationEmitter;
         this.connectedSockets = [];
-        
+
         this.initialize();
 
-        this.notificationEmitter.on('received', (address: string) => { 
+        this.notificationEmitter.on('received', (address: string) => {
             this.connectedSockets.forEach(ws => {
-                ws.send(JSON.stringify({ type: 'received', value: address }));
+                this.sendWebSocketMessage(ws, { type: 'received', value: address });
             });
-        
+
         });
     }
 
     private initialize() {
         this.wss.on('connection', (ws: WebSocket) => {
             try {
-                ws.send(JSON.stringify({ type: 'connected' }));
+                this.sendWebSocketMessage(ws, { type: 'connected' });
                 this.connectedSockets.push(ws);
                 console.log(`New connection established. Total sockets: ${this.connectedSockets.length}`);
-                
+
                 ws.on('close', () => {
                     const index = this.connectedSockets.indexOf(ws);
                     if (index !== -1) {
@@ -47,6 +48,10 @@ class WebSocketNotifier {
         setInterval(() => {
             this.connectedSockets = this.connectedSockets.filter(socket => socket.readyState === WebSocket.OPEN);
         }, 5000);
+    }
+
+    private sendWebSocketMessage(ws: WebSocket, newLocal: WebSocketMessage) {
+        ws.send(JSON.stringify(newLocal));
     }
 
     public getConnectionCount(): number {
