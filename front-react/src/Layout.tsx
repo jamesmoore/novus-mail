@@ -145,7 +145,7 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
   return (
     <>
       <title>{title}</title>
-      <Box sx={{ display: 'flex', height: "10" }}>
+      <Box sx={{ display: 'flex', height: "100dvh" }}>
         <AppBar
           position="fixed"
           sx={{
