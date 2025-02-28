@@ -145,7 +145,7 @@ function Manage() {
                                             {deleteAddress === address &&
                                                 <>
                                                     <Typography color='error'>Confirm delete?</Typography>
-                                                    <IconButton aria-label="delete" onClick={() => confirmDeleteClicked(address)}>
+                                                    <IconButton onPointerUp={() => confirmDeleteClicked(address)}>
                                                         <DeleteForever color="error" />
                                                     </IconButton>
                                                 </>
