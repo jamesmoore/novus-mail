@@ -26,6 +26,19 @@ const fetchAddress = async () => {
     return response.json() as Promise<AddressesResponse>;
 };
 
+const getAddress = async (newAddressText: string) => {
+    const response = await fetch(`${BaseUrl}/getAddress`, {
+        method: 'POST',
+        body: JSON.stringify(
+            {
+                address: newAddressText,
+            }
+        ),
+        headers: defaultHeaders
+    });
+    return response.text();
+}
+
 const addAddress = async (newAddressText: string) => {
     const response = await fetch(`${BaseUrl}/addAddress`, {
         method: 'POST',
@@ -124,6 +137,7 @@ const fetchUnreadCounts = async () => {
 export {
     fetchDomain,
     fetchAddress,
+    getAddress,
     addAddress,
     deleteAddress,
     fetchMails,

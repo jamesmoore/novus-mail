@@ -79,6 +79,24 @@ const mod = {
 
 		});
 
+		app.post('/getAddress', (req, res) => {
+			const json = req.body;
+			try {
+				const address = json.address.toLowerCase();
+				const rows = db.prepare("SELECT addr FROM address WHERE addr = ?").all(address);
+				if (rows.length > 0) {
+					res.status(200).send((rows[0] as {addr: string}).addr);
+				}
+				else 
+				{
+					res.status(200).send('');
+				}
+			} catch (err) {
+				console.error("DB get addresses fail")
+				console.error(err)
+			}
+		})
+
 		app.post('/addAddress', (req, res) => {
 
 			const json = req.body;
