@@ -1,4 +1,3 @@
-"use strict";
 import express from 'express'
 import config from './config.js'
 import { join } from 'path'
@@ -6,6 +5,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { Database } from 'better-sqlite3';
 import cors from 'cors';
+import { Server } from 'http';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -19,10 +19,18 @@ interface Mail {
 	received: number;
 }
 
+export class HttpServer {
+	private db: Database;
+	private port: number;
+	private domainName: string;
 
-const mod = {
+	constructor(db: Database, domainName: string, port: number) {
+		this.db = db;
+		this.port = port;
+		this.domainName = domainName;
+	}
 
-	start: function (db: Database, domainName: string, port: number) {
+	public start(): Server {
 
 		const app = express();
 
@@ -53,7 +61,7 @@ const mod = {
 
 			try {
 
-				const rows = db.prepare("SELECT addr FROM address").all();
+				const rows = this.db.prepare("SELECT addr FROM address").all();
 				res.json({ addresses: rows, refreshInterval: refreshInterval });
 
 			} catch (err) {
@@ -67,9 +75,9 @@ const mod = {
 
 		app.post('/domain', (req, res) => {
 
-			if (domainName) {
+			if (this.domainName) {
 
-				res.status(200).send(domainName);
+				res.status(200).send(this.domainName);
 
 			} else {
 
@@ -83,12 +91,11 @@ const mod = {
 			const json = req.body;
 			try {
 				const address = json.address.toLowerCase();
-				const rows = db.prepare("SELECT addr FROM address WHERE addr = ?").all(address);
+				const rows = this.db.prepare("SELECT addr FROM address WHERE addr = ?").all(address);
 				if (rows.length > 0) {
-					res.status(200).send((rows[0] as {addr: string}).addr);
+					res.status(200).send((rows[0] as { addr: string }).addr);
 				}
-				else 
-				{
+				else {
 					res.status(200).send('');
 				}
 			} catch (err) {
@@ -104,14 +111,14 @@ const mod = {
 			try {
 
 				const address = json.address.toLowerCase();
-				const rows = db.prepare("SELECT addr FROM address WHERE addr = ?").all(address);
+				const rows = this.db.prepare("SELECT addr FROM address WHERE addr = ?").all(address);
 				if (rows.length > 0) {
 
 					res.status(200).send("exist");
 
 				}
 
-				db.prepare("INSERT INTO address (addr) VALUES (?)").run(address);
+				this.db.prepare("INSERT INTO address (addr) VALUES (?)").run(address);
 				res.status(200).send("done");
 
 			} catch (err) {
@@ -128,8 +135,8 @@ const mod = {
 
 			try {
 
-				db.prepare("DELETE FROM address WHERE addr = ?").run(json.address);
-				db.prepare("DELETE FROM mail WHERE recipient = ?").run(json.address);
+				this.db.prepare("DELETE FROM address WHERE addr = ?").run(json.address);
+				this.db.prepare("DELETE FROM mail WHERE recipient = ?").run(json.address);
 
 				res.status(200).send("done");
 
@@ -170,7 +177,7 @@ const mod = {
 				  LIMIT @mailCount
 				`;
 
-				let rows = db.prepare(sql).all(params) as Mail[];
+				let rows = this.db.prepare(sql).all(params) as Mail[];
 
 				if (direction === 'gt') {
 					rows = rows.sort((a, b) => b.id > a.id ? 1 : -1);
@@ -197,7 +204,7 @@ const mod = {
 
 			try {
 
-				const rows = db.prepare("SELECT recipient, sender, subject, content, read, received FROM mail WHERE id = ?").all(json.id);
+				const rows = this.db.prepare("SELECT recipient, sender, subject, content, read, received FROM mail WHERE id = ?").all(json.id);
 				res.json(rows[0])
 
 			} catch (err) {
@@ -215,7 +222,7 @@ const mod = {
 
 			try {
 
-				db.prepare("DELETE FROM mail WHERE id = ?").run(json.id);
+				this.db.prepare("DELETE FROM mail WHERE id = ?").run(json.id);
 				res.status(200).send();
 
 			} catch (err) {
@@ -232,7 +239,7 @@ const mod = {
 			const json = req.body;
 
 			try {
-				db.prepare("UPDATE mail SET read = 1 where id = ?").run(json.id);
+				this.db.prepare("UPDATE mail SET read = 1 where id = ?").run(json.id);
 				res.status(200).send();
 			} catch (err) {
 				console.error("DB update mail fail")
@@ -245,7 +252,7 @@ const mod = {
 			const json = req.body;
 
 			try {
-				db.prepare("UPDATE mail SET read = 1 where recipient = ? and read = 0").run(json.address);
+				this.db.prepare("UPDATE mail SET read = 1 where recipient = ? and read = 0").run(json.address);
 				res.status(200).send();
 			} catch (err) {
 				console.error("DB read all mail fail")
@@ -256,7 +263,7 @@ const mod = {
 		app.post('/unreadCounts', (req, res) => {
 
 			try {
-				const unread = db.prepare(`
+				const unread = this.db.prepare(`
 					SELECT recipient, count(*) as unread
 					from mail
 					where read = 0
@@ -270,8 +277,8 @@ const mod = {
 		})
 
 		app.post('/status', (req, res) => {
-			const unread = db.prepare('SELECT count(*) as unread from mail where read = 0').get();
-			const addresses = db.prepare('SELECT count(*) as addresses from address').get();
+			const unread = this.db.prepare('SELECT count(*) as unread from mail where read = 0').get();
+			const addresses = this.db.prepare('SELECT count(*) as addresses from address').get();
 			res.json({
 				unread: (unread as { unread: number }).unread,
 				addresses: (addresses as { addresses: number }).addresses,
@@ -287,14 +294,11 @@ const mod = {
 			});
 		})
 
-		const server = app.listen(port, () => {
-			console.log('http server listening at port: ' + port);
+		const server = app.listen(this.port, () => {
+			console.log('http server listening at port: ' + this.port);
 		})
 
 		return server;
-	},
+	}
 
 }
-
-
-export default mod;

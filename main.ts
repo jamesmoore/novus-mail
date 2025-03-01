@@ -1,6 +1,6 @@
 "use strict";
-import smtpSrv from './smtpSrv.js'
-import httpSrv from './httpSrv.js'
+import { SMTPServer } from './smtpSrv.js'
+import { HttpServer } from './httpSrv.js'
 import config from './config.js'
 import domain from './domain.js'
 import database from './database.js'
@@ -13,6 +13,9 @@ const domainName = domain.getDomainName();
 
 const notificationEventEmitter = new EventEmitter();
 
-smtpSrv.start(db, 25, notificationEventEmitter);
-const server = httpSrv.start(db, domainName, 80);
+
+const smtpSrv = new SMTPServer(db, 25,notificationEventEmitter);
+smtpSrv.start();
+const httpServer = new HttpServer(db, domainName, 80);
+const server = httpServer.start();
 new WebSocketNotifier(server, notificationEventEmitter);
