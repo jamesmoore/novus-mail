@@ -6,7 +6,7 @@
     "dev": "node --loader ts-node/esm --watch -r ts-node/register --env-file=.env.development ./main.ts",
     "build": "tsc",
     "bundle": "ncc build main.js",
-    "lint": "eslint ." 
+    "lint": "eslint ."
   },
   "author": "",
   "license": "ISC",
@@ -16,7 +16,8 @@
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "mailparser": "^3.7.2",
-    "smtp-server": "^3.13.6"
+    "smtp-server": "^3.13.6",
+    "ws": "^8.18.1"
   },
   "type": "module",
   "devDependencies": {
@@ -26,6 +27,7 @@
     "@types/mailparser": "^3.4.5",
     "@types/node": "^22.13.5",
     "@types/smtp-server": "^3.5.10",
+    "@types/ws": "^8.5.14",
     "@vercel/ncc": "^0.38.3",
     "eslint": "^9.21.0",
     "nodemon": "^3.1.9",

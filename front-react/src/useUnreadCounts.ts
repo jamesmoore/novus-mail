@@ -5,7 +5,7 @@ const useUnreadCounts = () =>  useQuery(
     {
       queryKey: ["unread-counts"],
       queryFn: fetchUnreadCounts,
-      refetchInterval: 10000,
+      staleTime: 300 * 1000,
     }
   )
 

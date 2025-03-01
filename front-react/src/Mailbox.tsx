@@ -1,13 +1,13 @@
 import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Typography } from "@mui/material"
 import MailboxItem from "./MailboxItem"
-import { deleteMail, fetchMails, readMail } from "./api-client";
+import { deleteMail, readMail } from "./api-client";
 import { Mail } from "./models/mail";
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { useNavigate, useParams } from "react-router-dom";
 import useAddressResponse from "./useAddressResponse";
 import useUnreadCounts from "./useUnreadCounts";
-import useMailItems from "./useMailItems";
+import { useMailItems } from './useMailItems';
 
 function Mailbox() {
     const { address: selectedAddress } = useParams();
@@ -20,9 +20,12 @@ function Mailbox() {
     const { data: addressResponse } = useAddressResponse();
 
     async function onMailItemSelect(mail: Mail) {
-        await readMail(mail.id);
-        mail.read = true;
-        navigate('/mail/' + mail.id);
+        if (!mail.read) {
+            await readMail(mail.id);
+            mail.read = true;
+            refetchUnread();
+        }
+        navigate(`/mail/${selectedAddress}/${mail.id}`);
     }
 
     async function onMailItemDelete(itemKey: string) {
@@ -43,7 +46,7 @@ function Mailbox() {
                 navigate('/inbox/' + address);
             }
         }
-    }, [selectedAddress, addressResponse])
+    }, [selectedAddress, addressResponse, navigate])
 
     const {
         data: mails,
@@ -54,7 +57,7 @@ function Mailbox() {
         hasNextPage,
         refetch,
         isRefetching,
-        
+
     } = useMailItems(selectedAddress);
 
     async function deleteYes() {
@@ -72,27 +75,6 @@ function Mailbox() {
     async function deleteNo() {
         setDeleteConfirm(false);
     }
-
-    useEffect(() => {
-
-        const newMailCheck = () => {
-            const previousId = mails?.pages[0].previousId ?? '';
-            fetchMails(selectedAddress!, previousId).then(
-                (p) => {
-                    if (p.data.length > 0) {
-                        refetch();
-                    }
-                }
-            );
-        };
-
-        if (addressResponse?.refreshInterval) {
-            const interval = setInterval(newMailCheck, addressResponse?.refreshInterval * 1000);
-            return () => {
-                clearInterval(interval);
-            };
-        }
-    }, [addressResponse?.refreshInterval, selectedAddress, mails, refetch]);
 
     useEffect(() => {
         if (inView) {

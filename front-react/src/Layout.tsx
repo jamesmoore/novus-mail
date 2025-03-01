@@ -1,6 +1,6 @@
-import { useState, ReactNode } from 'react';
+import { useState, ReactNode, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { AppBar, Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
+import { AppBar, Badge, Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import useAddressResponse from './useAddressResponse';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -8,6 +8,8 @@ import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
 import DraftsIcon from '@mui/icons-material/Drafts';
 import useUnreadCounts from './useUnreadCounts';
+import { useWebSocketNotifier, WebSocketMessage } from './useWebSocketNotifier';
+import { useMailItems, useInvalidateMailItemsCache } from './useMailItems';
 
 export interface LayoutProps {
   bodyChildren?: ReactNode;
@@ -16,6 +18,8 @@ export interface LayoutProps {
 
 function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
 
+  const { lastJsonMessage } = useWebSocketNotifier();
+
   const navigate = useNavigate();
   const location = useLocation();
   const { address: urlAddressSegment } = useParams();
@@ -23,7 +27,7 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-
+  const { refetch } = useMailItems(urlAddressSegment);
 
   const handleDrawerClose = () => {
     setIsClosing(true);
@@ -42,33 +46,77 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
 
   const { data: addressesResponse, isLoading: addressIsLoading } = useAddressResponse();
 
-  const { data: unreadCounts } = useUnreadCounts();
+  const { refetch: unreadRefetch, data: unreadCounts } = useUnreadCounts();
 
-  if (addressIsLoading) {
-    return <div>Loading...</div>;
-  }
+  const { invalidate } = useInvalidateMailItemsCache();
+
+  const [lastReceivedMessage, setLastReceivedMessage] = useState<WebSocketMessage | null>(null);
+
+  useEffect(() => {
+    setLastReceivedMessage(lastJsonMessage);
+  },
+    [lastJsonMessage]
+  )
+
+  useEffect(() => {
+    if (!lastReceivedMessage) return;
+
+    switch (lastReceivedMessage.type) {
+      case 'received':
+        unreadRefetch();
+        if (urlAddressSegment === lastReceivedMessage.value) {
+          refetch();
+        } else if (lastReceivedMessage.value) {
+          invalidate(lastReceivedMessage.value);
+        }
+        break;
+
+      case 'connected':
+        // Handle connected state if needed
+        break;
+
+      default:
+        console.error('Unhandled message type:', JSON.stringify(lastReceivedMessage));
+    }
+
+    setLastReceivedMessage(null);
+  }, [lastReceivedMessage, invalidate, unreadRefetch, refetch, urlAddressSegment, setLastReceivedMessage]);
+
+  const mailboxes = useMemo(() => addressesResponse?.addresses.map(p => p.addr).map((address) => ({
+    address,
+    unreadcount: unreadCounts?.filter(p => p.recipient === address).at(0)?.unread,
+    selected: address === urlAddressSegment
+  })) ?? [], [addressesResponse, unreadCounts, urlAddressSegment]);
+
+  useEffect(() => {
+    const unreadCount = unreadCounts?.map(p => p.unread).reduce((p, q) => p + q, 0) ?? 0;
+    const title = `NovusMail${unreadCount > 0 ? ` (${unreadCount})` : ''}`;
+    document.title = ''; // https://stackoverflow.com/questions/72982365/setting-document-title-doesnt-change-the-tabs-text-after-pressing-back-in-the
+    document.title = title;
+  }, [unreadCounts, location]);
 
   const drawer = (
-    <div>
+    <>
       <Toolbar />
       <Divider />
       <List>
-        {addressesResponse?.addresses.map(p => p.addr).map((address) => (
-          <ListItem key={address} disablePadding>
+        {mailboxes.map((mailbox) => (
+          <ListItem key={mailbox.address} disablePadding>
             <ListItemButton
               onClick={() => {
                 if (mobileOpen) {
                   handleDrawerToggle();
                 }
-                navigate('/inbox/' + address);
+                navigate('/inbox/' + mailbox.address);
               }}
-              selected={address === urlAddressSegment}
+              selected={mailbox.selected}
             >
               <ListItemIcon sx={{ minWidth: '40px' }}>
-                {address === urlAddressSegment ? <DraftsIcon /> : <MailIcon />}
+                <Badge badgeContent={mailbox.unreadcount} color="primary">
+                  {mailbox.selected ? <DraftsIcon /> : <MailIcon />}
+                </Badge>
               </ListItemIcon>
-              <ListItemText primary={address} sx={{ mr: 1, overflow: 'hidden', textOverflow: 'ellipsis' }} />
-              <ListItemText sx={{ ml: "auto", textAlign: "right" }} primary={unreadCounts?.filter(p => p.recipient === address).at(0)?.unread} slotProps={{ primary: { color: "primary" } }} />
+              <ListItemText primary={mailbox.address} sx={{ mr: 1, overflow: 'hidden', textOverflow: 'ellipsis' }} />
             </ListItemButton>
           </ListItem>
         ))}
@@ -86,11 +134,15 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
           <ListItemIcon sx={{ minWidth: '40px' }}>
             <SettingsIcon />
           </ListItemIcon>
-          <ListItemText primary={"Settings"}/>
+          <ListItemText primary={"Settings"} />
         </ListItemButton>
       </ListItem>
-    </div>
+    </>
   );
+
+  if (addressIsLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Box sx={{ display: 'flex', height: "100dvh" }}>
@@ -166,9 +218,6 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
           {bodyChildren && bodyChildren}
         </Grid>
       </Box>
-
-
-
     </Box>
   );
 }

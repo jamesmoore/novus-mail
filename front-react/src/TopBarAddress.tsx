@@ -5,7 +5,7 @@ import useDomain from "./useDomain";
 import { useParams } from "react-router-dom";
 import { readAllMail } from "./api-client";
 import useUnreadCounts from "./useUnreadCounts";
-import useMailItems from "./useMailItems";
+import { useMailItems } from "./useMailItems";
 
 const handleCopy = async (text: string) => {
     try {
