@@ -88,10 +88,12 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
     selected: address === urlAddressSegment
   })) ?? [], [addressesResponse, unreadCounts, urlAddressSegment]);
 
-  const title = useMemo(() => { 
+  useEffect(() => {
     const unreadCount = unreadCounts?.map(p => p.unread).reduce((p, q) => p + q, 0) ?? 0;
-    return `NovusMail${unreadCount > 0 ? ` (${unreadCount})` : ''}`;
-  }, [unreadCounts]);
+    const title = `NovusMail${unreadCount > 0 ? ` (${unreadCount})` : ''}`;
+    document.title = ''; // https://stackoverflow.com/questions/72982365/setting-document-title-doesnt-change-the-tabs-text-after-pressing-back-in-the
+    document.title = title;
+  }, [unreadCounts, location]);
 
   const drawer = (
     <>
@@ -143,83 +145,80 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
   }
 
   return (
-    <>
-      <title>{title}</title>
-      <Box sx={{ display: 'flex', height: "100dvh" }}>
-        <AppBar
-          position="fixed"
+    <Box sx={{ display: 'flex', height: "100dvh" }}>
+      <AppBar
+        position="fixed"
+        sx={{
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          ml: { sm: `${drawerWidth}px` },
+        }}
+      >
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ mr: 2, display: { sm: 'none' } }}
+          >
+            <MenuIcon />
+          </IconButton>
+
+          {topBarChildren && topBarChildren}
+
+        </Toolbar>
+      </AppBar>
+      <Box
+        component="nav"
+        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        aria-label="mailbox folders"
+      >
+        <Drawer
+          //container={container}
+          variant="temporary"
+          open={mobileOpen}
+          onTransitionEnd={handleDrawerTransitionEnd}
+          onClose={handleDrawerClose}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
           sx={{
-            width: { sm: `calc(100% - ${drawerWidth}px)` },
-            ml: { sm: `${drawerWidth}px` },
+            display: { xs: 'block', sm: 'none' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
           }}
         >
-          <Toolbar>
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              edge="start"
-              onClick={handleDrawerToggle}
-              sx={{ mr: 2, display: { sm: 'none' } }}
-            >
-              <MenuIcon />
-            </IconButton>
-
-            {topBarChildren && topBarChildren}
-
-          </Toolbar>
-        </AppBar>
-        <Box
-          component="nav"
-          sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-          aria-label="mailbox folders"
-        >
-          <Drawer
-            //container={container}
-            variant="temporary"
-            open={mobileOpen}
-            onTransitionEnd={handleDrawerTransitionEnd}
-            onClose={handleDrawerClose}
-            ModalProps={{
-              keepMounted: true, // Better open performance on mobile.
-            }}
-            sx={{
-              display: { xs: 'block', sm: 'none' },
-              '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-            }}
-          >
-            {drawer}
-          </Drawer>
-          <Drawer
-            variant="permanent"
-            sx={{
-              display: { xs: 'none', sm: 'block' },
-              '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-            }}
-            open
-          >
-            {drawer}
-          </Drawer>
-        </Box>
-
-        <Box
+          {drawer}
+        </Drawer>
+        <Drawer
+          variant="permanent"
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            flex: "1 1 auto",
-            width: {
-              xs: "100%",
-              sm: `calc(100% - ${drawerWidth}px)`
-            },
+            display: { xs: 'none', sm: 'block' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
           }}
+          open
         >
-
-          <Toolbar />
-          <Grid flex="1 0 auto" paddingLeft={1} paddingRight={1}>
-            {bodyChildren && bodyChildren}
-          </Grid>
-        </Box>
+          {drawer}
+        </Drawer>
       </Box>
-    </>
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          flex: "1 1 auto",
+          width: {
+            xs: "100%",
+            sm: `calc(100% - ${drawerWidth}px)`
+          },
+        }}
+      >
+
+        <Toolbar />
+        <Grid flex="1 0 auto" paddingLeft={1} paddingRight={1}>
+          {bodyChildren && bodyChildren}
+        </Grid>
+      </Box>
+    </Box>
   );
 }
 
