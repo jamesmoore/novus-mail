@@ -1,22 +1,18 @@
-import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, LinearProgress, Typography } from "@mui/material"
-import MailboxItem from "./MailboxItem"
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material"
 import { deleteMail, readMail } from "./api-client";
 import { Mail } from "./models/mail";
 import { useEffect, useState } from "react";
-import { useInView } from "react-intersection-observer";
 import { useNavigate, useParams } from "react-router-dom";
 import useAddressResponse from "./useAddressResponse";
 import useUnreadCounts from "./useUnreadCounts";
 import { useMailItems } from './useMailItems';
-import FadeDelay from "./FadeDelay";
+import MailboxItems from "./MailboxItems";
 
 function Mailbox() {
     const { address: selectedAddress } = useParams();
     const navigate = useNavigate();
     const [deleteConfirm, setDeleteConfirm] = useState(false);
     const [deleteItemKey, setDeleteItemKey] = useState<string | null>(null);
-
-    const { ref, inView } = useInView();
 
     const { data: addressResponse } = useAddressResponse();
 
@@ -49,23 +45,13 @@ function Mailbox() {
         }
     }, [selectedAddress, addressResponse, navigate])
 
-    const {
-        data: mails,
-        error,
-        isFetching,
-        isFetchingNextPage,
-        fetchNextPage,
-        hasNextPage,
-        refetch,
-        isRefetching,
-
-    } = useMailItems(selectedAddress);
+    const useMailItemsHook = useMailItems(selectedAddress);
 
     async function deleteYes() {
         try {
             await deleteMail(deleteItemKey!);
             setDeleteConfirm(false);
-            await refetch();
+            await useMailItemsHook.refetch();
             await refetchUnread();
         }
         catch (error) {
@@ -77,43 +63,13 @@ function Mailbox() {
         setDeleteConfirm(false);
     }
 
-    useEffect(() => {
-        if (inView) {
-            fetchNextPage()
-        }
-    }, [fetchNextPage, inView])
-
-    if (error) {
-        return <div className="error">{error.message}</div>;
-    }
-
     return (
         <>
-            <FadeDelay isLoading={isFetching && !isFetchingNextPage && !isRefetching}>
-                <Box flex="1 0 auto" display="flex" justifyContent={'center'} height={"100%"} alignItems={'center'}>
-                    <CircularProgress color="primary" />
-                </Box>
-            </FadeDelay>
-
-            {
-                mails && mails.pages && mails.pages.map((mailPage) => {
-                    return mailPage.data.map((mail) =>
-                    (
-                        <MailboxItem key={mail.id} mail={mail} onDelete={onMailItemDelete} onSelect={() => onMailItemSelect(mail)} />
-                    ))
-                }
-                )
-            }
-
-            <Box ref={ref} mt={3} mb={3} flex="0 0 auto" display="flex" justifyContent={'center'}>
-
-                <FadeDelay isLoading={isFetchingNextPage}>
-                    <Box sx={{ width: '100%' }}><LinearProgress color="primary" /></Box>
-                </FadeDelay>
-
-                {!hasNextPage && !isFetching && <Divider component="div" sx={{ width: "100%" }}><Typography variant='body1'>No more mail</Typography></Divider>}
-            </Box>
-
+            <MailboxItems
+                onMailItemDelete={onMailItemDelete}
+                onMailItemSelect={onMailItemSelect}
+                useMailItems={useMailItemsHook}
+            />
 
             <Dialog
                 open={deleteConfirm}
