@@ -150,7 +150,11 @@ export class HttpServer {
 
 		app.post('/mails', (req, res) => {
 
-			const json = req.body;
+			const json = req.body as {
+				cursorId: string,
+				addr: string,
+				deleted: boolean
+			};
 
 			try {
 				const perPage = Number(config.getConfig('MailCountPerPage'));
@@ -166,13 +170,17 @@ export class HttpServer {
 				};
 
 				const comparisonOperator = direction === 'lt' ? '<' : '>';
-				const whereClause = cursorId ? `AND Id ${comparisonOperator} @cursorId` : '';
+				const whereClause = 
+					(json.deleted ? ` deleted = 1 ` : ' deleted <> 1 ' ) +
+					(cursorId ? ` AND Id ${comparisonOperator} @cursorId` : '') +
+					(json.addr ? ` AND recipient = @recipient` : '' )
+
 				const sortOrder = direction === 'lt' ? 'DESC' : 'ASC';
 
 				const sql = `
 				  SELECT id, sender, subject, read, received 
 				  FROM mail 
-				  WHERE recipient = @recipient ${whereClause}
+				  WHERE ${whereClause}
 				  ORDER BY id ${sortOrder} 
 				  LIMIT @mailCount
 				`;
@@ -222,7 +230,15 @@ export class HttpServer {
 
 			try {
 
-				this.db.prepare("DELETE FROM mail WHERE id = ?").run(json.id);
+				const mail = this.db.prepare("SELECT deleted FROM mail WHERE id = ?").get(json.id);
+				const isDeleted = mail as unknown as { deleted: boolean };
+
+				if (isDeleted.deleted) {
+					this.db.prepare("DELETE FROM mail WHERE id = ?").run(json.id);
+				}
+				else {
+					this.db.prepare("UPDATE mail SET deleted = 1 WHERE id = ?").run(json.id);
+				}
 				res.status(200).send();
 
 			} catch (err) {

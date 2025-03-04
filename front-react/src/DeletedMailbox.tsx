@@ -1,38 +1,51 @@
-import { Box, CircularProgress, Divider, LinearProgress, Typography } from "@mui/material";
-import FadeDelay from "./FadeDelay";
-import MailboxItem from "./MailboxItem";
-import { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult } from "@tanstack/react-query";
-import { MailResponse } from "./models/mail-response";
+import { deleteMail, readMail } from "./api-client";
+import { Mail } from "./models/mail";
+import { useNavigate, useParams } from "react-router-dom";
+import useUnreadCounts from "./useUnreadCounts";
+import { useDeletedMailItems } from './useMailItems';
+// import MailboxItems from "./MailboxItems";
 import { useInView } from "react-intersection-observer";
 import { useEffect } from "react";
-import { Mail } from "./models/mail";
+import FadeDelay from "./FadeDelay";
+import { Box, CircularProgress, Divider, LinearProgress, Typography } from "@mui/material";
+import MailboxItem from "./MailboxItem";
 
-interface MailboxItemsProps {
-    onMailItemSelect: (mail: Mail) => void;
-    onMailItemDelete: (itemKey: string) => void;
-    mails: InfiniteData<MailResponse, unknown> | undefined,
-    error: Error | null,
-    isFetching: boolean,
-    isFetchingNextPage: boolean,
-    fetchNextPage: (options?: FetchNextPageOptions) => Promise<InfiniteQueryObserverResult<InfiniteData<MailResponse, unknown>, Error>>
-    hasNextPage: boolean,
-    isRefetching: boolean,
-}
+function Mailbox() {
+    const { address: selectedAddress } = useParams();
+    const navigate = useNavigate();
 
-function MailboxItems({
-    onMailItemSelect,
-    onMailItemDelete,
-    mails,
-    error,
-    isFetching,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-    isRefetching,
-}: MailboxItemsProps) {
+    async function onMailItemSelect(mail: Mail) {
+        if (!mail.read) {
+            await readMail(mail.id);
+            mail.read = true;
+            refetchUnread();
+        }
+        navigate(`/mail/${selectedAddress}/${mail.id}`);
+    }
 
+    async function onMailItemDelete(itemKey: string) {
+        try {
+            await deleteMail(itemKey!);
+            await refetch();
+            await refetchUnread();
+        }
+        catch (error) {
+            console.error('Failed to delete mail ' + error);
+        };
+    }
 
+    const { refetch: refetchUnread } = useUnreadCounts();
 
+    const { 
+        fetchNextPage,
+        error,
+        refetch,
+        isFetching,
+        isFetchingNextPage,
+        isRefetching,
+        data: mails,
+        hasNextPage,
+    } = useDeletedMailItems();
 
     const { ref, inView } = useInView();
 
@@ -45,7 +58,7 @@ function MailboxItems({
     if (error) {
         return <div className="error">{error.message}</div>;
     }
-
+    
     return (
         <>
             <FadeDelay isLoading={isFetching && !isFetchingNextPage && !isRefetching}>
@@ -76,4 +89,4 @@ function MailboxItems({
     );
 }
 
-export default MailboxItems;
+export default Mailbox;
