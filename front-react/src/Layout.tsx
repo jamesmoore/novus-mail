@@ -91,7 +91,7 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
 
   useEffect(() => {
     const unreadCount = unreadCounts?.map(p => p.unread).reduce((p, q) => p + q, 0) ?? 0;
-    const title = `NovusMail${unreadCount > 0 ? ` (${unreadCount})` : ''}`;
+    const title = `NovusMail${import.meta.env.DEV ? ' [DEV]' : ''}${unreadCount > 0 ? ` (${unreadCount})` : ''}`;
     document.title = ''; // https://stackoverflow.com/questions/72982365/setting-document-title-doesnt-change-the-tabs-text-after-pressing-back-in-the
     document.title = title;
   }, [unreadCounts, location]);
