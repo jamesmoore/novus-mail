@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Typography } from "@mui/material"
+import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, LinearProgress, Typography } from "@mui/material"
 import MailboxItem from "./MailboxItem"
 import { deleteMail, readMail } from "./api-client";
 import { Mail } from "./models/mail";
@@ -8,6 +8,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import useAddressResponse from "./useAddressResponse";
 import useUnreadCounts from "./useUnreadCounts";
 import { useMailItems } from './useMailItems';
+import FadeDelay from "./FadeDelay";
 
 function Mailbox() {
     const { address: selectedAddress } = useParams();
@@ -88,7 +89,12 @@ function Mailbox() {
 
     return (
         <>
-            {isFetching && !isRefetching && (<>Loading...</>)}
+            <FadeDelay isLoading={isFetching && !isFetchingNextPage && !isRefetching}>
+                <Box flex="1 0 auto" display="flex" justifyContent={'center'} height={"100%"} alignItems={'center'}>
+                    <CircularProgress color="primary" />
+                </Box>
+            </FadeDelay>
+
             {
                 mails && mails.pages && mails.pages.map((mailPage) => {
                     return mailPage.data.map((mail) =>
@@ -100,8 +106,11 @@ function Mailbox() {
             }
 
             <Box ref={ref} mt={3} mb={3} flex="0 0 auto" display="flex" justifyContent={'center'}>
-                {isFetching && !isFetchingNextPage && <CircularProgress color="primary" />}
-                {isFetchingNextPage && <CircularProgress />}
+
+                <FadeDelay isLoading={isFetchingNextPage}>
+                    <Box sx={{ width: '100%' }}><LinearProgress color="primary" /></Box>
+                </FadeDelay>
+
                 {!hasNextPage && !isFetching && <Divider component="div" sx={{ width: "100%" }}><Typography variant='body1'>No more mail</Typography></Divider>}
             </Box>
 
