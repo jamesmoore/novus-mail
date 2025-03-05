@@ -3,12 +3,7 @@ import { Mail } from "./models/mail";
 import { useNavigate, useParams } from "react-router-dom";
 import useUnreadCounts from "./useUnreadCounts";
 import { useDeletedMailItems } from './useMailItems';
-// import MailboxItems from "./MailboxItems";
-import { useInView } from "react-intersection-observer";
-import { useEffect } from "react";
-import FadeDelay from "./FadeDelay";
-import { Box, CircularProgress, Divider, LinearProgress, Typography } from "@mui/material";
-import MailboxItem from "./MailboxItem";
+import MailboxItems from "./MailboxItems";
 
 function Mailbox() {
     const { address: selectedAddress } = useParams();
@@ -23,11 +18,13 @@ function Mailbox() {
         navigate(`/mail/${selectedAddress}/${mail.id}`);
     }
 
-    async function onMailItemDelete(itemKey: string) {
+    async function onMailItemDelete(mail: Mail) {
         try {
-            await deleteMail(itemKey!);
+            await deleteMail(mail.id);
             await refetch();
-            await refetchUnread();
+            if (!mail.read) {
+                await refetchUnread();
+            }
         }
         catch (error) {
             console.error('Failed to delete mail ' + error);
@@ -36,7 +33,7 @@ function Mailbox() {
 
     const { refetch: refetchUnread } = useUnreadCounts();
 
-    const { 
+    const {
         fetchNextPage,
         error,
         refetch,
@@ -47,45 +44,18 @@ function Mailbox() {
         hasNextPage,
     } = useDeletedMailItems();
 
-    const { ref, inView } = useInView();
-
-    useEffect(() => {
-        if (inView) {
-            fetchNextPage()
-        }
-    }, [fetchNextPage, inView])
-
-    if (error) {
-        return <div className="error">{error.message}</div>;
-    }
-    
     return (
-        <>
-            <FadeDelay isLoading={isFetching && !isFetchingNextPage && !isRefetching}>
-                <Box flex="1 0 auto" display="flex" justifyContent={'center'} height={"100%"} alignItems={'center'}>
-                    <CircularProgress color="primary" />
-                </Box>
-            </FadeDelay>
-
-            {
-                mails && mails.pages && mails.pages.map((mailPage) => {
-                    return mailPage.data.map((mail) =>
-                    (
-                        <MailboxItem key={mail.id} mail={mail} onDelete={onMailItemDelete} onSelect={() => onMailItemSelect(mail)} />
-                    ))
-                }
-                )
-            }
-
-            <Box ref={ref} mt={3} mb={3} flex="0 0 auto" display="flex" justifyContent={'center'}>
-
-                <FadeDelay isLoading={isFetchingNextPage}>
-                    <Box sx={{ width: '100%' }}><LinearProgress color="primary" /></Box>
-                </FadeDelay>
-
-                {!hasNextPage && !isFetching && <Divider component="div" sx={{ width: "100%" }}><Typography variant='body1'>No more mail</Typography></Divider>}
-            </Box>
-        </>
+        <MailboxItems
+            onMailItemDelete={onMailItemDelete}
+            onMailItemSelect={onMailItemSelect}
+            mails={mails}
+            error={error}
+            fetchNextPage={fetchNextPage}
+            hasNextPage={hasNextPage}
+            isFetching={isFetching}
+            isFetchingNextPage={isFetchingNextPage}
+            isRefetching={isRefetching}
+        />
     );
 }
 

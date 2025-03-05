@@ -282,7 +282,7 @@ export class HttpServer {
 				const unread = this.db.prepare(`
 					SELECT recipient, count(*) as unread
 					from mail
-					where read = 0
+					where read = 0 and deleted = 0
 					group by recipient
 					`).all();
 				res.json(unread);

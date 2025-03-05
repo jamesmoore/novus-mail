@@ -4,9 +4,8 @@ import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useAddressResponse from "./useAddressResponse";
 import useUnreadCounts from "./useUnreadCounts";
-import { useInvalidateDeletedMailItemsCache, useMailItems } from './useMailItems';
+import { useDeletedMailItems, useInvalidateDeletedMailItemsCache, useMailItems } from './useMailItems';
 import MailboxItems from "./MailboxItems";
-// import { useQueryClient } from "@tanstack/react-query";
 
 function Mailbox() {
     const { address: selectedAddress } = useParams();
@@ -25,15 +24,15 @@ function Mailbox() {
         navigate(`/mail/${selectedAddress}/${mail.id}`);
     }
 
-    // const queryClient = useQueryClient();
+    useDeletedMailItems(); // unused but seems necessary for invalidateDeleted to work reliably 🤔
 
-    async function onMailItemDelete(itemKey: string) {
+    async function onMailItemDelete(mail: Mail) {
         try {
-            console.log('deleting ' + itemKey);
-            await deleteMail(itemKey!);
-            await useMailItemsHook.refetch();
-            await refetchUnread();
-            // await queryClient.invalidateQueries({ queryKey: ['deletedmail'] });
+            await deleteMail(mail.id);
+            await refetch();
+            if (!mail.read) {
+                await refetchUnread();
+            }
             await invalidateDeleted();
         }
         catch (error) {
@@ -52,19 +51,27 @@ function Mailbox() {
         }
     }, [selectedAddress, addressResponse, navigate])
 
-    const useMailItemsHook = useMailItems(selectedAddress);
+    const {
+        fetchNextPage,
+        error,
+        refetch,
+        isFetching,
+        isFetchingNextPage,
+        isRefetching,
+        data: mails,
+        hasNextPage } = useMailItems(selectedAddress);
 
     return (
         <MailboxItems
             onMailItemDelete={onMailItemDelete}
             onMailItemSelect={onMailItemSelect}
-            mails={useMailItemsHook.data}
-            error={useMailItemsHook.error}
-            fetchNextPage={useMailItemsHook.fetchNextPage}
-            hasNextPage={useMailItemsHook.hasNextPage}
-            isFetching={useMailItemsHook.isFetching}
-            isFetchingNextPage={useMailItemsHook.isFetchingNextPage}
-            isRefetching={useMailItemsHook.isRefetching}
+            mails={mails}
+            error={error}
+            fetchNextPage={fetchNextPage}
+            hasNextPage={hasNextPage}
+            isFetching={isFetching}
+            isFetchingNextPage={isFetchingNextPage}
+            isRefetching={isRefetching}
         />
     );
 }

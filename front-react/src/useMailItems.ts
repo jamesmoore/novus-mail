@@ -21,6 +21,16 @@ const useMailItems = (selectedAddress?: string) => {
     });
 }
 
+const useInvalidateMailItemsCache = () => {
+    const queryClient = useQueryClient();
+    const invalidate = (address: string) => {
+        const queryKey = getUseMailItemsQueryKey(address);
+        return queryClient.invalidateQueries({ queryKey: queryKey });
+    }
+
+    return { invalidate };
+}
+
 const getUseDeletedMailItemsQueryKey = ['deletedmail'];
 
 const useDeletedMailItems = () => {
@@ -34,10 +44,6 @@ const useDeletedMailItems = () => {
         getPreviousPageParam: (firstPage) => firstPage.previousId,
         getNextPageParam: (lastPage) => lastPage.nextId,
         staleTime: 300 * 1000,
-        // select: (p) => {
-        //     console.log('select amount: ' + p.pages.reduce((p,q) => p + q.data.length, 0));
-        //     return p;
-        // },
     });
 }
 
@@ -51,21 +57,9 @@ const useInvalidateDeletedMailItemsCache = () => {
     return { invalidate };
 }
 
-
-const useInvalidateMailItemsCache = () => {
-    const queryClient = useQueryClient();
-    const invalidate = (address: string) => {
-        const queryKey = getUseMailItemsQueryKey(address);
-        return queryClient.invalidateQueries({ queryKey: queryKey });
-    }
-
-    return { invalidate };
-}
-
 export {
     useMailItems,
     useDeletedMailItems,
     useInvalidateMailItemsCache,
     useInvalidateDeletedMailItemsCache
 };
-

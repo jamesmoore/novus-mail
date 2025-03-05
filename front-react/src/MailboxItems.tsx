@@ -9,7 +9,7 @@ import { Mail } from "./models/mail";
 
 interface MailboxItemsProps {
     onMailItemSelect: (mail: Mail) => void;
-    onMailItemDelete: (itemKey: string) => void;
+    onMailItemDelete: (mail: Mail) => void;
     mails: InfiniteData<MailResponse, unknown> | undefined,
     error: Error | null,
     isFetching: boolean,
@@ -30,9 +30,6 @@ function MailboxItems({
     hasNextPage,
     isRefetching,
 }: MailboxItemsProps) {
-
-
-
 
     const { ref, inView } = useInView();
 
@@ -58,7 +55,7 @@ function MailboxItems({
                 mails && mails.pages && mails.pages.map((mailPage) => {
                     return mailPage.data.map((mail) =>
                     (
-                        <MailboxItem key={mail.id} mail={mail} onDelete={onMailItemDelete} onSelect={() => onMailItemSelect(mail)} />
+                        <MailboxItem key={mail.id} mail={mail} onDelete={() => onMailItemDelete(mail)} onSelect={() => onMailItemSelect(mail)} />
                     ))
                 }
                 )

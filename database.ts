@@ -45,7 +45,7 @@ const database = {
 			try {
 				db.exec("ALTER TABLE mail ADD COLUMN deleted INTEGER default 0");
 			} catch {
-				console.log("received column already exists");
+				console.log("deleted column already exists");
 			}
 
 			return db;
