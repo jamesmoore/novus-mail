@@ -43,34 +43,41 @@ function MailboxItems({
         return <div className="error">{error.message}</div>;
     }
 
-    return (
-        <>
-            <FadeDelay isLoading={isFetching && !isFetchingNextPage && !isRefetching}>
-                <Box flex="1 0 auto" display="flex" justifyContent={'center'} height={"100%"} alignItems={'center'}>
+    const showSpinner = isFetching && !isFetchingNextPage && !isRefetching;
+
+    if (showSpinner) {
+        return (
+            <FadeDelay isLoading={showSpinner}>
+                <Box flex="1 0 auto" display="flex" justifyContent={'center'} alignItems={'center'}>
                     <CircularProgress color="primary" />
                 </Box>
             </FadeDelay>
-
-            {
-                mails && mails.pages && mails.pages.map((mailPage) => {
-                    return mailPage.data.map((mail) =>
-                    (
-                        <MailboxItem key={mail.id} mail={mail} onDelete={() => onMailItemDelete(mail)} onSelect={() => onMailItemSelect(mail)} />
-                    ))
+        )
+    }
+    else {
+        return (
+            <>
+                {
+                    mails && mails.pages && mails.pages.map((mailPage) => {
+                        return mailPage.data.map((mail) =>
+                        (
+                            <MailboxItem key={mail.id} mail={mail} onDelete={() => onMailItemDelete(mail)} onSelect={() => onMailItemSelect(mail)} />
+                        ))
+                    }
+                    )
                 }
-                )
-            }
 
-            <Box ref={ref} mt={3} mb={3} flex="0 0 auto" display="flex" justifyContent={'center'}>
+                <Box ref={ref} mt={1} mb={1} flex="0 0 auto" display="flex" justifyContent={'center'}>
 
-                <FadeDelay isLoading={isFetchingNextPage}>
-                    <Box sx={{ width: '100%' }}><LinearProgress color="primary" /></Box>
-                </FadeDelay>
+                    <FadeDelay isLoading={isFetchingNextPage}>
+                        <Box sx={{ width: '100%' }}><LinearProgress color="primary" /></Box>
+                    </FadeDelay>
 
-                {!hasNextPage && !isFetching && <Divider component="div" sx={{ width: "100%" }}><Typography variant='body1'>No more mail</Typography></Divider>}
-            </Box>
-        </>
-    );
+                    {!hasNextPage && !isFetching && <Divider component="div" sx={{ width: "100%" }}><Typography variant='body1'>No more mail</Typography></Divider>}
+                </Box>
+            </>
+        );
+    }
 }
 
 export default MailboxItems;

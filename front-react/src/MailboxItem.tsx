@@ -1,4 +1,4 @@
-import { IconButton, Paper, Tooltip, Typography } from "@mui/material";
+import { IconButton, Paper, SxProps, Theme, Tooltip, Typography } from "@mui/material";
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Grid from '@mui/material/Grid2';
@@ -49,7 +49,7 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
 
     const cursor = onSelect ? "pointer" : "default";
     const fontWeight = mail.read ? 400 : 700;
-    const style = {
+    const style: SxProps<Theme> = {
         fontWeight: fontWeight,
         whiteSpace: "nowrap",
         overflow: "hidden",
@@ -59,9 +59,8 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
     return (
         <Paper
             sx={{
-                mt: 1,
-                mb: 1,
-                "&:hover": { cursor: cursor }
+                "&:hover": { cursor: cursor },
+                maxWidth:"100%"
             }}
             elevation={hover ? 3 : 1}
             tabIndex={1}
@@ -71,7 +70,7 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
             onPointerEnter={() => { setHover(true); }}
             onPointerLeave={() => { setHover(false); }}
         >
-            <Grid container columns={24} sx={{ ml: 1 }}>
+            <Grid container columns={24} sx={{ ml: 1 }} flex="1 1 auto">
                 <Grid container size={{ xs: 22, md: 23 }} key={mail.id} alignItems='center'>
                     <Grid size={{ xs: 24, md: 8 }} >
                         <Typography sx={style}>{mail.sender}</Typography>
