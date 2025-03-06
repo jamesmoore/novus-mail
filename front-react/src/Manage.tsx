@@ -77,9 +77,9 @@ function Manage() {
     }
 
     return (
-        <>
+        <Grid>
             <SnackbarProvider />
-            <Paper >
+            <Paper>
                 <Grid container m={1} p={1}>
                     <Grid mt={2} mb={2} size={{ xs: 12, md: 3 }}>
                         <Typography>New address</Typography>
@@ -158,7 +158,7 @@ function Manage() {
                     </Grid>
                 </Paper>
             }
-        </>
+        </Grid>
     );
 }
 

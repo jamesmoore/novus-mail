@@ -238,8 +238,8 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
       >
 
         <Toolbar />
-        <Grid flex="1 0 auto" paddingLeft={1} paddingRight={1}>
-          {bodyChildren && bodyChildren}
+        <Grid container flexDirection='column' flex="1 0 auto" spacing={1} padding={1}>
+          {bodyChildren}
         </Grid>
       </Box>
     </Box>
