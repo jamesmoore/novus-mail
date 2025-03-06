@@ -1,11 +1,12 @@
 import ContentCopy from "@mui/icons-material/ContentCopy";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
-import { IconButton, Tooltip, Typography } from "@mui/material";
+import { IconButton, Tooltip, Typography, useTheme } from "@mui/material";
 import useDomain from "./useDomain";
 import { useParams } from "react-router-dom";
 import { readAllMail } from "./api-client";
 import useUnreadCounts from "./useUnreadCounts";
 import { useMailItems } from "./useMailItems";
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const handleCopy = async (text: string) => {
     try {
@@ -20,7 +21,8 @@ function TopBarAddress() {
     const { data: domainName } = useDomain();
     const { address: selectedAddress } = useParams();
     const { refetch: refetchUread } = useUnreadCounts();
-    const { refetch } = useMailItems(selectedAddress);
+    const { refetch, data, hasNextPage } = useMailItems(selectedAddress);
+    const theme = useTheme();
 
     async function copyClicked() {
         await handleCopy(getFullAddress());
@@ -29,6 +31,17 @@ function TopBarAddress() {
     function getFullAddress() {
         return `${selectedAddress}@${domainName}`;
     }
+
+    const newFunction = () => {
+        readAllMail(selectedAddress!).then(() => {
+            refetchUread();
+            refetch();
+        });
+    }
+
+    const total = data?.pages.reduce((p, q) => p + q.data.length, 0) ?? 0;
+    const text = total === 0 ? 'Empty' :
+        total + (hasNextPage ? '+' : '') + ' item' + (total === 1 ? '' : 's');
 
     return (
         selectedAddress &&
@@ -41,19 +54,18 @@ function TopBarAddress() {
                     <ContentCopy />
                 </IconButton>
             </Tooltip>
-            <Tooltip title="Mark all as read" sx={{ marginLeft: 'auto' }}>
-                <IconButton onClick={() => {
-                    readAllMail(selectedAddress).then(() => {
-                        refetchUread();
-                        refetch();
-                    });
-                }}>
-                    <DoneAllIcon />
+
+            <IconButton sx={{ "&:hover": { color: theme.palette.error.main }, marginLeft: 'auto' }} disabled={total === 0}>
+                <DeleteIcon />
+            </IconButton>
+            <Tooltip title="Mark all as read" >
+                <IconButton onClick={newFunction} disabled={total === 0}>
+                    <DoneAllIcon sx={{ "&:hover": { color: theme.palette.primary.main } }} />
                 </IconButton>
             </Tooltip>
+            <Typography sx={{ ml: 1 }}>{text}</Typography>
         </>
     )
-
 }
 
 export default TopBarAddress;
