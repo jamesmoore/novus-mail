@@ -68,7 +68,7 @@ export class HttpServer {
 
 				console.error("DB get addresses fail")
 				console.error(err)
-
+				res.status(500).send('Failed to get addresses');
 			}
 
 		})
@@ -101,6 +101,7 @@ export class HttpServer {
 			} catch (err) {
 				console.error("DB get addresses fail")
 				console.error(err)
+				res.status(500).send('Failed to get address');
 			}
 		})
 
@@ -116,17 +117,17 @@ export class HttpServer {
 
 					res.status(200).send("exist");
 
+				} else {
+					this.db.prepare("INSERT INTO address (addr) VALUES (?)").run(address);
+					res.status(200).send("done");
 				}
-
-				this.db.prepare("INSERT INTO address (addr) VALUES (?)").run(address);
-				res.status(200).send("done");
 
 			} catch (err) {
 
 				console.error("DB add addresses fail")
 				console.error(err)
+				res.status(500).json({ error: "Failed to add address" });
 			}
-
 		})
 
 		app.post('/deleteAddress', (req, res) => {
@@ -141,14 +142,15 @@ export class HttpServer {
 				res.status(200).send("done");
 
 			} catch (err) {
-
-				console.error("DB delete address fail")
+				console.error("DB delete address fail");
 				console.error(err)
+				res.status(500).send('Failed to delete address');
 			}
 
 		})
 
 		app.post('/mails', (req, res) => {
+			// Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 1110);
 
 			const json = req.body as {
 				cursorId: string,
@@ -170,10 +172,10 @@ export class HttpServer {
 				};
 
 				const comparisonOperator = direction === 'lt' ? '<' : '>';
-				const whereClause = 
-					(json.deleted ? ` deleted = 1 ` : ' deleted <> 1 ' ) +
+				const whereClause =
+					(json.deleted ? ` deleted = 1 ` : ' deleted <> 1 ') +
 					(cursorId ? ` AND Id ${comparisonOperator} @cursorId` : '') +
-					(json.addr ? ` AND recipient = @recipient` : '' )
+					(json.addr ? ` AND recipient = @recipient` : '')
 
 				const sortOrder = direction === 'lt' ? 'DESC' : 'ASC';
 
@@ -198,10 +200,9 @@ export class HttpServer {
 				});
 
 			} catch (err) {
-
-				console.error("DB get mails fail")
-				console.error(err)
-
+				console.error("DB get mails fail");
+				console.error(err);
+				res.status(500).json({ error: "Failed to get mails" });
 			}
 
 		});
@@ -219,7 +220,7 @@ export class HttpServer {
 
 				console.error("DB get mail data fail")
 				console.error(err)
-
+				res.status(500).json({ error: "Failed to delete mails" });
 			}
 
 		});
@@ -245,9 +246,32 @@ export class HttpServer {
 
 				console.error("DB delete mail fail")
 				console.error(err)
-
+				res.status(500).json({ error: "Failed to delete mail" });
 			}
 
+		})
+
+		app.post('/deleteMails', (req, res) => {
+			const json = req.body;
+			try {
+				this.db.prepare("UPDATE mail SET deleted = 1 WHERE recipient = ?").run(json.address);
+				res.status(200).send();
+			} catch (err) {
+				console.error("DB delete mails fail")
+				console.error(err)
+				res.status(500).json({ error: "Failed to delete mails" });
+			}
+		})
+
+		app.post('/emptyDeletedMails', (req, res) => {
+			try {
+				this.db.prepare("DELETE FROM mail WHERE deleted = 1").run();
+				res.status(200).send();
+			} catch (err) {
+				console.error("DB empty deleted mails fail")
+				console.error(err)
+				res.status(500).json({ error: "Failed to empty deleted mails" });
+			}
 		})
 
 		app.post('/readMail', (req, res) => {
@@ -260,19 +284,20 @@ export class HttpServer {
 			} catch (err) {
 				console.error("DB update mail fail")
 				console.error(err)
+				res.status(500).json({ error: "Failed to update mail as read" });
 			}
 		})
 
 		app.post('/readAllMail', (req, res) => {
 
 			const json = req.body;
-
 			try {
 				this.db.prepare("UPDATE mail SET read = 1 where recipient = ? and read = 0").run(json.address);
 				res.status(200).send();
 			} catch (err) {
 				console.error("DB read all mail fail")
 				console.error(err)
+				res.status(500).json({ error: "Failed to mark all mails as read" });
 			}
 		})
 
@@ -289,6 +314,7 @@ export class HttpServer {
 			} catch (err) {
 				console.error("unread counts select fail");
 				console.error(err)
+				res.status(500).json({ error: "Failed to get unread counts" });
 			}
 		})
 

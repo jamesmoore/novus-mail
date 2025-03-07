@@ -3,9 +3,9 @@ import DoneAllIcon from '@mui/icons-material/DoneAll';
 import { IconButton, Tooltip, Typography, useTheme } from "@mui/material";
 import useDomain from "./useDomain";
 import { useParams } from "react-router-dom";
-import { readAllMail } from "./api-client";
+import { deleteMails, readAllMail } from "./api-client";
 import useUnreadCounts from "./useUnreadCounts";
-import { useMailItems } from "./useMailItems";
+import { useInvalidateDeletedMailItemsCache, useMailItems } from "./useMailItems";
 import DeleteIcon from '@mui/icons-material/Delete';
 
 const handleCopy = async (text: string) => {
@@ -22,6 +22,7 @@ function TopBarAddress() {
     const { address: selectedAddress } = useParams();
     const { refetch: refetchUread } = useUnreadCounts();
     const { refetch, data, hasNextPage } = useMailItems(selectedAddress);
+    const { invalidate: invalidateDeleted } = useInvalidateDeletedMailItemsCache();
     const theme = useTheme();
 
     async function copyClicked() {
@@ -32,7 +33,15 @@ function TopBarAddress() {
         return `${selectedAddress}@${domainName}`;
     }
 
-    const newFunction = () => {
+    const onDeleteAllMails = () => {
+        deleteMails(selectedAddress!).then(() => {
+            refetchUread();
+            refetch();
+            invalidateDeleted();
+        });
+    }
+
+    const onMarkAllAsRead = () => {
         readAllMail(selectedAddress!).then(() => {
             refetchUread();
             refetch();
@@ -55,11 +64,11 @@ function TopBarAddress() {
                 </IconButton>
             </Tooltip>
 
-            <IconButton sx={{ "&:hover": { color: theme.palette.error.main }, marginLeft: 'auto' }} disabled={total === 0}>
+            <IconButton sx={{ "&:hover": { color: theme.palette.error.main }, marginLeft: 'auto' }} disabled={total === 0} onClick={onDeleteAllMails} >
                 <DeleteIcon />
             </IconButton>
             <Tooltip title="Mark all as read" >
-                <IconButton onClick={newFunction} disabled={total === 0}>
+                <IconButton onClick={onMarkAllAsRead} disabled={total === 0}>
                     <DoneAllIcon sx={{ "&:hover": { color: theme.palette.primary.main } }} />
                 </IconButton>
             </Tooltip>

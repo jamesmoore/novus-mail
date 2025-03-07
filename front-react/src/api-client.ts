@@ -116,6 +116,25 @@ const deleteMail = async (deleteItemKey: string) => {
     })
 };
 
+const deleteMails = async (address: string) => {
+    await fetch(`${BaseUrl}/deleteMails`, {
+        method: 'POST',
+        body: JSON.stringify(
+            {
+                address: address,
+            }
+        ),
+        headers: defaultHeaders,
+    })
+};
+
+const emptyDeletedMails = async () => {
+    await fetch(`${BaseUrl}/emptyDeletedMails`, {
+        method: 'POST',
+        headers: defaultHeaders,
+    })
+};
+
 const readMail = async (id: string) => {
     await fetch(`${BaseUrl}/readMail`, {
         method: 'POST',
@@ -158,6 +177,8 @@ export {
     fetchDeletedMails,
     fetchMail,
     deleteMail,
+    deleteMails,
+    emptyDeletedMails,
     readMail,
     fetchUnreadCounts,
     readAllMail,
