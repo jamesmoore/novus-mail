@@ -254,7 +254,7 @@ export class HttpServer {
 		app.post('/deleteMails', (req, res) => {
 			const json = req.body;
 			try {
-				this.db.prepare("UPDATE mail SET deleted = 1 WHERE recipient = ?").run(json.address);
+				this.db.prepare("UPDATE mail SET deleted = 1 WHERE recipient = ? and deleted = 0").run(json.address);
 				res.status(200).send();
 			} catch (err) {
 				console.error("DB delete mails fail")
