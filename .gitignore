@@ -1,8 +1,1 @@
-node_modules
-*.key
-*.crt
-*.db
-dist
-/*.js
-!eslint.config.js
 .vs

@@ -16,7 +16,7 @@ updates:
       interval: "daily"
 
   - package-ecosystem: "npm"
-    directory: "/"
+    directory: "/api"
     schedule:
       interval: "daily"
     versioning-strategy: increase
