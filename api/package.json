@@ -25,7 +25,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/mailparser": "^3.4.5",
-    "@types/node": "^22.13.9",
+    "@types/node": "^22.13.10",
     "@types/smtp-server": "^3.5.10",
     "@types/ws": "^8.18.0",
     "@vercel/ncc": "^0.38.3",
