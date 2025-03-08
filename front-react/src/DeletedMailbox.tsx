@@ -1,19 +1,13 @@
 import { deleteMail, readMail } from "./api-client";
 import { Mail } from "./models/mail";
-import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import useAddressResponse from "./useAddressResponse";
 import useUnreadCounts from "./useUnreadCounts";
-import { useDeletedMailItems, useInvalidateDeletedMailItemsCache, useMailItems } from './useMailItems';
+import { useDeletedMailItems } from './useMailItems';
 import MailboxItems from "./MailboxItems";
 
 function Mailbox() {
     const { address: selectedAddress } = useParams();
     const navigate = useNavigate();
-
-    const { data: addressResponse } = useAddressResponse();
-
-    const { invalidate: invalidateDeleted } = useInvalidateDeletedMailItemsCache();
 
     async function onMailItemSelect(mail: Mail) {
         if (!mail.read) {
@@ -24,8 +18,6 @@ function Mailbox() {
         navigate(`/mail/${selectedAddress}/${mail.id}`);
     }
 
-    useDeletedMailItems(); // unused but seems necessary for invalidateDeleted to work reliably 🤔
-
     async function onMailItemDelete(mail: Mail) {
         try {
             await deleteMail(mail.id);
@@ -33,7 +25,6 @@ function Mailbox() {
             if (!mail.read) {
                 await refetchUnread();
             }
-            await invalidateDeleted();
         }
         catch (error) {
             console.error('Failed to delete mail ' + error);
@@ -41,15 +32,6 @@ function Mailbox() {
     }
 
     const { refetch: refetchUnread } = useUnreadCounts();
-
-    useEffect(() => {
-        if (!selectedAddress) {
-            const address = addressResponse?.addresses[0]?.addr;
-            if (address) {
-                navigate('/inbox/' + address);
-            }
-        }
-    }, [selectedAddress, addressResponse, navigate])
 
     const {
         fetchNextPage,
@@ -59,7 +41,8 @@ function Mailbox() {
         isFetchingNextPage,
         isRefetching,
         data: mails,
-        hasNextPage } = useMailItems(selectedAddress);
+        hasNextPage,
+    } = useDeletedMailItems();
 
     return (
         <MailboxItems

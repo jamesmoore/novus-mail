@@ -7,6 +7,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
 import DraftsIcon from '@mui/icons-material/Drafts';
+import DeleteIcon from '@mui/icons-material/Delete';
 import useUnreadCounts from './useUnreadCounts';
 import { useWebSocketNotifier, WebSocketMessage } from './useWebSocketNotifier';
 import { useMailItems, useInvalidateMailItemsCache } from './useMailItems';
@@ -128,6 +129,22 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
           if (mobileOpen) {
             handleDrawerToggle();
           }
+          navigate('/deleted');
+        }}
+          selected={location.pathname === '/deleted'}
+        >
+          <ListItemIcon sx={{ minWidth: '40px' }}>
+            <DeleteIcon />
+          </ListItemIcon>
+          <ListItemText primary={"Deleted mail"} />
+        </ListItemButton>
+      </ListItem>      
+      <Divider />
+      <ListItem disablePadding>
+        <ListItemButton onClick={() => {
+          if (mobileOpen) {
+            handleDrawerToggle();
+          }
           navigate('/manage');
         }}
           selected={location.pathname === '/manage'}
@@ -221,8 +238,8 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
       >
 
         <Toolbar />
-        <Grid flex="1 0 auto" paddingLeft={1} paddingRight={1}>
-          {bodyChildren && bodyChildren}
+        <Grid container flexDirection='column' flex="1 0 auto" spacing={1} padding={1}>
+          {bodyChildren}
         </Grid>
       </Box>
     </Box>

@@ -39,15 +39,16 @@ function Mail() {
         return <div className="error">{error.message}</div>;
     }
 
+    if (loading) {
+        return (<FadeDelay isLoading={loading}>
+            <Box flex="1 0 auto" display="flex" justifyContent={'center'} alignItems={'center'}>
+                <CircularProgress color="primary" />
+            </Box>
+        </FadeDelay>)
+    }
+
     return (
         <>
-
-            <FadeDelay isLoading={loading}>
-                <Box flex="1 0 auto" display="flex" justifyContent={'center'} height={"100%"} alignItems={'center'}>
-                    <CircularProgress color="primary" />
-                </Box>
-            </FadeDelay>
-
             {message &&
                 <Grid display="flex" flexDirection="column" height="100%">
                     <Grid flex="0 0 auto">

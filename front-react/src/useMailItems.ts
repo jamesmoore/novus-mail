@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchMails } from "./api-client";
+import { fetchDeletedMails, fetchMails } from "./api-client";
 import { MailResponse } from "./models/mail-response";
 
 const getUseMailItemsQueryKey = (selectedAddress: string) => {
@@ -23,10 +23,35 @@ const useMailItems = (selectedAddress?: string) => {
 
 const useInvalidateMailItemsCache = () => {
     const queryClient = useQueryClient();
-
     const invalidate = (address: string) => {
         const queryKey = getUseMailItemsQueryKey(address);
-        queryClient.invalidateQueries({ queryKey: queryKey });
+        return queryClient.invalidateQueries({ queryKey: queryKey });
+    }
+
+    return { invalidate };
+}
+
+const getUseDeletedMailItemsQueryKey = ['deletedmail'];
+
+const useDeletedMailItems = () => {
+
+    return useInfiniteQuery({
+        queryKey: getUseDeletedMailItemsQueryKey,
+        queryFn: async ({
+            pageParam,
+        }): Promise<MailResponse> => fetchDeletedMails(pageParam),
+        initialPageParam: '',
+        getPreviousPageParam: (firstPage) => firstPage.previousId,
+        getNextPageParam: (lastPage) => lastPage.nextId,
+        staleTime: 300 * 1000,
+    });
+}
+
+const useInvalidateDeletedMailItemsCache = () => {
+    const queryClient = useQueryClient();
+    const invalidate = () => {
+        const queryKey = getUseDeletedMailItemsQueryKey;
+        return queryClient.invalidateQueries({ queryKey: queryKey });
     }
 
     return { invalidate };
@@ -34,6 +59,7 @@ const useInvalidateMailItemsCache = () => {
 
 export {
     useMailItems,
-    useInvalidateMailItemsCache
+    useDeletedMailItems,
+    useInvalidateMailItemsCache,
+    useInvalidateDeletedMailItemsCache
 };
-

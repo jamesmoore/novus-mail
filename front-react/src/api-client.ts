@@ -77,6 +77,20 @@ const fetchMails = async (selectedAddress: string, cursorId: string) => {
     return response.json() as Promise<MailResponse>;
 };
 
+const fetchDeletedMails = async (cursorId: string) => {
+    const response = await fetch(`${BaseUrl}/mails`, {
+        method: 'POST',
+        body: JSON.stringify(
+            {
+                cursorId: cursorId,
+                deleted: true
+            }
+        ),
+        headers: defaultHeaders,
+    });
+    return response.json() as Promise<MailResponse>;
+};
+
 const fetchMail = async (id: string) => {
     const response = await fetch(`${BaseUrl}/mailData`, {
         method: 'POST',
@@ -98,6 +112,25 @@ const deleteMail = async (deleteItemKey: string) => {
                 id: deleteItemKey,
             }
         ),
+        headers: defaultHeaders,
+    })
+};
+
+const deleteMails = async (address: string) => {
+    await fetch(`${BaseUrl}/deleteMails`, {
+        method: 'POST',
+        body: JSON.stringify(
+            {
+                address: address,
+            }
+        ),
+        headers: defaultHeaders,
+    })
+};
+
+const emptyDeletedMails = async () => {
+    await fetch(`${BaseUrl}/emptyDeletedMails`, {
+        method: 'POST',
         headers: defaultHeaders,
     })
 };
@@ -141,8 +174,11 @@ export {
     addAddress,
     deleteAddress,
     fetchMails,
+    fetchDeletedMails,
     fetchMail,
     deleteMail,
+    deleteMails,
+    emptyDeletedMails,
     readMail,
     fetchUnreadCounts,
     readAllMail,
