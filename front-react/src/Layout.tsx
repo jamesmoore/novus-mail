@@ -86,7 +86,7 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
 
   const mailboxes = useMemo(() => addressesResponse?.addresses.map(p => p.addr).map((address) => ({
     address,
-    unreadcount: unreadCounts?.filter(p => p.recipient === address).at(0)?.unread,
+    unreadcount: unreadCounts?.filter(p => p.recipient === address)[0]?.unread,
     selected: address === urlAddressSegment
   })) ?? [], [addressesResponse, unreadCounts, urlAddressSegment]);
 
