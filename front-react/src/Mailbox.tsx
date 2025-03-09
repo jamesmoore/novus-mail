@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useAddressResponse from "./useAddressResponse";
 import useUnreadCounts from "./useUnreadCounts";
-import { useDeletedMailItems, useInvalidateDeletedMailItemsCache, useMailItems } from './useMailItems';
+import { useInvalidateDeletedMailItemsCache, useMailItems } from './useMailItems';
 import MailboxItems from "./MailboxItems";
 
 function Mailbox() {
@@ -23,8 +23,6 @@ function Mailbox() {
         }
         navigate(`/mail/${selectedAddress}/${mail.id}`);
     }
-
-    useDeletedMailItems(); // unused but seems necessary for invalidateDeleted to work reliably 🤔
 
     async function onMailItemDelete(mail: Mail) {
         try {
