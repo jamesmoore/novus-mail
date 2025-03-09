@@ -84,38 +84,23 @@ const fetchDeletedMails = async (cursorId: string) => {
 };
 
 const fetchMail = async (id: string) => {
-    const response = await fetch(`${BaseUrl}/mailData`, {
-        method: 'POST',
-        body: JSON.stringify(
-            {
-                id: id,
-            }
-        ),
+    const response = await fetch(`${BaseUrl}/mail/${id}`, {
+        method: 'GET',
         headers: defaultHeaders,
     });
     return response.json() as Promise<MailMessage>;
 }
 
-const deleteMail = async (deleteItemKey: string) => {
-    await fetch(`${BaseUrl}/deleteMail`, {
-        method: 'POST',
-        body: JSON.stringify(
-            {
-                id: deleteItemKey,
-            }
-        ),
+const deleteMail = async (id: string) => {
+    await fetch(`${BaseUrl}/mail/${id}`, {
+        method: 'DELETE',
         headers: defaultHeaders,
     })
 };
 
 const deleteMails = async (address: string) => {
-    await fetch(`${BaseUrl}/deleteMails`, {
-        method: 'POST',
-        body: JSON.stringify(
-            {
-                address: address,
-            }
-        ),
+    await fetch(`${BaseUrl}/mails/${address}`, {
+        method: 'DELETE',
         headers: defaultHeaders,
     })
 };
@@ -153,7 +138,7 @@ const readAllMail = async (address: string) => {
 
 const fetchUnreadCounts = async () => {
     const response = await fetch(`${BaseUrl}/unreadCounts`, {
-        method: 'POST',
+        method: 'GET',
         headers: defaultHeaders,
     });
     return response.json() as Promise<UnreadCount[]>;
