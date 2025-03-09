@@ -12,7 +12,7 @@ const BaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
 
 const fetchDomain = async () => {
     const response = await fetch(`${BaseUrl}/domain`, {
-        method: 'POST',
+        method: 'GET',
         headers: defaultHeaders,
     });
     return response.text();
@@ -20,47 +20,39 @@ const fetchDomain = async () => {
 
 const fetchAddress = async () => {
     const response = await fetch(`${BaseUrl}/addresses`, {
-        method: 'POST',
+        method: 'GET',
         headers: defaultHeaders,
     });
     return response.json() as Promise<AddressesResponse>;
 };
 
 const getAddress = async (newAddressText: string) => {
-    const response = await fetch(`${BaseUrl}/getAddress`, {
-        method: 'POST',
-        body: JSON.stringify(
-            {
-                address: newAddressText,
-            }
-        ),
+    const response = await fetch(`${BaseUrl}/address/${newAddressText}`, {
+        method: 'GET',
         headers: defaultHeaders
     });
-    return response.text();
+    if (response.status === 404) {
+        return '';
+    }
+    else if (response.status === 200) {
+        return response.text();
+    }
 }
 
 const addAddress = async (newAddressText: string) => {
-    const response = await fetch(`${BaseUrl}/addAddress`, {
-        method: 'POST',
-        body: JSON.stringify(
-            {
-                address: newAddressText,
-            }
-        ),
+    const response = await fetch(`${BaseUrl}/address/${newAddressText}`, {
+        method: 'PUT',
         headers: defaultHeaders
     });
-    return response.text();
+    return response.status === 200;
 }
 
 const deleteAddress = async (selectedAddress: string) => {
-    const response = await fetch(`${BaseUrl}/deleteaddress`, {
-        method: 'POST',
-        body: JSON.stringify({
-            address: selectedAddress,
-        }),
+    const response = await fetch(`${BaseUrl}/address/${selectedAddress}`, {
+        method: 'DELETE',
         headers: defaultHeaders
     });
-    return response.text();
+    return response.status === 200;
 }
 
 const fetchMails = async (selectedAddress: string, cursorId: string) => {
