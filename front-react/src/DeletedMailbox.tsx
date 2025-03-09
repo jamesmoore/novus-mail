@@ -5,7 +5,7 @@ import useUnreadCounts from "./useUnreadCounts";
 import { useDeletedMailItems } from './useMailItems';
 import MailboxItems from "./MailboxItems";
 
-function Mailbox() {
+function DeletedMailbox() {
     const { address: selectedAddress } = useParams();
     const navigate = useNavigate();
 
@@ -45,18 +45,18 @@ function Mailbox() {
     } = useDeletedMailItems();
 
     return (
-        <MailboxItems
-            onMailItemDelete={onMailItemDelete}
-            onMailItemSelect={onMailItemSelect}
-            mails={mails}
-            error={error}
-            fetchNextPage={fetchNextPage}
-            hasNextPage={hasNextPage}
-            isFetching={isFetching}
-            isFetchingNextPage={isFetchingNextPage}
-            isRefetching={isRefetching}
-        />
+            <MailboxItems
+                onMailItemDelete={onMailItemDelete}
+                onMailItemSelect={onMailItemSelect}
+                mails={mails}
+                error={error}
+                fetchNextPage={fetchNextPage}
+                hasNextPage={hasNextPage}
+                isFetching={isFetching}
+                isFetchingNextPage={isFetchingNextPage}
+                isRefetching={isRefetching}
+            />
     );
 }
 
-export default Mailbox;
+export default DeletedMailbox;

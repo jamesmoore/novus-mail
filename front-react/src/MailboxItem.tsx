@@ -69,9 +69,10 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
             onClick={(e) => mailClicked(e, mail.id)}
             onPointerEnter={() => { setHover(true); }}
             onPointerLeave={() => { setHover(false); }}
+            key={mail.id}
         >
             <Grid container columns={24} sx={{ ml: 1 }} flex="1 1 auto">
-                <Grid container size={{ xs: 22, md: 23 }} key={mail.id} alignItems='center'>
+                <Grid container size={{ xs: 22, md: 23 }} alignItems='center'>
                     <Grid size={{ xs: 24, md: 8 }} >
                         <Typography sx={style}>{mail.sender}</Typography>
                     </Grid>

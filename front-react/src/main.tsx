@@ -20,6 +20,7 @@ import { WebSocketNotificationProvider } from './WebSocketNotificationProvider.t
 import TopBarSettings from './TopBarSettings.tsx';
 import DeletedMailbox from './DeletedMailbox.tsx';
 import TopBarDeleted from './TopBarDeleted.tsx';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ createRoot(document.getElementById('app')!).render(
       <CssBaseline />
       <WebSocketNotificationProvider>
         <QueryClientProvider client={queryClient}>
+          <ReactQueryDevtools initialIsOpen={false} />
           {/* <App /> */}
           <Router>
             <Routes>

@@ -51,7 +51,7 @@ const useInvalidateDeletedMailItemsCache = () => {
     const queryClient = useQueryClient();
     const invalidate = () => {
         const queryKey = getUseDeletedMailItemsQueryKey;
-        return queryClient.invalidateQueries({ queryKey: queryKey });
+        return queryClient.resetQueries({ queryKey: queryKey }); // prteviously invalidateQueries, but not working for unknown reasons https://stackoverflow.com/questions/78679768/react-query-not-updating-data-even-after-refetch-shows-new-data-from-api
     }
 
     return { invalidate };
