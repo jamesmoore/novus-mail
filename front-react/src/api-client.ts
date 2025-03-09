@@ -12,7 +12,7 @@ const BaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
 
 const fetchDomain = async () => {
     const response = await fetch(`${BaseUrl}/domain`, {
-        method: 'POST',
+        method: 'GET',
         headers: defaultHeaders,
     });
     return response.text();
@@ -20,47 +20,39 @@ const fetchDomain = async () => {
 
 const fetchAddress = async () => {
     const response = await fetch(`${BaseUrl}/addresses`, {
-        method: 'POST',
+        method: 'GET',
         headers: defaultHeaders,
     });
     return response.json() as Promise<AddressesResponse>;
 };
 
 const getAddress = async (newAddressText: string) => {
-    const response = await fetch(`${BaseUrl}/getAddress`, {
-        method: 'POST',
-        body: JSON.stringify(
-            {
-                address: newAddressText,
-            }
-        ),
+    const response = await fetch(`${BaseUrl}/address/${newAddressText}`, {
+        method: 'GET',
         headers: defaultHeaders
     });
-    return response.text();
+    if (response.status === 404) {
+        return '';
+    }
+    else if (response.status === 200) {
+        return response.text();
+    }
 }
 
 const addAddress = async (newAddressText: string) => {
-    const response = await fetch(`${BaseUrl}/addAddress`, {
-        method: 'POST',
-        body: JSON.stringify(
-            {
-                address: newAddressText,
-            }
-        ),
+    const response = await fetch(`${BaseUrl}/address/${newAddressText}`, {
+        method: 'PUT',
         headers: defaultHeaders
     });
-    return response.text();
+    return response.status === 200;
 }
 
 const deleteAddress = async (selectedAddress: string) => {
-    const response = await fetch(`${BaseUrl}/deleteaddress`, {
-        method: 'POST',
-        body: JSON.stringify({
-            address: selectedAddress,
-        }),
+    const response = await fetch(`${BaseUrl}/address/${selectedAddress}`, {
+        method: 'DELETE',
         headers: defaultHeaders
     });
-    return response.text();
+    return response.status === 200;
 }
 
 const fetchMails = async (selectedAddress: string, cursorId: string) => {
@@ -92,38 +84,23 @@ const fetchDeletedMails = async (cursorId: string) => {
 };
 
 const fetchMail = async (id: string) => {
-    const response = await fetch(`${BaseUrl}/mailData`, {
-        method: 'POST',
-        body: JSON.stringify(
-            {
-                id: id,
-            }
-        ),
+    const response = await fetch(`${BaseUrl}/mail/${id}`, {
+        method: 'GET',
         headers: defaultHeaders,
     });
     return response.json() as Promise<MailMessage>;
 }
 
-const deleteMail = async (deleteItemKey: string) => {
-    await fetch(`${BaseUrl}/deleteMail`, {
-        method: 'POST',
-        body: JSON.stringify(
-            {
-                id: deleteItemKey,
-            }
-        ),
+const deleteMail = async (id: string) => {
+    await fetch(`${BaseUrl}/mail/${id}`, {
+        method: 'DELETE',
         headers: defaultHeaders,
     })
 };
 
 const deleteMails = async (address: string) => {
-    await fetch(`${BaseUrl}/deleteMails`, {
-        method: 'POST',
-        body: JSON.stringify(
-            {
-                address: address,
-            }
-        ),
+    await fetch(`${BaseUrl}/mails/${address}`, {
+        method: 'DELETE',
         headers: defaultHeaders,
     })
 };
@@ -161,7 +138,7 @@ const readAllMail = async (address: string) => {
 
 const fetchUnreadCounts = async () => {
     const response = await fetch(`${BaseUrl}/unreadCounts`, {
-        method: 'POST',
+        method: 'GET',
         headers: defaultHeaders,
     });
     return response.json() as Promise<UnreadCount[]>;

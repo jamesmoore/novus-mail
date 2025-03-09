@@ -40,14 +40,14 @@ function Manage() {
         }
         else if (newAddressText !== '') {
             apiAddAddress(newAddressText)
-                .then((data: string) => {
-                    if (data == "done") {
+                .then((success: boolean) => {
+                    if (success) {
                         enqueueSnackbar('Added ' + newAddressText, { variant: 'success' });
                         setNewAddressText("");
                         refreshAddresses();
                     }
-                    else if (data === "exists") {
-                        enqueueSnackbar('Address already exists', { variant: 'error' });
+                    else {
+                        enqueueSnackbar('Failed to add address', { variant: 'error' });
                     }
                 }
                 );
@@ -60,8 +60,8 @@ function Manage() {
 
     function confirmDeleteClicked(addr: string) {
         apiDeleteAddress(addr)
-            .then((data: string) => {
-                if (data === 'done') {
+            .then((success: boolean) => {
+                if (success) {
                     enqueueSnackbar('Deleted ' + addr, { variant: 'success' });
                     setDeleteAddress('');
                     refreshAddresses();

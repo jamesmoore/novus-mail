@@ -1,18 +1,21 @@
 import { Database } from 'better-sqlite3';
 import { Router } from 'express';
 import config from '../config.js';
+import { noCacheMiddleware } from './noCacheMiddleware.js';
 
 interface Mail {
-	id: string;
-	sender: string;
-	subject: string;
-	read: boolean;
-	received: number;
+    id: string;
+    sender: string;
+    subject: string;
+    read: boolean;
+    received: number;
 }
 
 export function createRouter(db: Database) {
-    
+
     const router = Router();
+
+    router.use(noCacheMiddleware);
 
     router.post('/mails', (req, res) => {
         // Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 1110);
@@ -72,58 +75,43 @@ export function createRouter(db: Database) {
 
     });
 
-    router.post('/mailData', (req, res) => {
-
-        const json = req.body;
-
+    router.get('/mail/:id', (req, res) => {
+        const id = req.params.id;
         try {
-
-            const rows = db.prepare("SELECT recipient, sender, subject, content, read, received FROM mail WHERE id = ?").all(json.id);
+            const rows = db.prepare("SELECT recipient, sender, subject, content, read, received FROM mail WHERE id = ?").all(id);
             res.json(rows[0])
-
         } catch (err) {
-
-            console.error("DB get mail data fail")
-            console.error(err)
-            res.status(500).json({ error: "Failed to delete mails" });
+            console.error("DB get mail data fail", err)
+            res.status(500).json({ error: "Failed to get mail" });
         }
-
     });
 
-    router.post('/deleteMail', (req, res) => {
-
-        const json = req.body;
-
+    router.delete('/mail/:id', (req, res) => {
+        const id = req.params.id;
         try {
-
-            const mail = db.prepare("SELECT deleted FROM mail WHERE id = ?").get(json.id);
+            const mail = db.prepare("SELECT deleted FROM mail WHERE id = ?").get(id);
             const isDeleted = mail as unknown as { deleted: boolean };
 
             if (isDeleted.deleted) {
-                db.prepare("DELETE FROM mail WHERE id = ?").run(json.id);
+                db.prepare("DELETE FROM mail WHERE id = ?").run(id);
             }
             else {
-                db.prepare("UPDATE mail SET deleted = 1 WHERE id = ?").run(json.id);
+                db.prepare("UPDATE mail SET deleted = 1 WHERE id = ?").run(id);
             }
             res.status(200).send();
-
         } catch (err) {
-
-            console.error("DB delete mail fail")
-            console.error(err)
+            console.error("DB delete mail fail", err)
             res.status(500).json({ error: "Failed to delete mail" });
         }
+    });
 
-    })
-
-    router.post('/deleteMails', (req, res) => {
-        const json = req.body;
+    router.delete('/mails/:addr', (req, res) => {
+        const addr = req.params.addr;
         try {
-            db.prepare("UPDATE mail SET deleted = 1 WHERE recipient = ? and deleted = 0").run(json.address);
+            db.prepare("UPDATE mail SET deleted = 1 WHERE recipient = ? and deleted = 0").run(addr);
             res.status(200).send();
         } catch (err) {
-            console.error("DB delete mails fail")
-            console.error(err)
+            console.error("DB delete mails fail", err)
             res.status(500).json({ error: "Failed to delete mails" });
         }
     })
@@ -166,7 +154,7 @@ export function createRouter(db: Database) {
         }
     })
 
-    router.post('/unreadCounts', (req, res) => {
+    router.get('/unreadCounts', (req, res) => {
 
         try {
             const unread = db.prepare(`
@@ -177,8 +165,7 @@ export function createRouter(db: Database) {
                 `).all();
             res.json(unread);
         } catch (err) {
-            console.error("unread counts select fail");
-            console.error(err)
+            console.error("unread counts select fail", err);
             res.status(500).json({ error: "Failed to get unread counts" });
         }
     })
