@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@tanstack/react-query-devtools": "^5.67.3",
+    "@tanstack/react-query-devtools": "^5.68.0",
     "humanize-duration": "^3.32.1",
     "notistack": "^3.0.2",
     "react": "^19.0.0",
@@ -25,7 +25,7 @@
     "@fontsource/roboto": "^5.2.5",
     "@mui/icons-material": "^6.4.7",
     "@mui/material": "^6.4.3",
-    "@tanstack/react-query": "^5.67.3",
+    "@tanstack/react-query": "^5.68.0",
     "@types/humanize-duration": "^3.27.4",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
@@ -37,6 +37,6 @@
     "react-router-dom": "^7.3.0",
     "typescript": "~5.8.2",
     "typescript-eslint": "^8.26.1",
-    "vite": "^6.2.1"
+    "vite": "^6.2.2"
   }
 }
