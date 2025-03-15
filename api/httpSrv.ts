@@ -48,9 +48,9 @@ export class HttpServer {
 
 		// app.use(function(req,res,next){setTimeout(next,1000)});
 
-		app.use('/', createAddressRouter(this.db, this.domainName));
-		app.use('/', createMailRouter(this.db));
-		app.use('/', createStatusRouter(this.db));
+		app.use('/api', createAddressRouter(this.db, this.domainName));
+		app.use('/api', createMailRouter(this.db));
+		app.use('/api', createStatusRouter(this.db));
 
 		// catch-all handler for react router
 		app.get('*', (_req, res) => {

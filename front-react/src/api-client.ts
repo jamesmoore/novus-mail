@@ -9,9 +9,10 @@ const defaultHeaders = {
 
 /** To support local development - add this env variable to the file `.env.development.local`, which should be located alongside package.json  */
 const BaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
+const ApiUrl = `${BaseUrl}/api`;
 
 const fetchDomain = async () => {
-    const response = await fetch(`${BaseUrl}/domain`, {
+    const response = await fetch(`${ApiUrl}/domain`, {
         method: 'GET',
         headers: defaultHeaders,
     });
@@ -19,7 +20,7 @@ const fetchDomain = async () => {
 };
 
 const fetchAddress = async () => {
-    const response = await fetch(`${BaseUrl}/addresses`, {
+    const response = await fetch(`${ApiUrl}/addresses`, {
         method: 'GET',
         headers: defaultHeaders,
     });
@@ -27,7 +28,7 @@ const fetchAddress = async () => {
 };
 
 const getAddress = async (newAddressText: string) => {
-    const response = await fetch(`${BaseUrl}/address/${newAddressText}`, {
+    const response = await fetch(`${ApiUrl}/address/${newAddressText}`, {
         method: 'GET',
         headers: defaultHeaders
     });
@@ -40,7 +41,7 @@ const getAddress = async (newAddressText: string) => {
 }
 
 const addAddress = async (newAddressText: string) => {
-    const response = await fetch(`${BaseUrl}/address/${newAddressText}`, {
+    const response = await fetch(`${ApiUrl}/address/${newAddressText}`, {
         method: 'PUT',
         headers: defaultHeaders
     });
@@ -48,7 +49,7 @@ const addAddress = async (newAddressText: string) => {
 }
 
 const deleteAddress = async (selectedAddress: string) => {
-    const response = await fetch(`${BaseUrl}/address/${selectedAddress}`, {
+    const response = await fetch(`${ApiUrl}/address/${selectedAddress}`, {
         method: 'DELETE',
         headers: defaultHeaders
     });
@@ -56,7 +57,7 @@ const deleteAddress = async (selectedAddress: string) => {
 }
 
 const fetchMails = async (selectedAddress: string, cursorId: string) => {
-    const response = await fetch(`${BaseUrl}/mails`, {
+    const response = await fetch(`${ApiUrl}/mails`, {
         method: 'POST',
         body: JSON.stringify(
             {
@@ -70,7 +71,7 @@ const fetchMails = async (selectedAddress: string, cursorId: string) => {
 };
 
 const fetchDeletedMails = async (cursorId: string) => {
-    const response = await fetch(`${BaseUrl}/mails`, {
+    const response = await fetch(`${ApiUrl}/mails`, {
         method: 'POST',
         body: JSON.stringify(
             {
@@ -84,7 +85,7 @@ const fetchDeletedMails = async (cursorId: string) => {
 };
 
 const fetchMail = async (id: string) => {
-    const response = await fetch(`${BaseUrl}/mail/${id}`, {
+    const response = await fetch(`${ApiUrl}/mail/${id}`, {
         method: 'GET',
         headers: defaultHeaders,
     });
@@ -92,28 +93,28 @@ const fetchMail = async (id: string) => {
 }
 
 const deleteMail = async (id: string) => {
-    await fetch(`${BaseUrl}/mail/${id}`, {
+    await fetch(`${ApiUrl}/mail/${id}`, {
         method: 'DELETE',
         headers: defaultHeaders,
     })
 };
 
 const deleteMails = async (address: string) => {
-    await fetch(`${BaseUrl}/mails/${address}`, {
+    await fetch(`${ApiUrl}/mails/${address}`, {
         method: 'DELETE',
         headers: defaultHeaders,
     })
 };
 
 const emptyDeletedMails = async () => {
-    await fetch(`${BaseUrl}/emptyDeletedMails`, {
+    await fetch(`${ApiUrl}/emptyDeletedMails`, {
         method: 'POST',
         headers: defaultHeaders,
     })
 };
 
 const readMail = async (id: string) => {
-    await fetch(`${BaseUrl}/readMail`, {
+    await fetch(`${ApiUrl}/readMail`, {
         method: 'POST',
         body: JSON.stringify(
             {
@@ -125,7 +126,7 @@ const readMail = async (id: string) => {
 };
 
 const readAllMail = async (address: string) => {
-    await fetch(`${BaseUrl}/readAllMail`, {
+    await fetch(`${ApiUrl}/readAllMail`, {
         method: 'POST',
         body: JSON.stringify(
             {
@@ -137,7 +138,7 @@ const readAllMail = async (address: string) => {
 };
 
 const fetchUnreadCounts = async () => {
-    const response = await fetch(`${BaseUrl}/unreadCounts`, {
+    const response = await fetch(`${ApiUrl}/unreadCounts`, {
         method: 'GET',
         headers: defaultHeaders,
     });
