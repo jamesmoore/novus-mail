@@ -1,7 +1,7 @@
 import { Server } from "http";
 import { EventEmitter } from "events";
 import WebSocket, { WebSocketServer } from 'ws';
-import { WebSocketMessage } from "./WebSocketMessage";
+import { WebSocketMessage } from "./WebSocketMessage.js";
 
 class WebSocketNotifier {
     private wss: WebSocketServer;
