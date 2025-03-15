@@ -26,6 +26,10 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       '@tanstack/query/exhaustive-deps': 'error',
+      '@tanstack/query/no-rest-destructuring': 'error',
+      '@tanstack/query/stable-query-client': 'error',
+      '@tanstack/query/no-unstable-deps': 'error',
+      '@tanstack/query/infinite-query-property-order': 'error',
     },
   },
 )
