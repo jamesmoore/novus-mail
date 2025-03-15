@@ -51,6 +51,9 @@ export class HttpServer {
 					ttl: 3600 * 24 * 7,
 					path: './data/session-store.db',
 				}) as session.Store,
+				cookie: {
+					secure: process.env.NODE_ENV === 'production',
+				},
 			}),
 		)
 		app.use(passport.initialize());
