@@ -3,5 +3,6 @@ node_modules
 *.crt
 *.db
 dist
-/*.js
+**/*.js
 !eslint.config.js
+.env

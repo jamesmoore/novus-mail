@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "dev": "node --loader ts-node/esm --watch -r ts-node/register --env-file=.env.development ./main.ts",
+    "dev": "node --loader ts-node/esm --watch -r ts-node/register --env-file=.env --env-file=.env.development ./main.ts",
     "build": "tsc",
     "bundle": "ncc build main.js",
     "lint": "eslint ."
