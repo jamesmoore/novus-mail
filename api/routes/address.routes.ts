@@ -1,6 +1,7 @@
 import { Database } from 'better-sqlite3';
 import { Router } from 'express';
 import { noCacheMiddleware } from './noCacheMiddleware.js';
+import { env } from '../env/env.js';
 
 export function createRouter(db: Database, domainName: string) {
 
@@ -8,7 +9,7 @@ export function createRouter(db: Database, domainName: string) {
 
     router.use(noCacheMiddleware);
 
-    const refreshInterval = process.env.MAIL_REFRESH_INTERVAL ? Number(process.env.MAIL_REFRESH_INTERVAL) : 300;
+    const refreshInterval = env.MAIL_REFRESH_INTERVAL;
     router.get('/addresses', (_req, res) => {
         try {
             const rows = db.prepare("SELECT addr FROM address").all();
