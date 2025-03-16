@@ -1,6 +1,7 @@
 import { Database } from 'better-sqlite3';
 import { Router } from 'express';
 import { noCacheMiddleware } from './noCacheMiddleware.js';
+import { env } from '../env/env.js';
 
 interface Mail {
     id: string;
@@ -26,7 +27,7 @@ export function createRouter(db: Database) {
         };
 
         try {
-            const perPage = process.env.MAIL_COUNT_PER_PAGE ? Number(process.env.MAIL_COUNT_PER_PAGE) : 50;
+            const perPage = env.MAIL_COUNT_PER_PAGE;
 
             const directionDursorId = (json.cursorId as string) || 'lt';
             const direction = directionDursorId.substring(0, 2);
