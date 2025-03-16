@@ -47,9 +47,9 @@ export const env = createEnv({
 });
 
 console.log("Environment variables:");
-for (const property of Object.keys(env)) {
+for (const property of Object.keys(env) as Array<keyof typeof env>) {
   const isSecret = property.toLowerCase().includes("secret");
-  const value = process.env[property];
+  const value = env[property];
   if (!isSecret || !value) {
     console.log(`\t${property}: ${value}`);
   } else {
