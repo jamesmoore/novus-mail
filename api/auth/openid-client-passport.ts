@@ -348,7 +348,6 @@ export class Strategy implements passport.Strategy {
         })
       }
 
-      console.log('currentUrl', currentUrl);
       let input: URL | Request = currentUrl
       if (req.method === 'POST') {
         input = new Request(currentUrl.href, {
@@ -366,7 +365,6 @@ export class Strategy implements passport.Strategy {
           //duplex: 'half',
         })
       }
-      console.log('DONE');
 
       const tokens = await client.authorizationCodeGrant(
         this._config,
@@ -380,8 +378,6 @@ export class Strategy implements passport.Strategy {
         this.authorizationCodeGrantParameters(req, options),
         { DPoP: await this._DPoP?.(req) },
       )
-
-      console.log('GOT TOKENS', tokens);
 
       const verified: passport.AuthenticateCallback = (err, user, info) => {
         if (err) return this.error(err)

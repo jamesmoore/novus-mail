@@ -6,22 +6,16 @@ import { createRouter as createAddressRouter } from './routes/address.routes.js'
 import { createRouter as createMailRouter } from './routes/mail.routes.js';
 import { createRouter as createStatusRouter } from './routes/status.routes.js';
 import { createRouter as createAuthRouter } from './routes/auth.routes.js';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-import { configuration, oidcStrategyOptions } from './auth/passport-config.js';
 import session from 'express-session';
 import passport from 'passport';
 import cookieParser from 'cookie-parser';
-import { Strategy, type VerifyFunction } from './auth/openid-client-passport.js';
-import { ensureLoggedIn, ensureLoggedOut } from 'connect-ensure-login'
-
+import { env } from './env/env.js';
+import { passportConfig } from './auth/passport-config.js';
 // @ts-expect-error missing types - no @types/connect-loki package
 import LokiStore from 'connect-loki';
 
 const lokiStore = LokiStore(session);
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 const staticContentPath = './front-react/dist';
 
 export class HttpServer {
@@ -39,14 +33,12 @@ export class HttpServer {
 
 		const app = express();
 
-		const sessionSecret = process.env.SESSION_SECRET ?? "342b4b79-9d2d-49cc-851a-7e3e48fd2efd";
-
 		app.use(cookieParser())
 		app.use(
 			session({
 				saveUninitialized: false,
 				resave: true,
-				secret: sessionSecret,
+				secret: env.SESSION_SECRET,
 				store: new lokiStore({
 					ttl: 3600 * 24 * 7,
 					path: './data/session-store.db',
@@ -59,14 +51,9 @@ export class HttpServer {
 		app.use(passport.initialize());
 		app.use(passport.session());
 		app.use(passport.authenticate('session'))
-		const verify: VerifyFunction = (tokens, verified) => {
-			verified(null, tokens.claims())
-		}
 
-		console.log('options');
-		console.log(oidcStrategyOptions);
-		const strategy = new Strategy(oidcStrategyOptions, verify);
-		passport.use(strategy)
+		console.log('Using passport strategy:' + passportConfig.strategy.name);
+		passport.use(passportConfig.strategy)
 
 		passport.serializeUser((user: Express.User, cb) => {
 			cb(null, user)
@@ -83,12 +70,14 @@ export class HttpServer {
 			next();
 		});
 
-		if (process.env.CORS_ALLOW_ALL_ORIGINS == "true") {
+		if (env.CORS_ALLOW_ALL_ORIGINS) {
 			console.info("CORS: Allowing all origins");
 			app.use(cors());
 		}
 
 		app.use('/', createAuthRouter());
+
+		const authMiddleware = passportConfig.middleware;
 
 		// app.get('/', (_req, res) => {
 		// 	res.redirect('/index.html');
@@ -96,14 +85,14 @@ export class HttpServer {
 
 		// app.use(function(req,res,next){setTimeout(next,1000)});
 
-		app.use(ensureLoggedIn('/login'), express.static(staticContentPath));
+		app.use(authMiddleware, express.static(staticContentPath));
 
-		app.use('/api', ensureLoggedIn('/login'), createAddressRouter(this.db, this.domainName));
-		app.use('/api', ensureLoggedIn('/login'), createMailRouter(this.db));
-		app.use('/api', ensureLoggedIn('/login'), createStatusRouter(this.db));
+		app.use('/api', authMiddleware, createAddressRouter(this.db, this.domainName));
+		app.use('/api', authMiddleware, createMailRouter(this.db));
+		app.use('/api', authMiddleware, createStatusRouter(this.db));
 
 		// catch-all handler for react router
-		app.get('*', ensureLoggedIn('/login'), (_req, res) => {
+		app.get('*', authMiddleware, (_req, res) => {
 			res.redirect('/');
 			// res.sendFile(join(__dirname, staticContentPath, 'index.html'), (err) => {
 			// 	if (err) {

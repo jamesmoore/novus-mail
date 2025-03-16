@@ -3,7 +3,7 @@ import { noCacheMiddleware } from './noCacheMiddleware.js';
 import passport from 'passport';
 import { ensureLoggedOut } from 'connect-ensure-login';
 import * as client from 'openid-client'
-import { configuration, oidcStrategyOptions } from '../auth/passport-config.js';
+import { configuration, oidcStrategyOptions, passportConfig } from '../auth/passport-config.js';
 
 export function createRouter() {
 
@@ -18,7 +18,7 @@ export function createRouter() {
     router.get(
         '/login',
         ensureLoggedOut('/logout'),
-        passport.authenticate(oidcStrategyOptions.name!)
+        passport.authenticate(passportConfig.strategy)
     )
 
     router.get('/logout', (req, res) => {
