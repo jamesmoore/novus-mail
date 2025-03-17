@@ -420,7 +420,9 @@ export class Strategy implements passport.Strategy {
    * not match the actual URL the authorization server redirected the user to.
    */
   currentUrl(req: express.Request): URL {
-    return new URL(`${req.protocol}://${req.host}${req.originalUrl ?? req.url}`)
+    const url = new URL(`${req.protocol}://${req.host}${req.originalUrl ?? req.url}`);
+    console.log('currentUrl', url);
+    return url;
   }
 
   /**
