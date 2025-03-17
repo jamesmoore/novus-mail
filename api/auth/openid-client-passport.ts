@@ -1,5 +1,5 @@
 /**
- * Duplicated from `openid-client-passport`. https://github.com/panva/openid-client/blob/main/examples/passport.ts
+ * Duplicated from `openid-client-passport`. https://raw.githubusercontent.com/panva/openid-client/refs/heads/main/src/passport.ts
  * This is because Authelia requires a state in the authorization request. 
  * This line had to be made unconditional:
  *  redirectTo.searchParams.set('state', client.randomState())
