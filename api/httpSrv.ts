@@ -13,9 +13,13 @@ import { env } from './env/env.js';
 import { passportConfig } from './auth/passport-config.js';
 // @ts-expect-error missing types - no @types/connect-loki package
 import LokiStore from 'connect-loki';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 
 const lokiStore = LokiStore(session);
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const staticContentPath = './front-react/dist';
 
 export class HttpServer {
@@ -93,14 +97,13 @@ export class HttpServer {
 		app.use('/api', authMiddleware, createMailRouter(this.db));
 		app.use('/api', authMiddleware, createStatusRouter(this.db));
 
-		// catch-all handler for react router
+		// catch-all handler for react router. This is needed so that urls that are refreshed activate the react router. The alternative 302 redirect to / would break that.
 		app.get('*', authMiddleware, (_req, res) => {
-			res.redirect('/');
-			// res.sendFile(join(__dirname, staticContentPath, 'index.html'), (err) => {
-			// 	if (err) {
-			// 		res.status(500).send(err)
-			// 	}
-			// });
+			res.sendFile(join(__dirname, staticContentPath, 'index.html'), (err) => {
+				if (err) {
+					res.status(500).send(err)
+				}
+			});
 		})
 
 		const server = app.listen(this.port, () => {
