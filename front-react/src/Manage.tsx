@@ -28,7 +28,10 @@ function Manage() {
     const [addressExists, setAddressExists] = useState(false);
 
     const [user, setUser] = useState<User>();
-    fetchUser().then((p) => setUser(p));
+    useEffect(() => {
+        fetchUser().then((p) => setUser(p));
+    }, []);
+
 
     useEffect(() => {
         if (newAddressText === '') {
