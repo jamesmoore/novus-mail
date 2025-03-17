@@ -6,17 +6,10 @@ import { createRouter as createAddressRouter } from './routes/address.routes.js'
 import { createRouter as createMailRouter } from './routes/mail.routes.js';
 import { createRouter as createStatusRouter } from './routes/status.routes.js';
 import { createRouter as createAuthRouter } from './routes/auth.routes.js';
-import session from 'express-session';
-import passport from 'passport';
-import cookieParser from 'cookie-parser';
 import { env } from './env/env.js';
 import { passportConfig } from './auth/passport-config.js';
-// @ts-expect-error missing types - no @types/connect-loki package
-import LokiStore from 'connect-loki';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-
-const lokiStore = LokiStore(session);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -38,36 +31,6 @@ export class HttpServer {
 		const app = express();
 
 		app.set('trust proxy',true);
-
-		app.use(cookieParser())
-		app.use(
-			session({
-				saveUninitialized: false,
-				resave: true,
-				secret: env.SESSION_SECRET,
-				store: new lokiStore({
-					ttl: 3600 * 24 * 7,
-					path: './data/session-store.db',
-				}) as session.Store,
-				cookie: {
-					secure: process.env.NODE_ENV === 'production',
-				},
-			}),
-		)
-		app.use(passport.initialize());
-		app.use(passport.session());
-		app.use(passport.authenticate('session'))
-
-		console.log('Using passport strategy: ' + passportConfig.strategy.name);
-		passport.use(passportConfig.strategy)
-
-		passport.serializeUser((user: Express.User, cb) => {
-			cb(null, user)
-		})
-
-		passport.deserializeUser((user: Express.User, cb) => {
-			return cb(null, user)
-		})
 
 		app.use(express.json());
 

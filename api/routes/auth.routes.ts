@@ -4,16 +4,49 @@ import passport from 'passport';
 import { ensureLoggedOut } from 'connect-ensure-login';
 import * as client from 'openid-client'
 import { configuration, oidcStrategyOptions, passportConfig } from '../auth/passport-config.js';
+import cookieParser from 'cookie-parser';
+import { env } from '../env/env.js';
+import session from 'express-session';
+// @ts-expect-error missing types - no @types/connect-loki package
+import LokiStore from 'connect-loki';
 
 export function createRouter() {
+
+    const lokiStore = LokiStore(session);
 
     const router = Router();
 
     router.use(noCacheMiddleware);
 
-    // app.get('/', ensureLoggedIn('/login'), (req, res) => {
-    // 	res.send(`Welcome ${req.user?.email + '/' + req.user?.sub}`)
-    // })
+    router.use(cookieParser())
+    router.use(
+        session({
+            saveUninitialized: false,
+            resave: true,
+            secret: env.SESSION_SECRET,
+            store: new lokiStore({
+                ttl: 3600 * 24 * 7,
+                path: './data/session-store.db',
+            }) as session.Store,
+            cookie: {
+                secure: process.env.NODE_ENV === 'production',
+            },
+        }),
+    )
+    router.use(passport.initialize());
+    router.use(passport.session());
+    router.use(passport.authenticate('session'))
+
+    console.log('Using passport strategy: ' + passportConfig.strategy.name);
+    passport.use(passportConfig.strategy)
+
+    passport.serializeUser((user: Express.User, cb) => {
+        cb(null, user)
+    })
+
+    passport.deserializeUser((user: Express.User, cb) => {
+        return cb(null, user)
+    })
 
     router.get(
         '/login',
