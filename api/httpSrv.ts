@@ -33,6 +33,8 @@ export class HttpServer {
 
 		const app = express();
 
+		app.set('trust proxy',true);
+
 		app.use(cookieParser())
 		app.use(
 			session({
