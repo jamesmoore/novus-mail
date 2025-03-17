@@ -13,8 +13,8 @@ import { env } from './env/env.js';
 import { passportConfig } from './auth/passport-config.js';
 // @ts-expect-error missing types - no @types/connect-loki package
 import LokiStore from 'connect-loki';
-import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
 const lokiStore = LokiStore(session);
 
