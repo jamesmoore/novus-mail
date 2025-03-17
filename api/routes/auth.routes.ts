@@ -50,5 +50,14 @@ export function createRouter() {
         }
     );
 
+    router.get('/auth/user', (req, res) => {
+        res.status(200).json({
+            strategy: passportConfig.strategy.name,
+            email: req.user?.email,
+            sub: req.user?.sub,
+            isAuthenticated: req.isAuthenticated(),
+        });
+    })
+
     return router;
 }

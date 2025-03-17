@@ -52,7 +52,7 @@ export class HttpServer {
 		app.use(passport.session());
 		app.use(passport.authenticate('session'))
 
-		console.log('Using passport strategy:' + passportConfig.strategy.name);
+		console.log('Using passport strategy: ' + passportConfig.strategy.name);
 		passport.use(passportConfig.strategy)
 
 		passport.serializeUser((user: Express.User, cb) => {

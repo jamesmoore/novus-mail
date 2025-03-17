@@ -1,8 +1,8 @@
 /**
  * See https://github.com/panva/openid-client/blob/main/examples/passport.ts
  */
-import { Configuration, discovery } from 'openid-client'
-import { Strategy, StrategyOptions, VerifyFunction } from './openid-client-passport.js';
+import { Configuration, discovery, fetchUserInfo } from 'openid-client'
+import { Strategy, StrategyOptionsWithRequest, VerifyFunctionWithRequest } from './openid-client-passport.js';
 import { Strategy as AnonymousStrategy } from 'passport-anonymous';
 import { env } from '../env/env.js';
 import { ensureLoggedIn } from 'connect-ensure-login';
@@ -31,25 +31,36 @@ export const configuration: Configuration = oidcEnabled ? await discovery(
 
 //console.log(configuration.serverMetadata());
 
-const scope = 'openid email'
-
-const oidcOptionsName = 'oidc';
-
-export const oidcStrategyOptions: StrategyOptions = {
+export const oidcStrategyOptions: StrategyOptionsWithRequest = {
   config: configuration,
-  scope,
-  callbackURL: `${env.REDIRECT_URI}`,
-  name: oidcOptionsName,
+  scope: 'openid email profile',
+  callbackURL: authConfig.redirectUri!,
+  name: 'oidc',
+  passReqToCallback: true
 }
 
-const verify: VerifyFunction = (tokens, verified) => {
-  verified(null, tokens.claims())
+const verify: VerifyFunctionWithRequest = (req, tokens, verified) => {
+
+  const sub = tokens.claims()?.sub;
+  if (sub) {
+    fetchUserInfo(configuration, tokens.access_token, sub).then((userInfo) => {
+      if (req.user) {
+        req.user.email = userInfo.email;
+      }
+    }).catch(
+      (e) => console.error('userinfo error', e)
+    );
+  }
+  else {
+    console.error('No sub in verify callback');
+  }
+  verified(null, tokens.claims());
 }
 
 export const passportConfig = oidcEnabled ? {
   strategy: new Strategy(oidcStrategyOptions, verify),
   middleware: ensureLoggedIn('/login')
-}: {
+} : {
   strategy: new AnonymousStrategy(),
   middleware: (_req: Request, res: Response, next: NextFunction) => next()
 };
