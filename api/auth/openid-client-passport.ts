@@ -421,7 +421,6 @@ export class Strategy implements passport.Strategy {
    */
   currentUrl(req: express.Request): URL {
     const url = new URL(`${req.protocol}://${req.host}${req.originalUrl ?? req.url}`);
-    console.log('currentUrl', url);
     return url;
   }
 
