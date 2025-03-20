@@ -12,7 +12,8 @@ export const env = createEnv({
     REDIRECT_URI: z.union([z.string().url().nullish(), z.literal("")]),
     SESSION_SECRET: z.string().optional().default('342b4b79-9d2d-49cc-851a-7e3e48fd2efd'),
 
-    CORS_ALLOW_ALL_ORIGINS: z.string().default('false').transform((s) => s !== "false" && s !== "0"),
+    CORS_ALLOW_ALL_ORIGINS: z.string().default('false').transform((s) => s.toLowerCase() !== "false" && s !== "0"),
+    TRUST_PROXY: z.string().default('false').transform((s) => s.toLowerCase() !== "false" && s !== "0"),
   },
 
   /**

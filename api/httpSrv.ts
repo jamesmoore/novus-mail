@@ -30,7 +30,7 @@ export class HttpServer {
 
 		const app = express();
 
-		app.set('trust proxy',true);
+		app.set('trust proxy',env.TRUST_PROXY);
 
 		app.use(express.json());
 
