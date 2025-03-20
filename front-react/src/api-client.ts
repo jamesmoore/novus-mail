@@ -2,6 +2,7 @@ import { AddressesResponse } from "./models/addresses-response";
 import { MailMessage } from "./models/mail-message";
 import { MailResponse } from "./models/mail-response";
 import { UnreadCount } from "./models/unread-count";
+import { User } from "./models/user";
 
 const defaultHeaders = {
     'Content-Type': 'application/json',
@@ -145,6 +146,14 @@ const fetchUnreadCounts = async () => {
     return response.json() as Promise<UnreadCount[]>;
 };
 
+const fetchUser = async () => {
+    const response = await fetch(`${BaseUrl}/auth/user`, {
+        method: 'GET',
+        headers: defaultHeaders,
+    });
+    return response.json() as Promise<User>;
+};
+
 export {
     fetchDomain,
     fetchAddress,
@@ -160,4 +169,5 @@ export {
     readMail,
     fetchUnreadCounts,
     readAllMail,
+    fetchUser,
 };

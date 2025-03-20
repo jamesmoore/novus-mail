@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { addAddress as apiAddAddress, deleteAddress as apiDeleteAddress, getAddress } from './api-client';
+import { addAddress as apiAddAddress, deleteAddress as apiDeleteAddress, fetchUser, getAddress } from './api-client';
 import { Button, FormControl, IconButton, Paper, TextField, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import useAddressResponse from './useAddressResponse';
@@ -9,6 +9,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import DeleteForever from '@mui/icons-material/DeleteForever';
 import AddIcon from '@mui/icons-material/Add';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
+import { User } from './models/user';
 
 function Manage() {
     const [newAddressText, setNewAddressText] = useState('');
@@ -25,6 +26,13 @@ function Manage() {
     }, [newAddressText]);
 
     const [addressExists, setAddressExists] = useState(false);
+
+    const [user, setUser] = useState<User>();
+    useEffect(() => {
+        fetchUser().then((p) => setUser(p));
+    }, []);
+
+
     useEffect(() => {
         if (newAddressText === '') {
             setAddressExists(false);
@@ -79,6 +87,18 @@ function Manage() {
     return (
         <Grid>
             <SnackbarProvider />
+            {
+                user && <Paper>
+                    <Grid container mb={1} ml={1} mr={1} p={1}>
+                        <Grid mt={2} mb={2} size={{ xs: 12, md: 3 }}>
+                            <Typography>User</Typography>
+                        </Grid>
+                        <Grid mt={2} size={{ xs: 12, md: 9 }}>
+                            <Typography>{user.email ?? 'No email'} ({user.strategy})</Typography>
+                        </Grid>
+                    </Grid>
+                </Paper>
+            }
             <Paper>
                 <Grid container m={1} p={1}>
                     <Grid mt={2} mb={2} size={{ xs: 12, md: 3 }}>
@@ -158,6 +178,7 @@ function Manage() {
                     </Grid>
                 </Paper>
             }
+
         </Grid>
     );
 }
