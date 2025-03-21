@@ -31,9 +31,9 @@ export function createRouter(db: Database, domainName: string) {
     router.get('/address/:addr', (req, res) => {
         const address = req.params.addr.toLowerCase();
         try {
-            const rows = db.prepare("SELECT addr FROM address WHERE addr = ?").all(address);
-            if (rows.length > 0) {
-                res.status(200).send((rows[0] as { addr: string }).addr);
+            const addressRow = db.prepare("SELECT addr FROM address WHERE addr = ?").get(address);
+            if (addressRow) {
+                res.status(200).send((addressRow as { addr: string }).addr);
             } else {
                 res.status(404).send('Address not found');
             }
@@ -62,18 +62,32 @@ export function createRouter(db: Database, domainName: string) {
     router.post('/address/:addr', (req, res) => {
         const address = req.params.addr.toLowerCase();
 
+        try {
+            const addressRow = db.prepare("SELECT owner FROM address WHERE addr = ?").get(address);
+            if (addressRow) {
+                const owner = (addressRow as { owner: string | null }).owner;
+                if (owner !== req.user?.sub && owner !== null) {
+                    res.status(401).send('Address not yours');
+                }
+            } else {
+                res.status(404).send('Address not found');
+            }
+        } catch (err) {
+            console.error("DB update addresses fail", err)
+            res.status(500).json({ error: "Failed to update address" });
+        }
+
         const json = req.body as {
             private: boolean,
         };
 
         const owner = json.private ? req.user?.sub : null;
         try {
-            // check that addr is public or owned by sub first
             db.prepare("UPDATE address SET owner = ? WHERE addr = ?").run(owner, address);
             res.status(200).send();
         } catch (err) {
-            console.error("DB add addresses fail", err)
-            res.status(500).json({ error: "Failed to add address" });
+            console.error("DB update addresses fail", err)
+            res.status(500).json({ error: "Failed to update address" });
         }
     })
 

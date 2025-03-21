@@ -85,6 +85,7 @@ function Manage() {
             (success: boolean) => {
                 if (success) {
                     refreshAddresses();
+                    enqueueSnackbar(addr + (makePrivate ? ' made private 🔒' : ' made public 🔓'), { variant: 'success' });
                 }
                 else {
                     enqueueSnackbar('Failed to update ' + addr, { variant: 'error' });
