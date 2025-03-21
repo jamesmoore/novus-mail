@@ -156,13 +156,15 @@ export function createRouter(db: Database) {
 
     router.get('/unreadCounts', (req, res) => {
 
+        const owner = req.user?.sub;
         try {
             const unread = db.prepare(`
                 SELECT recipient, count(*) as unread
                 from mail
-                where read = 0 and deleted = 0
+                join address on mail.recipient = address.addr 
+                where read = 0 and deleted = 0 and (address.owner IS NULL OR address.owner = ?)
                 group by recipient
-                `).all();
+                `).all(owner);
             res.json(unread);
         } catch (err) {
             console.error("unread counts select fail", err);
