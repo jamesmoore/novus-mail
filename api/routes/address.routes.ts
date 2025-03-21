@@ -67,7 +67,6 @@ export function createRouter(db: Database, domainName: string) {
         };
 
         const owner = json.private ? req.user?.sub : null;
-        console.log("Assigning " + address + " to " + owner)
         try {
             // check that addr is public or owned by sub first
             db.prepare("UPDATE address SET owner = ? WHERE addr = ?").run(owner, address);
