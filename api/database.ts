@@ -33,19 +33,25 @@ const database = {
 			try {
 				db.exec("ALTER TABLE mail ADD COLUMN read INTEGER default 0");
 			} catch {
-				console.log("read column already exists");
+				console.log("mail.read column already exists");
 			}
 
 			try {
 				db.exec("ALTER TABLE mail ADD COLUMN received INTEGER default 0");
 			} catch {
-				console.log("received column already exists");
+				console.log("mail.received column already exists");
 			}
 			
 			try {
 				db.exec("ALTER TABLE mail ADD COLUMN deleted INTEGER default 0");
 			} catch {
-				console.log("deleted column already exists");
+				console.log("mail.deleted column already exists");
+			}
+
+			try {
+				db.exec("ALTER TABLE address ADD COLUMN owner TEXT");
+			} catch {
+				console.log("address.owner column already exists");
 			}
 
 			return db;

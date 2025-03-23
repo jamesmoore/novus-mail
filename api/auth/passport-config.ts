@@ -60,7 +60,12 @@ const verify: VerifyFunctionWithRequest = (req, tokens, verified) => {
 
 export const passportConfig = oidcEnabled ? {
   strategy: new Strategy(oidcStrategyOptions, verify),
-  middleware: ensureLoggedIn('/login')
+  middleware: (_req: Request, res: Response, next: NextFunction) => {
+    if(
+      _req.path.startsWith('/api/status') || 
+      _req.path.startsWith('/status')) return next();
+    return ensureLoggedIn('/login')(_req, res, next);
+  }
 } : {
   strategy: new AnonymousStrategy(),
   middleware: (_req: Request, res: Response, next: NextFunction) => next()

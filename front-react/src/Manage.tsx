@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { addAddress as apiAddAddress, deleteAddress as apiDeleteAddress, fetchUser, getAddress } from './api-client';
-import { Button, FormControl, IconButton, Paper, TextField, Typography } from '@mui/material';
+import { addAddress as apiAddAddress, deleteAddress as apiDeleteAddress, fetchUser, getAddress, updateAddress } from './api-client';
+import { Button, FormControl, FormControlLabel, IconButton, Paper, Switch, TextField, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import useAddressResponse from './useAddressResponse';
 import useDomain from './useDomain';
@@ -80,6 +80,20 @@ function Manage() {
             });
     }
 
+    function setVisibility(addr: string, makePrivate: boolean) {
+        updateAddress(addr, makePrivate).then(
+            (success: boolean) => {
+                if (success) {
+                    refreshAddresses();
+                    enqueueSnackbar(addr + (makePrivate ? ' made private 🔒' : ' made public 🔓'), { variant: 'success' });
+                }
+                else {
+                    enqueueSnackbar('Failed to update ' + addr, { variant: 'error' });
+                }
+            }
+        )
+    }
+
     if (error) {
         return <div>{error.message}</div>;
     }
@@ -94,7 +108,7 @@ function Manage() {
                             <Typography>User</Typography>
                         </Grid>
                         <Grid mt={2} size={{ xs: 12, md: 9 }}>
-                            <Typography>{user.email ?? 'No email'} ({user.strategy})</Typography>
+                            <Typography>{user.email ?? 'Anon'} ({user.strategy})</Typography>
                         </Grid>
                     </Grid>
                 </Paper>
@@ -141,31 +155,41 @@ function Manage() {
                         </Grid>
                         <Grid container size={{ xs: 12, md: 9 }} flexDirection={'column'}>
                             {
-                                addressesResponse && addressesResponse.addresses.map((address) => address.addr).map((address) => (
+                                addressesResponse && addressesResponse.addresses.map(({ addr, owner }) => (
                                     <Grid
-                                        key={address}
+                                        key={addr}
                                         container
                                         pt={1}
                                         pb={1}
                                         flexDirection={'row'}
-                                        onPointerEnter={() => { setSelectedAddress(address) }}
+                                        onPointerEnter={() => { setSelectedAddress(addr) }}
                                         onPointerLeave={() => { setSelectedAddress(''); setDeleteAddress(''); }}
                                     >
                                         <Grid display={'flex'} alignItems={'center'}>
-                                            <Typography component={'span'}>{address}</Typography>
+                                            <Typography component={'span'}>{addr}</Typography>
                                             <Typography component={'span'} sx={{ opacity: 0.3 }}>@{domainName}</Typography>
                                         </Grid>
                                         <Grid display={'flex'} sx={{ marginLeft: 'auto' }} justifyContent={'right'} alignItems={'center'}>
-                                            {deleteAddress !== address &&
-                                                <IconButton aria-label="delete" onClick={() => deleteClicked(address)}>
-                                                    {!(selectedAddress === address) && <DeleteOutlineIcon color="action" opacity={0.3} />}
-                                                    {selectedAddress === address && <DeleteIcon color="error" />}
-                                                </IconButton>
+                                            {deleteAddress !== addr &&
+                                                <>
+                                                    <FormControlLabel
+                                                        control={<Switch
+                                                            checked={!!owner}
+                                                            onChange={(_event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => setVisibility(addr, checked)}
+                                                        />}
+                                                        label={owner ? 'Private' : 'Public'}
+                                                        labelPlacement='start'
+                                                    />
+                                                    <IconButton aria-label="delete" onClick={() => deleteClicked(addr)}>
+                                                        {!(selectedAddress === addr) && <DeleteOutlineIcon color="action" opacity={0.3} />}
+                                                        {selectedAddress === addr && <DeleteIcon color="error" />}
+                                                    </IconButton>
+                                                </>
                                             }
-                                            {deleteAddress === address &&
+                                            {deleteAddress === addr &&
                                                 <>
                                                     <Typography color='error'>Confirm delete?</Typography>
-                                                    <IconButton onPointerUp={() => confirmDeleteClicked(address)}>
+                                                    <IconButton onPointerUp={() => confirmDeleteClicked(addr)}>
                                                         <DeleteForever color="error" />
                                                     </IconButton>
                                                 </>

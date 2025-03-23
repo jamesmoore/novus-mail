@@ -57,6 +57,19 @@ const deleteAddress = async (selectedAddress: string) => {
     return response.status === 200;
 }
 
+const updateAddress = async (selectedAddress: string, makePrivate: boolean) => {
+    const response = await fetch(`${ApiUrl}/address/${selectedAddress}`, {
+        method: 'POST',
+        body: JSON.stringify(
+            {
+                private: makePrivate,
+            }
+        ),
+        headers: defaultHeaders,
+    });
+    return response.status === 200;
+}
+
 const fetchMails = async (selectedAddress: string, cursorId: string) => {
     const response = await fetch(`${ApiUrl}/mails`, {
         method: 'POST',
@@ -160,6 +173,7 @@ export {
     getAddress,
     addAddress,
     deleteAddress,
+    updateAddress,
     fetchMails,
     fetchDeletedMails,
     fetchMail,

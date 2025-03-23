@@ -54,6 +54,14 @@ export class HttpServer {
 
 		// app.use(function(req,res,next){setTimeout(next,1000)});
 
+		app.get(/\/favicon.ico|\/mail.svg/, (_req, res) => {
+			res.sendFile(join(__dirname, staticContentPath, 'mail.svg'), (err) => {
+				if (err) {
+					res.status(500).send(err)
+				}
+			});
+		})
+
 		app.use(authMiddleware, express.static(staticContentPath));
 
 		app.use('/api', authMiddleware, createAddressRouter(this.db, this.domainName));
