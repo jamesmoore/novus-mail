@@ -170,19 +170,21 @@ function Manage() {
                                             <Typography component={'span'} sx={{ opacity: 0.3 }}>@{domainName}</Typography>
                                         </Grid>
                                         <Grid display={'flex'} sx={{ marginLeft: 'auto' }} justifyContent={'right'} alignItems={'center'}>
-                                            <FormControlLabel
-                                                control={<Switch
-                                                    checked={!!owner}
-                                                    onChange={(_event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => setVisibility(addr, checked)}
-                                                />}
-                                                label={owner ? 'Private' : 'Public'}
-                                                labelPlacement='start'
-                                            />
                                             {deleteAddress !== addr &&
-                                                <IconButton aria-label="delete" onClick={() => deleteClicked(addr)}>
-                                                    {!(selectedAddress === addr) && <DeleteOutlineIcon color="action" opacity={0.3} />}
-                                                    {selectedAddress === addr && <DeleteIcon color="error" />}
-                                                </IconButton>
+                                                <>
+                                                    <FormControlLabel
+                                                        control={<Switch
+                                                            checked={!!owner}
+                                                            onChange={(_event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => setVisibility(addr, checked)}
+                                                        />}
+                                                        label={owner ? 'Private' : 'Public'}
+                                                        labelPlacement='start'
+                                                    />
+                                                    <IconButton aria-label="delete" onClick={() => deleteClicked(addr)}>
+                                                        {!(selectedAddress === addr) && <DeleteOutlineIcon color="action" opacity={0.3} />}
+                                                        {selectedAddress === addr && <DeleteIcon color="error" />}
+                                                    </IconButton>
+                                                </>
                                             }
                                             {deleteAddress === addr &&
                                                 <>
