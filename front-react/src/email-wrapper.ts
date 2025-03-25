@@ -2,6 +2,8 @@
 
 const applyEmailTemplate = (contents: string ) => {
 
+    const upgraded = upgradeHttpToHttps(contents);
+
     const template = `
         <html><head>
         <meta http-equiv="Content-Security-Policy" content="script-src 'none'">
@@ -10,11 +12,15 @@ const applyEmailTemplate = (contents: string ) => {
             body { font: 16px sans-serif; }
         </style>
         </head>
-        <body>${contents}</body>
+        <body>${upgraded}</body>
         </html>
     `
 
     return template;
+}
+
+const upgradeHttpToHttps = (text: string) => {
+    return text.replace(/http:\/\/([^ ]+)/g, 'https://$1');
 }
 
 export default applyEmailTemplate;
