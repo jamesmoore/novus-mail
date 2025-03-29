@@ -1,7 +1,7 @@
 import { IconButton, Paper, SxProps, Theme, Tooltip, Typography } from "@mui/material";
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import { Mail } from "./models/mail";
 import { isEnterKeyUp, isLeftMouseClick } from "./Events";
 import humanizeDuration from "humanize-duration";

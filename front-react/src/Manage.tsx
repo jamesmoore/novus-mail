@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { addAddress as apiAddAddress, deleteAddress as apiDeleteAddress, fetchUser, getAddress, updateAddress } from './api-client';
 import { Button, FormControl, FormControlLabel, IconButton, Paper, Switch, TextField, Typography } from '@mui/material';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import useAddressResponse from './useAddressResponse';
 import useDomain from './useDomain';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';

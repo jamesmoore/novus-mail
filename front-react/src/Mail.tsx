@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { deleteMail, fetchMail } from './api-client';
 import { useQuery } from '@tanstack/react-query';
 import { Box, CircularProgress, Paper } from '@mui/material';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import applyEmailTemplate from './email-wrapper';
 import MailboxItem from './MailboxItem';
 import { useInvalidateMailItemsCache } from './useMailItems';
