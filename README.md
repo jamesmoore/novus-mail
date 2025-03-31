@@ -1,6 +1,7 @@
 # Novus Mail
 Please star this repo if you find it useful, thank you!
-![image](https://github.com/user-attachments/assets/d046ef05-af9c-4801-8d74-35ba69b63b75)
+![image](https://github.com/user-attachments/assets/b1026444-5090-4221-a762-1be59548f10c)
+
 
 # Purpose 🎯
 Whenever you sign up with your email on a website, your email address is stored and sometimes sold to advertisers. This is where you get your bulk of spam emails. Whenever a data breach happens, you also risk having your primary email address leaked and informations stolen.
