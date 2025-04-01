@@ -69,7 +69,8 @@ export class HttpServer {
 		app.use('/api', authMiddleware, createStatusRouter(this.db));
 
 		// catch-all handler for react router. This is needed so that urls that are refreshed activate the react router. The alternative 302 redirect to / would break that.
-		app.get('*', authMiddleware, (_req, res) => {
+		// https://expressjs.com/en/guide/migrating-5.html#path-syntax
+		app.get('/{*splat}', authMiddleware, (_req, res) => {
 			res.sendFile(join(__dirname, staticContentPath, 'index.html'), (err) => {
 				if (err) {
 					res.status(500).send(err)
