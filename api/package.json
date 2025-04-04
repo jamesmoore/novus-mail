@@ -21,7 +21,7 @@
     "express": "^5.1.0",
     "express-session": "^1.18.1",
     "mailparser": "^3.7.2",
-    "openid-client": "^6.3.3",
+    "openid-client": "^6.4.0",
     "passport": "^0.7.0",
     "passport-anonymous": "^1.0.1",
     "smtp-server": "^3.13.6",
