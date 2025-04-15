@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { addAddress as apiAddAddress, deleteAddress as apiDeleteAddress, fetchUser, getAddress, updateAddress } from './api-client';
-import { Button, FormControl, FormControlLabel, IconButton, Paper, Switch, TextField, Typography } from '@mui/material';
+import { Avatar, Button, FormControl, FormControlLabel, IconButton, Paper, Switch, TextField, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import useAddressResponse from './useAddressResponse';
 import useDomain from './useDomain';
@@ -104,10 +104,13 @@ function Manage() {
             {
                 user && <Paper>
                     <Grid container mb={1} ml={1} mr={1} p={1}>
-                        <Grid mt={2} mb={2} size={{ xs: 12, md: 3 }}>
+                        <Grid size={{ xs: 12, md: 3 }} display={'flex'} alignItems={'center'} sx={{
+                            mb: { xs: 1, md: 0 }
+                        }} >
                             <Typography>User</Typography>
                         </Grid>
-                        <Grid mt={2} size={{ xs: 12, md: 9 }}>
+                        <Grid size={{ xs: 12, md: 9 }} display={'flex'} flexDirection={'row'} alignItems={'center'} columnGap={1}>
+                            <Avatar src={user.picture} />
                             <Typography>{user.email ?? 'Anon'} ({user.strategy})</Typography>
                         </Grid>
                     </Grid>
