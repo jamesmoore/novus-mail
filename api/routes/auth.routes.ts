@@ -88,6 +88,7 @@ export function createRouter() {
             strategy: passportConfig.strategy.name,
             email: req.user?.email,
             sub: req.user?.sub,
+            picture: req.user?.picture,
             isAuthenticated: req.isAuthenticated(),
         });
     })
