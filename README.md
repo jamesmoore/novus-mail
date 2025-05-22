@@ -16,7 +16,7 @@ This is an example docker-compose file:
 ```yaml
 services:
   novusmail:
-    image: ghcr.io/jamesmoore/novusmail:main
+    image: ghcr.io/jamesmoore/novus-mail:main
     ports:
       - 25:25
       - 80:80
