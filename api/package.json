@@ -20,7 +20,7 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "express-session": "^1.18.1",
-    "mailparser": "^3.7.2",
+    "mailparser": "^3.7.3",
     "openid-client": "^6.5.0",
     "passport": "^0.7.0",
     "passport-anonymous": "^1.0.1",
