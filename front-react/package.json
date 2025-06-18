@@ -29,7 +29,7 @@
     "@tanstack/react-query": "^5.80.6",
     "@types/humanize-duration": "^3.27.4",
     "@types/react": "^19.1.6",
-    "@types/react-dom": "^19.1.5",
+    "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.5.1",
     "eslint": "^9.29.0",
     "eslint-plugin-react-hooks": "^5.2.0",
