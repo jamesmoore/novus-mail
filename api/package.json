@@ -25,7 +25,7 @@
     "passport": "^0.7.0",
     "passport-anonymous": "^1.0.1",
     "smtp-server": "^3.14.0",
-    "ws": "^8.18.2",
+    "ws": "^8.18.3",
     "zod": "^3.25.67"
   },
   "type": "module",
