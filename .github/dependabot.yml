@@ -20,9 +20,12 @@ updates:
     schedule:
       interval: "daily"
     versioning-strategy: increase
+    groups:
+      api-version-updates: 
 
   - package-ecosystem: "npm"
     directory: "/front-react"
     schedule:
       interval: "daily"
     versioning-strategy: increase
+      front-react-version-updates:
