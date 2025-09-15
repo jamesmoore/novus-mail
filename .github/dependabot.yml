@@ -21,8 +21,9 @@ updates:
       interval: "daily"
     versioning-strategy: increase
     groups:
-      api-version-updates: 
-
+      api-version-updates:
+        applies-to: version-updates
+        
   - package-ecosystem: "npm"
     directory: "/front-react"
     schedule:
@@ -30,3 +31,4 @@ updates:
     versioning-strategy: increase
     groups:
       front-react-version-updates:
+        applies-to: version-updates      
