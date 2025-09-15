@@ -23,7 +23,11 @@ updates:
     groups:
       api-version-updates:
         applies-to: version-updates
-        
+        patterns: ["*"]
+        update-types:
+          - "minor"
+          - "patch"
+          
   - package-ecosystem: "npm"
     directory: "/front-react"
     schedule:
@@ -32,3 +36,7 @@ updates:
     groups:
       front-react-version-updates:
         applies-to: version-updates      
+        patterns: ["*"]
+        update-types:
+          - "minor"
+          - "patch"
