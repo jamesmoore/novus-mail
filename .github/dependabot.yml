@@ -28,4 +28,5 @@ updates:
     schedule:
       interval: "daily"
     versioning-strategy: increase
+    groups:
       front-react-version-updates:
