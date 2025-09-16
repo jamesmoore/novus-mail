@@ -101,7 +101,7 @@ export function createRouter(db: Database, domainName: string) {
             }
 
             const owner = (addressRow as { owner: string | null }).owner;
-            if (owner !== req.user?.sub) {
+            if (owner && owner !== req.user?.sub) {
                 res.status(401).send('Address not yours');
                 return;
             }
