@@ -94,6 +94,18 @@ export function createRouter(db: Database, domainName: string) {
     router.delete('/address/:addr', (req, res) => {
         const address = req.params.addr.toLowerCase();
         try {
+            const addressRow = db.prepare("SELECT owner FROM address WHERE addr = ?").get(address);
+            if (!addressRow) {
+                res.status(404).send('Address not found');
+                return;
+            }
+
+            const owner = (addressRow as { owner: string | null }).owner;
+            if (owner && owner !== req.user?.sub) {
+                res.status(401).send('Address not yours');
+                return;
+            }
+
             db.prepare("DELETE FROM address WHERE addr = ?").run(address);
             db.prepare("DELETE FROM mail WHERE recipient = ?").run(address);
             res.status(200).send();
