@@ -26,7 +26,7 @@
     "passport-anonymous": "^1.0.1",
     "smtp-server": "^3.14.0",
     "ws": "^8.18.3",
-    "zod": "^4.1.8"
+    "zod": "^4.1.9"
   },
   "type": "module",
   "devDependencies": {
@@ -37,16 +37,16 @@
     "@types/express": "^5.0.3",
     "@types/express-session": "^1.18.2",
     "@types/mailparser": "^3.4.6",
-    "@types/node": "^24.4.0",
+    "@types/node": "^24.5.2",
     "@types/passport": "^1.0.17",
     "@types/passport-anonymous": "^1.0.5",
     "@types/smtp-server": "^3.5.12",
     "@types/ws": "^8.18.1",
-    "@vercel/ncc": "^0.38.3",
+    "@vercel/ncc": "^0.38.4",
     "eslint": "^9.35.0",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.43.0"
+    "typescript-eslint": "^8.44.0"
   }
 }
