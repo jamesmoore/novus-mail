@@ -13,7 +13,7 @@
   "description": "",
   "dependencies": {
     "@t3-oss/env-core": "^0.13.8",
-    "better-sqlite3": "^12.2.0",
+    "better-sqlite3": "^12.3.0",
     "connect-ensure-login": "^0.1.1",
     "connect-loki": "^1.2.0",
     "cookie-parser": "^1.4.7",
@@ -26,7 +26,7 @@
     "passport-anonymous": "^1.0.1",
     "smtp-server": "^3.14.0",
     "ws": "^8.18.3",
-    "zod": "^4.1.9"
+    "zod": "^4.1.11"
   },
   "type": "module",
   "devDependencies": {
@@ -43,10 +43,10 @@
     "@types/smtp-server": "^3.5.12",
     "@types/ws": "^8.18.1",
     "@vercel/ncc": "^0.38.4",
-    "eslint": "^9.35.0",
+    "eslint": "^9.36.0",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.44.0"
+    "typescript-eslint": "^8.44.1"
   }
 }
