@@ -32,14 +32,23 @@ function Manage() {
         fetchUser().then((p) => setUser(p));
     }, []);
 
-
     useEffect(() => {
-        if (newAddressText === '') {
-            setAddressExists(false);
+        let cancelled = false;
+        async function checkAddress() {
+            if (newAddressText.trim() === '') {
+                setAddressExists((prev) => prev ? false : prev);
+                return;
+            }
+
+            const result = await getAddress(newAddressText);
+            if (!cancelled) {
+                setAddressExists(result !== '');
+            }
         }
-        else {
-            getAddress(newAddressText).then((p) => setAddressExists(p !== ''));
-        }
+
+        checkAddress();
+
+        return () => { cancelled = true; };
     }, [newAddressText]);
 
     function addAddress() {
