@@ -21,6 +21,7 @@ import TopBarSettings from './TopBarSettings.tsx';
 import DeletedMailbox from './DeletedMailbox.tsx';
 import TopBarDeleted from './TopBarDeleted.tsx';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import MailboxRedirect from './MailboxRedirect.tsx';
 
 const queryClient = new QueryClient();
 
@@ -41,7 +42,7 @@ createRoot(document.getElementById('app')!).render(
           {/* <App /> */}
           <Router>
             <Routes>
-              <Route path="/" element={<Layout bodyChildren={<Mailbox />} topBarChildren={<TopBarAddress />} />} />
+              <Route path="/" element={<Layout bodyChildren={<MailboxRedirect />} topBarChildren={<TopBarAddress />} />} />
               <Route path="/manage" element={<Layout bodyChildren={<Manage />} topBarChildren={<TopBarSettings />} />} />
               <Route path="/deleted" element={<Layout bodyChildren={<DeletedMailbox />} topBarChildren={<TopBarDeleted />} />} />
               <Route path="/mail/:address/:messageId" element={<Layout bodyChildren={<Mail />} topBarChildren={<TopBarAddress />} />} />

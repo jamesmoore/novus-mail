@@ -1,8 +1,6 @@
 import { deleteMail, readMail } from "./api-client";
 import { Mail } from "./models/mail";
-import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import useAddressResponse from "./useAddressResponse";
 import useUnreadCounts from "./useUnreadCounts";
 import { useInvalidateDeletedMailItemsCache, useMailItems } from './useMailItems';
 import MailboxItems from "./MailboxItems";
@@ -10,8 +8,6 @@ import MailboxItems from "./MailboxItems";
 function Mailbox() {
     const { address: selectedAddress } = useParams();
     const navigate = useNavigate();
-
-    const { data: addressResponse } = useAddressResponse();
 
     const { invalidate: invalidateDeleted } = useInvalidateDeletedMailItemsCache();
 
@@ -39,15 +35,6 @@ function Mailbox() {
     }
 
     const { refetch: refetchUnread } = useUnreadCounts();
-
-    useEffect(() => {
-        if (!selectedAddress) {
-            const address = addressResponse?.addresses[0]?.addr;
-            if (address) {
-                navigate('/inbox/' + address);
-            }
-        }
-    }, [selectedAddress, addressResponse, navigate])
 
     const {
         fetchNextPage,
