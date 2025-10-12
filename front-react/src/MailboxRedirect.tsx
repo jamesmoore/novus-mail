@@ -2,32 +2,35 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useAddressResponse from "./useAddressResponse";
 import useUnreadCounts from "./useUnreadCounts";
+import { AddressesResponse } from "./models/addresses-response";
+import { UnreadCount } from "./models/unread-count";
+
+function getFirstUnreadOrDefault(
+  unreadCounts?: UnreadCount[],
+  addressResponse?: AddressesResponse
+): string | undefined {
+  const firstUnread = unreadCounts?.find(p => p.unread > 0);
+  if (firstUnread) return firstUnread.recipient;
+  return addressResponse?.addresses[0]?.addr;
+}
 
 function MailboxRedirect() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { data: addressResponse, isLoading: isAddressesLoading } = useAddressResponse();
+  const { data: unreadCounts, isLoading: isUnreadLoading } = useUnreadCounts();
 
-    const { data: addressResponse } = useAddressResponse();
+  useEffect(() => {
+    if (isAddressesLoading || isUnreadLoading) return;
 
-    const { data: unreadCounts } = useUnreadCounts();
+    if (!addressResponse || !unreadCounts) return;
 
-    useEffect(() => {
-        if (unreadCounts) {
-            const firstUnread = unreadCounts.find(p => p.unread > 0);
-            if (firstUnread) {
-                navigate('/inbox/' + firstUnread.recipient);
-            }
-            else if (addressResponse) {
-                const address = addressResponse.addresses[0]?.addr;
-                if (address) {
-                    navigate('/inbox/' + address);
-                }
-            }
-        }
-    }, [unreadCounts, addressResponse, navigate])
+    const firstUnread = getFirstUnreadOrDefault(unreadCounts, addressResponse);
+    if (firstUnread) {
+      navigate(`/inbox/${firstUnread}`, { replace: true });
+    }
+  }, [unreadCounts, addressResponse, isAddressesLoading, isUnreadLoading, navigate]);
 
-    return (
-        <></>
-    );
+  return null;
 }
 
 export default MailboxRedirect;
