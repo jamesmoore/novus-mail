@@ -3,10 +3,6 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import CssBaseline from '@mui/material/CssBaseline';
 
-// import './index.css'
-// import './layout.css'
-// import './style.css'
-// import App from './App.tsx'
 import Layout from './Layout.tsx'
 import Manage from './Manage.tsx';
 import Mail from './Mail.tsx';
