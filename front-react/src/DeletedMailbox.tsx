@@ -45,17 +45,17 @@ function DeletedMailbox() {
     } = useDeletedMailItems();
 
     return (
-            <MailboxItems
-                onMailItemDelete={onMailItemDelete}
-                onMailItemSelect={onMailItemSelect}
-                mails={mails}
-                error={error}
-                fetchNextPage={fetchNextPage}
-                hasNextPage={hasNextPage}
-                isFetching={isFetching}
-                isFetchingNextPage={isFetchingNextPage}
-                isRefetching={isRefetching}
-            />
+        <MailboxItems
+            onMailItemDelete={onMailItemDelete}
+            onMailItemSelect={onMailItemSelect}
+            mails={mails}
+            error={error}
+            fetchNextPage={fetchNextPage}
+            hasNextPage={hasNextPage}
+            isFetching={isFetching}
+            isFetchingNextPage={isFetchingNextPage}
+            isRefetching={isRefetching}
+        />
     );
 }
 
