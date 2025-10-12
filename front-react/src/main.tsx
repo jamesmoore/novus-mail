@@ -42,7 +42,7 @@ createRoot(document.getElementById('app')!).render(
           {/* <App /> */}
           <Router>
             <Routes>
-              <Route path="/" element={<Layout bodyChildren={<MailboxRedirect />} topBarChildren={<TopBarAddress />} />} />
+              <Route path="/" element={<MailboxRedirect />} />
               <Route path="/manage" element={<Layout bodyChildren={<Manage />} topBarChildren={<TopBarSettings />} />} />
               <Route path="/deleted" element={<Layout bodyChildren={<DeletedMailbox />} topBarChildren={<TopBarDeleted />} />} />
               <Route path="/mail/:address/:messageId" element={<Layout bodyChildren={<Mail />} topBarChildren={<TopBarAddress />} />} />
