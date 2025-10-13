@@ -1,13 +1,12 @@
 import { deleteMail, readMail } from "./api-client";
 import { Mail } from "./models/mail";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import useUnreadCounts from "./useUnreadCounts";
 import { useInvalidateDeletedMailItemsCache, useMailItems } from './useMailItems';
 import MailboxItems from "./MailboxItems";
 
 function Mailbox() {
     const { address: selectedAddress } = useParams();
-    const navigate = useNavigate();
 
     const { invalidate: invalidateDeleted } = useInvalidateDeletedMailItemsCache();
 

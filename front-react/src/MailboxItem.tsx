@@ -26,8 +26,10 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
 
     const [showMail, setShowMail] = useState(false);
 
-    async function mailClicked(e: React.MouseEvent<HTMLDivElement>, itemKey: string) {
-        setShowMail(!showMail);
+    async function mailClicked(e: React.MouseEvent<HTMLDivElement>) {
+        if (isLeftMouseClick(e) && onSelect) {
+            setShowMail(!showMail);
+        }
     }
 
     async function mailKeyUp(e: React.KeyboardEvent<HTMLDivElement>, itemKey: string) {
@@ -78,7 +80,7 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
                 tabIndex={1}
                 role="button"
                 onKeyUp={(e) => mailKeyUp(e, mail.id)}
-                onClick={(e) => mailClicked(e, mail.id)}
+                onClick={(e) => mailClicked(e)}
                 onPointerEnter={() => { setHover(true); }}
                 onPointerLeave={() => { setHover(false); }}
                 key={mail.id}
@@ -113,9 +115,15 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
                 </Grid>
             </Paper>
             {
-                showMail && message &&
+                showMail && message && !loading &&
                 <Paper sx={{ mb: 1 }} >
                     <ShadowEmail html={message.content} />
+                </Paper>
+            }
+            {
+                error &&
+                <Paper sx={{ mb: 1 }} >
+                    {error.message}
                 </Paper>
             }
         </>
