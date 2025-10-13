@@ -7,9 +7,8 @@ import { isEnterKeyUp, isLeftMouseClick } from "./Events";
 import humanizeDuration from "humanize-duration";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchMail, readMail } from "./api-client";
+import { fetchMail } from "./api-client";
 import ShadowEmail from "./ShadowEmail";
-import useUnreadCounts from "./useUnreadCounts";
 
 interface MailboxItemProps {
     mail: Mail;
@@ -25,18 +24,12 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
 
     const [hover, setHover] = useState(false);
     const [showMail, setShowMail] = useState(false);
-    const { refetch: refetchUnread } = useUnreadCounts();
 
-    const [read, setRead] = useState(mail.read);
-
-    async function mailClicked(e: React.MouseEvent<HTMLDivElement>) {
+    async function mailClicked(e: React.MouseEvent<HTMLDivElement>, itemKey: string) {
         if (isLeftMouseClick(e) && onSelect) {
-            setShowMail(!showMail);
-            if (showMail && !read) {
-                readMail(mail.id);
-                setRead(true);
-                refetchUnread();
-            }
+            const newState = !showMail;
+            setShowMail(newState);
+            onSelect(itemKey);
         }
     }
 
@@ -70,7 +63,7 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
 
 
     const cursor = onSelect ? "pointer" : "default";
-    const fontWeight = read ? 400 : 700;
+    const fontWeight = mail.read ? 400 : 700;
     const style: SxProps<Theme> = {
         fontWeight: fontWeight,
         whiteSpace: "nowrap",
@@ -89,7 +82,7 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
                 tabIndex={1}
                 role="button"
                 onKeyUp={(e) => mailKeyUp(e, mail.id)}
-                onClick={(e) => mailClicked(e)}
+                onClick={(e) => mailClicked(e, mail.id)}
                 onPointerEnter={() => { setHover(true); }}
                 onPointerLeave={() => { setHover(false); }}
                 key={mail.id}
@@ -101,7 +94,7 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
                         </Grid>
                         <Grid
                             size={{ xs: 24, md: 13 }}>
-                            <Typography sx={style} color={read ? "textPrimary" : "primary"}>{mail.subject}</Typography>
+                            <Typography sx={style} color={mail.read ? "textPrimary" : "primary"}>{mail.subject}</Typography>
                         </Grid>
                         <Grid container
                             size={{ md: 3 }}
