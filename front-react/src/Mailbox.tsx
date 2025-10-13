@@ -16,7 +16,6 @@ function Mailbox() {
             mail.read = true;
             refetchUnread();
         }
-        //navigate(`/mail/${selectedAddress}/${mail.id}`);
     }
 
     async function onMailItemDelete(mail: Mail) {
