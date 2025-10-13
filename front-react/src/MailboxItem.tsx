@@ -7,8 +7,9 @@ import { isEnterKeyUp, isLeftMouseClick } from "./Events";
 import humanizeDuration from "humanize-duration";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchMail } from "./api-client";
+import { fetchMail, readMail } from "./api-client";
 import ShadowEmail from "./ShadowEmail";
+import useUnreadCounts from "./useUnreadCounts";
 
 interface MailboxItemProps {
     mail: Mail;
@@ -23,12 +24,19 @@ function timeSince(timeStamp: number) {
 function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
 
     const [hover, setHover] = useState(false);
-
     const [showMail, setShowMail] = useState(false);
+    const { refetch: refetchUnread } = useUnreadCounts();
+
+    const [read, setRead] = useState(mail.read);
 
     async function mailClicked(e: React.MouseEvent<HTMLDivElement>) {
         if (isLeftMouseClick(e) && onSelect) {
             setShowMail(!showMail);
+            if (showMail && !read) {
+                readMail(mail.id);
+                setRead(true);
+                refetchUnread();
+            }
         }
     }
 
@@ -60,8 +68,9 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
         }
     );
 
+
     const cursor = onSelect ? "pointer" : "default";
-    const fontWeight = mail.read ? 400 : 700;
+    const fontWeight = read ? 400 : 700;
     const style: SxProps<Theme> = {
         fontWeight: fontWeight,
         whiteSpace: "nowrap",
@@ -92,7 +101,7 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
                         </Grid>
                         <Grid
                             size={{ xs: 24, md: 13 }}>
-                            <Typography sx={style} color={mail.read ? "textPrimary" : "primary"}>{mail.subject}</Typography>
+                            <Typography sx={style} color={read ? "textPrimary" : "primary"}>{mail.subject}</Typography>
                         </Grid>
                         <Grid container
                             size={{ md: 3 }}
