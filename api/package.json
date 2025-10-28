@@ -34,7 +34,7 @@
     "@types/connect-ensure-login": "^0.1.9",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.4",
+    "@types/express": "^5.0.5",
     "@types/express-session": "^1.18.2",
     "@types/mailparser": "^3.4.6",
     "@types/node": "^24.9.1",
