@@ -1,5 +1,5 @@
 import { Database } from 'better-sqlite3';
-import { Router } from 'express';
+import { Router, Response } from 'express';
 import { noCacheMiddleware } from './noCacheMiddleware.js';
 import { env } from '../env/env.js';
 
@@ -116,18 +116,10 @@ export function createRouter(db: Database) {
     router.delete('/mails/:addr', (req, res) => {
         const addr = req.params.addr;
         try {
-            const canUpdate = checkAddressOwnership(req.user?.sub, addr);
-            switch (canUpdate) {
-                case "ADDRESS_NOT_YOURS":
-                    res.status(401).send();
-                    break;
-                case "ADDRESS_NOT_FOUND":
-                    res.status(404).send();
-                    break;
-                case "OK":
-                    const dbResult = db.prepare("UPDATE mail SET deleted = 1 WHERE recipient = ? and deleted = 0").run(addr);
-                    res.status(200).send(`Deleted ${dbResult.changes} email`);
-            }
+            checkAddressOwnership(req.user?.sub, addr, res, () => {
+                const dbResult = db.prepare("UPDATE mail SET deleted = 1 WHERE recipient = ? and deleted = 0").run(addr);
+                res.status(200).send(`Deleted ${dbResult.changes} mails`);
+            });
         } catch (err) {
             console.error("DB delete mails fail", err)
             res.status(500).json({ error: "Failed to delete mails" });
@@ -174,18 +166,11 @@ export function createRouter(db: Database) {
     router.post('/readAllMail', (req, res) => {
         const addr = req.body.address;
         try {
-            const canUpdate = checkAddressOwnership(req.user?.sub, addr);
-            switch (canUpdate) {
-                case "ADDRESS_NOT_YOURS":
-                    res.status(401).send();
-                    break;
-                case "ADDRESS_NOT_FOUND":
-                    res.status(404).send();
-                    break;
-                case "OK":
-                    const dbResult = db.prepare("UPDATE mail SET read = 1 where recipient = ? and read = 0").run(addr);
-                    res.status(200).send(`Marked ${dbResult.changes} read`);
+            checkAddressOwnership(req.user?.sub, addr, res, () => {
+                const dbResult = db.prepare("UPDATE mail SET read = 1 where recipient = ? and read = 0").run(addr);
+                res.status(200).send(`Marked ${dbResult.changes} mails read`);
             }
+            );
         } catch (err) {
             console.error("DB read all mail fail")
             console.error(err)
@@ -221,21 +206,29 @@ export function createRouter(db: Database) {
         }
     })
 
-    const checkAddressOwnership = (user: string | undefined, address: string) => {
+    const checkAddressOwnership = (user: string | undefined, address: string, res: Response, handle: () => void) => {
         if (!user) {
-            return "OK";
+            handle();
+            return;
         }
 
-        const addressRow = db.prepare("SELECT owner FROM address WHERE addr = ?").get(address);
-        if (addressRow) {
-            const owner = (addressRow as { owner: string | null }).owner;
-            if (owner !== user && owner !== null) {
-                return "ADDRESS_NOT_YOURS";
-            }
-        } else {
-            return "ADDRESS_NOT_FOUND";
+        const addressRow = db
+            .prepare("SELECT owner FROM address WHERE addr = ?")
+            .get(address) as { owner: string | null } | undefined;
+
+        if (!addressRow) {
+            res.status(404).send();
+            return;
         }
-        return "OK";
+
+        const { owner } = addressRow;
+
+        if (owner !== user && owner !== null) {
+            res.status(401).send();
+        }
+        else {
+            handle();
+        }
     };
 
     return router;
