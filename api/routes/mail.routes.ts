@@ -84,6 +84,8 @@ export function createRouter(db: Database) {
     router.get('/mail/:id', (req, res) => {
         const id = req.params.id;
         try {
+            // TODO#1 Check owner
+
             const rows = db.prepare("SELECT recipient, sender, subject, content, read, received FROM mail WHERE id = ?").all(id);
             res.json(rows[0])
         } catch (err) {
@@ -95,6 +97,7 @@ export function createRouter(db: Database) {
     router.delete('/mail/:id', (req, res) => {
         const id = req.params.id;
         try {
+            // TODO#2 Check owner
             const mail = db.prepare("SELECT deleted FROM mail WHERE id = ?").get(id);
             const isDeleted = mail as unknown as { deleted: boolean };
 
@@ -111,9 +114,11 @@ export function createRouter(db: Database) {
         }
     });
 
+
     router.delete('/mails/:addr', (req, res) => {
         const addr = req.params.addr;
         try {
+            // TODO#3 Check owner
             db.prepare("UPDATE mail SET deleted = 1 WHERE recipient = ? and deleted = 0").run(addr);
             res.status(200).send();
         } catch (err) {
@@ -124,7 +129,20 @@ export function createRouter(db: Database) {
 
     router.post('/emptyDeletedMails', (req, res) => {
         try {
-            db.prepare("DELETE FROM mail WHERE deleted = 1").run();
+            const owner = req.user?.sub;
+
+            const params = {
+                owner: owner,
+            };
+
+            const whereClause = [
+                'deleted = 1',
+                owner && 'mail.recipient in (SELECT addr FROM address WHERE address.owner IS NULL OR address.owner = @owner)',
+            ].filter(Boolean).join(' AND ');
+
+            const sql = `DELETE FROM mail WHERE ${whereClause}`;
+
+            db.prepare(sql).run(params);
             res.status(200).send();
         } catch (err) {
             console.error("DB empty deleted mails fail")
@@ -134,10 +152,9 @@ export function createRouter(db: Database) {
     })
 
     router.post('/readMail', (req, res) => {
-
         const json = req.body;
-
         try {
+            // TODO#4 Check owner
             db.prepare("UPDATE mail SET read = 1 where id = ?").run(json.id);
             res.status(200).send();
         } catch (err) {
@@ -151,6 +168,7 @@ export function createRouter(db: Database) {
 
         const json = req.body;
         try {
+            // TODO#5 Check owner
             db.prepare("UPDATE mail SET read = 1 where recipient = ? and read = 0").run(json.address);
             res.status(200).send();
         } catch (err) {
