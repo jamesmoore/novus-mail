@@ -1,5 +1,5 @@
 import { Database } from 'better-sqlite3';
-import { Router } from 'express';
+import { Router, Response } from 'express';
 import { noCacheMiddleware } from './noCacheMiddleware.js';
 import { env } from '../env/env.js';
 
@@ -47,7 +47,7 @@ export function createRouter(db: Database) {
                 json.deleted ? 'deleted = 1' : 'deleted <> 1',
                 cursorId && `Id ${comparisonOperator} @cursorId`,
                 json.addr && 'recipient = @recipient',
-                owner && '(address.owner IS NULL OR address.owner = @owner)',
+                getOwnerWhereClause(owner),
             ].filter(Boolean).join(' AND ');
 
             const sortOrder = direction === 'lt' ? 'DESC' : 'ASC';
@@ -55,7 +55,6 @@ export function createRouter(db: Database) {
             const sql = `
               SELECT id, sender, subject, read, received 
               FROM mail 
-              JOIN address on mail.recipient = address.addr 
               WHERE ${whereClause}
               ORDER BY id ${sortOrder} 
               LIMIT @mailCount
@@ -114,13 +113,13 @@ export function createRouter(db: Database) {
         }
     });
 
-
     router.delete('/mails/:addr', (req, res) => {
         const addr = req.params.addr;
         try {
-            // TODO#3 Check owner
-            db.prepare("UPDATE mail SET deleted = 1 WHERE recipient = ? and deleted = 0").run(addr);
-            res.status(200).send();
+            checkAddressOwnership(req.user?.sub, addr, res, () => {
+                const dbResult = db.prepare("UPDATE mail SET deleted = 1 WHERE recipient = ? and deleted = 0").run(addr);
+                res.status(200).send(`Deleted ${dbResult.changes} mails`);
+            });
         } catch (err) {
             console.error("DB delete mails fail", err)
             res.status(500).json({ error: "Failed to delete mails" });
@@ -137,13 +136,13 @@ export function createRouter(db: Database) {
 
             const whereClause = [
                 'deleted = 1',
-                owner && 'mail.recipient in (SELECT addr FROM address WHERE address.owner IS NULL OR address.owner = @owner)',
+                getOwnerWhereClause(owner),
             ].filter(Boolean).join(' AND ');
 
             const sql = `DELETE FROM mail WHERE ${whereClause}`;
 
-            db.prepare(sql).run(params);
-            res.status(200).send();
+            const dbResult = db.prepare(sql).run(params);
+            res.status(200).send(`Deleted ${dbResult.changes} mails`);
         } catch (err) {
             console.error("DB empty deleted mails fail")
             console.error(err)
@@ -165,12 +164,13 @@ export function createRouter(db: Database) {
     })
 
     router.post('/readAllMail', (req, res) => {
-
-        const json = req.body;
+        const addr = req.body.address;
         try {
-            // TODO#5 Check owner
-            db.prepare("UPDATE mail SET read = 1 where recipient = ? and read = 0").run(json.address);
-            res.status(200).send();
+            checkAddressOwnership(req.user?.sub, addr, res, () => {
+                const dbResult = db.prepare("UPDATE mail SET read = 1 where recipient = ? and read = 0").run(addr);
+                res.status(200).send(`Marked ${dbResult.changes} mails read`);
+            }
+            );
         } catch (err) {
             console.error("DB read all mail fail")
             console.error(err)
@@ -180,15 +180,25 @@ export function createRouter(db: Database) {
 
     router.get('/unreadCounts', (req, res) => {
 
-        const owner = req.user?.sub;
         try {
+            const owner = req.user?.sub;
+
+            const params = {
+                owner: owner,
+            };
+
+            const whereClause = [
+                'read = 0',
+                'deleted = 0',
+                getOwnerWhereClause(owner),
+            ].filter(Boolean).join(' AND ');
+
             const unread = db.prepare(`
                 SELECT recipient, count(*) as unread
-                from mail
-                join address on mail.recipient = address.addr 
-                where read = 0 and deleted = 0 and (address.owner IS NULL OR address.owner = ?)
-                group by recipient
-                `).all(owner);
+                FROM mail
+                WHERE ${whereClause}
+                GROUP BY recipient
+                `).all(params);
             res.json(unread);
         } catch (err) {
             console.error("unread counts select fail", err);
@@ -196,7 +206,36 @@ export function createRouter(db: Database) {
         }
     })
 
+    const checkAddressOwnership = (user: string | undefined, address: string, res: Response, handle: () => void) => {
+        if (!user) {
+            handle();
+            return;
+        }
+
+        const addressRow = db
+            .prepare("SELECT owner FROM address WHERE addr = ?")
+            .get(address) as { owner: string | null } | undefined;
+
+        if (!addressRow) {
+            res.status(404).send();
+            return;
+        }
+
+        const { owner } = addressRow;
+
+        if (owner !== user && owner !== null) {
+            res.status(401).send();
+        }
+        else {
+            handle();
+        }
+    };
+
     return router;
 }
 
 export default createRouter;
+
+function getOwnerWhereClause(owner: string | undefined) {
+    return owner && 'mail.recipient in (SELECT addr FROM address WHERE address.owner IS NULL OR address.owner = @owner)';
+}
