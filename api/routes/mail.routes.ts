@@ -33,23 +33,29 @@ export function createRouter(db: Database) {
             const direction = directionDursorId.substring(0, 2);
             const cursorId = directionDursorId.substring(2);
 
+            const owner = req.user?.sub;
+
             const params = {
                 recipient: json.addr,
                 cursorId: cursorId,
-                mailCount: perPage
+                mailCount: perPage,
+                owner: owner,
             };
 
             const comparisonOperator = direction === 'lt' ? '<' : '>';
-            const whereClause =
-                (json.deleted ? ` deleted = 1 ` : ' deleted <> 1 ') +
-                (cursorId ? ` AND Id ${comparisonOperator} @cursorId` : '') +
-                (json.addr ? ` AND recipient = @recipient` : '')
+            const whereClause = [
+                json.deleted ? 'deleted = 1' : 'deleted <> 1',
+                cursorId && `Id ${comparisonOperator} @cursorId`,
+                json.addr && 'recipient = @recipient',
+                owner && '(address.owner IS NULL OR address.owner = @owner)',
+            ].filter(Boolean).join(' AND ');
 
             const sortOrder = direction === 'lt' ? 'DESC' : 'ASC';
 
             const sql = `
               SELECT id, sender, subject, read, received 
               FROM mail 
+              JOIN address on mail.recipient = address.addr 
               WHERE ${whereClause}
               ORDER BY id ${sortOrder} 
               LIMIT @mailCount
