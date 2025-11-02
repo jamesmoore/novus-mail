@@ -100,7 +100,7 @@ export function createRouter(db: Database) {
         try {
             const mail = getMail(id);
             checkMailOwnership(req.user?.sub, mail, res, () => {
-                var dbResult = mail.deleted ?
+                const dbResult = mail.deleted ?
                     db.prepare("DELETE FROM mail WHERE id = ?").run(id) :
                     db.prepare("UPDATE mail SET deleted = 1 WHERE id = ?").run(id);
                 res.status(200).send(`Deleted ${dbResult.changes} mails`);
