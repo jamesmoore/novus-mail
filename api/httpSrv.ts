@@ -8,6 +8,7 @@ import { createRouter as createStatusRouter } from './routes/status.routes.js';
 import { createRouter as createAuthRouter } from './routes/auth.routes.js';
 import { env } from './env/env.js';
 import { passportConfig } from './auth/passport-config.js';
+import { requireCsrfToken } from './routes/csrf.middleware.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -64,9 +65,9 @@ export class HttpServer {
 
 		app.use(authMiddleware, express.static(staticContentPath));
 
-		app.use('/api', authMiddleware, createAddressRouter(this.db, this.domainName));
-		app.use('/api', authMiddleware, createMailRouter(this.db));
-		app.use('/api', authMiddleware, createStatusRouter(this.db));
+                app.use('/api', authMiddleware, requireCsrfToken, createAddressRouter(this.db, this.domainName));
+                app.use('/api', authMiddleware, requireCsrfToken, createMailRouter(this.db));
+                app.use('/api', authMiddleware, requireCsrfToken, createStatusRouter(this.db));
 
 		// catch-all handler for react router. This is needed so that urls that are refreshed activate the react router. The alternative 302 redirect to / would break that.
 		// https://expressjs.com/en/guide/migrating-5.html#path-syntax
