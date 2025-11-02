@@ -4,6 +4,7 @@ import passport from 'passport';
 import { ensureLoggedOut } from 'connect-ensure-login';
 import * as client from 'openid-client'
 import { configuration, oidcStrategyOptions, passportConfig } from '../auth/passport-config.js';
+import { logoutRedirectUri } from '../auth/public-urls.js';
 import cookieParser from 'cookie-parser';
 import { env } from '../env/env.js';
 import session from 'express-session';
@@ -54,19 +55,21 @@ export function createRouter() {
         passport.authenticate(passportConfig.strategy)
     )
 
-    router.get('/logout', (req, res) => {
+    router.get('/logout', (_req, res) => {
         const endSessionUrl = () => {
             try {
-                return client.buildEndSessionUrl(configuration, {
-                    post_logout_redirect_uri: `${req.protocol}://${req.host}`,
-                }).href;
+                const endSessionParameters: client.EndSessionParameters = {};
+                if (logoutRedirectUri) {
+                    endSessionParameters.post_logout_redirect_uri = logoutRedirectUri;
+                }
+                return client.buildEndSessionUrl(configuration, endSessionParameters).href;
             } catch (error) {
                 console.error('Error building end session URL:', error);
                 return '';
             }
         }
 
-        req.logout(() => { });
+        _req.logout(() => { });
         res.status(200).json({
             logoutUrl: endSessionUrl(),
         });

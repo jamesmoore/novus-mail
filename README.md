@@ -36,7 +36,8 @@ Configuration is done through environment variables, which can be set in the doc
 | OIDC_CLIENT_SECRET         | *your secret id*                   | Secret key for OpenID Connect client.        |
 | OIDC_ISSUER                | https://auth.yourdomain.net          | Issuer URL of the OpenID Connect provider.    |
 | REDIRECT_URI               | https://mail.yourdomain.net/auth/callback | Redirect URI after authentication completion. This must have `/auth/callback` at the end. |
-| SESSION_SECRET             | *secret session key*                 | Secret key for session management.           |
+| LOGOUT_REDIRECT_URI        | https://mail.yourdomain.net/         | Optional absolute URL to redirect users to after logout. Defaults to the origin derived from `REDIRECT_URI`. |
+| SESSION_SECRET             | *secret session key*                 | Optional secret key for session management (generated automatically if omitted). |
 | CORS_ALLOW_ALL_ORIGINS     | false                                | ```true``` \| ```false``` Whether to allow all origins in CORS policy. This should only be needed for local development where the frontend and the api may be running on different ports.  |
 | TRUST_PROXY                | true                                 | ```true``` \| ```false``` Whether the application trusts the proxy server to provide the correct X-FORWARDED headers. This is needed for the OIDC implementation to determine the scheme. |
 

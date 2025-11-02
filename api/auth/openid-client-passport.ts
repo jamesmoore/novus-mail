@@ -13,6 +13,7 @@ import * as client from 'openid-client'
 import type { PrivateKey } from 'oauth4webapi'
 import type * as express from 'express'
 import type passport from 'passport'
+import { buildApplicationUrl } from './public-urls.js'
 
 export type VerifyFunction = (
   /**
@@ -420,8 +421,14 @@ export class Strategy implements passport.Strategy {
    * not match the actual URL the authorization server redirected the user to.
    */
   currentUrl(req: express.Request): URL {
-    const url = new URL(`${req.protocol}://${req.host}${req.originalUrl ?? req.url}`);
-    return url;
+    const requestPath = req.originalUrl ?? req.url
+    const applicationUrl = buildApplicationUrl(requestPath)
+    if (applicationUrl) {
+      return applicationUrl
+    }
+
+    const host = req.get('host') ?? req.headers.host ?? 'localhost'
+    return new URL(`${req.protocol}://${host}${requestPath}`)
   }
 
   /**

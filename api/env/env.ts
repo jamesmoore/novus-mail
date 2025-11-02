@@ -1,5 +1,8 @@
 import { createEnv } from "@t3-oss/env-core";
+import { randomBytes } from "crypto";
 import { z } from "zod";
+
+const fallbackSessionSecret = () => randomBytes(32).toString("hex");
 
 export const env = createEnv({
   server: {
@@ -10,7 +13,12 @@ export const env = createEnv({
     OIDC_CLIENT_SECRET: z.string().min(10).optional(),
     OIDC_ISSUER: z.union([z.string().url().nullish(), z.literal("")]),
     REDIRECT_URI: z.union([z.string().url().nullish(), z.literal("")]),
-    SESSION_SECRET: z.string().optional().default('342b4b79-9d2d-49cc-851a-7e3e48fd2efd'),
+    LOGOUT_REDIRECT_URI: z.string().url().optional(),
+    SESSION_SECRET: z
+      .string()
+      .min(32)
+      .optional()
+      .transform((value) => value ?? fallbackSessionSecret()),
 
     CORS_ALLOW_ALL_ORIGINS: z.string().default('false').transform((s) => s.toLowerCase() !== "false" && s !== "0"),
     TRUST_PROXY: z.string().default('false').transform((s) => s.toLowerCase() !== "false" && s !== "0"),
