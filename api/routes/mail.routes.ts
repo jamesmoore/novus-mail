@@ -6,9 +6,11 @@ import { env } from '../env/env.js';
 interface Mail {
     id: string;
     sender: string;
+    recipient: string;
     subject: string;
-    read: boolean;
+    read: number;
     received: number;
+    deleted: number;
 }
 
 export function createRouter(db: Database) {
@@ -83,10 +85,10 @@ export function createRouter(db: Database) {
     router.get('/mail/:id', (req, res) => {
         const id = req.params.id;
         try {
-            // TODO#1 Check owner
-
-            const rows = db.prepare("SELECT recipient, sender, subject, content, read, received FROM mail WHERE id = ?").all(id);
-            res.json(rows[0])
+            const mail = getMail(id);
+            checkMailOwnership(req.user?.sub, mail, res, () => {
+                res.json(mail);
+            });
         } catch (err) {
             console.error("DB get mail data fail", err)
             res.status(500).json({ error: "Failed to get mail" });
@@ -96,17 +98,13 @@ export function createRouter(db: Database) {
     router.delete('/mail/:id', (req, res) => {
         const id = req.params.id;
         try {
-            // TODO#2 Check owner
-            const mail = db.prepare("SELECT deleted FROM mail WHERE id = ?").get(id);
-            const isDeleted = mail as unknown as { deleted: boolean };
-
-            if (isDeleted.deleted) {
-                db.prepare("DELETE FROM mail WHERE id = ?").run(id);
-            }
-            else {
-                db.prepare("UPDATE mail SET deleted = 1 WHERE id = ?").run(id);
-            }
-            res.status(200).send();
+            const mail = getMail(id);
+            checkMailOwnership(req.user?.sub, mail, res, () => {
+                const dbResult = mail.deleted ?
+                    db.prepare("DELETE FROM mail WHERE id = ?").run(id) :
+                    db.prepare("UPDATE mail SET deleted = 1 WHERE id = ?").run(id);
+                res.status(200).send(`Deleted ${dbResult.changes} mails`);
+            });
         } catch (err) {
             console.error("DB delete mail fail", err)
             res.status(500).json({ error: "Failed to delete mail" });
@@ -153,9 +151,16 @@ export function createRouter(db: Database) {
     router.post('/readMail', (req, res) => {
         const json = req.body;
         try {
-            // TODO#4 Check owner
-            db.prepare("UPDATE mail SET read = 1 where id = ?").run(json.id);
-            res.status(200).send();
+            const mail = getMail(json.id);
+            checkMailOwnership(req.user?.sub, mail, res, () => {
+                if (mail.read === 0) {
+                    const dbResult = db.prepare("UPDATE mail SET read = 1 where id = ?").run(json.id);
+                    res.status(200).send(`Updated ${dbResult.changes} mails as read`);
+                }
+                else {
+                    res.status(200).send("Mail already read");
+                }
+            });
         } catch (err) {
             console.error("DB update mail fail")
             console.error(err)
@@ -206,15 +211,13 @@ export function createRouter(db: Database) {
         }
     })
 
-    const checkAddressOwnership = (user: string | undefined, address: string, res: Response, handle: () => void) => {
+    function checkAddressOwnership(user: string | undefined, address: string, res: Response, handle: () => void)  {
         if (!user) {
             handle();
             return;
         }
 
-        const addressRow = db
-            .prepare("SELECT owner FROM address WHERE addr = ?")
-            .get(address) as { owner: string | null } | undefined;
+        const addressRow = getAddress(address);
 
         if (!addressRow) {
             res.status(404).send();
@@ -230,6 +233,46 @@ export function createRouter(db: Database) {
             handle();
         }
     };
+
+    function checkMailOwnership(user: string | undefined, mail: Mail, res: Response, handle: () => void) {
+        if (!mail) {
+            res.status(404).send();
+            return;
+        }
+
+        if (!user) {
+            handle();
+            return;
+        }
+
+        const addressRow = getAddress(mail.recipient);
+
+        if (!addressRow) {
+            res.status(404).send();
+            return;
+        }
+
+        const { owner } = addressRow;
+
+        if (owner !== user && owner !== null) {
+            res.status(401).send();
+        }
+        else {
+            handle();
+        }
+    };
+
+    function getAddress(address: string) {
+        return db
+            .prepare("SELECT owner FROM address WHERE addr = ?")
+            .get(address) as { owner: string | null; } | undefined;
+    }
+
+    function getMail(id: string) {
+        const rows = db.prepare("SELECT recipient, sender, subject, content, read, received, deleted FROM mail WHERE id = ?").all(id);
+        const mail = rows[0] as Mail;
+        return mail;
+    }
 
     return router;
 }
