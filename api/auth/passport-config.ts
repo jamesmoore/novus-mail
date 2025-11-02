@@ -2,11 +2,12 @@
  * See https://github.com/panva/openid-client/blob/main/examples/passport.ts
  */
 import { ClientSecretBasic, Configuration, discovery, fetchUserInfo } from 'openid-client'
-import { Strategy, StrategyOptionsWithRequest, VerifyFunctionWithRequest } from './openid-client-passport.js';
+import { StrategyOptionsWithRequest, VerifyFunctionWithRequest } from 'openid-client/passport';
 import { Strategy as AnonymousStrategy } from 'passport-anonymous';
 import { env } from '../env/env.js';
 import { ensureLoggedIn } from 'connect-ensure-login';
 import { Request, Response, NextFunction } from 'express';
+import CustomStrategy from './custom-strategy.js';
 
 const authConfig = {
   issuer: env.OIDC_ISSUER,
@@ -60,7 +61,7 @@ const verify: VerifyFunctionWithRequest = (req, tokens, verified) => {
 }
 
 export const passportConfig = oidcEnabled ? {
-  strategy: new Strategy(oidcStrategyOptions, verify),
+  strategy: new CustomStrategy(oidcStrategyOptions, verify),
   middleware: (_req: Request, res: Response, next: NextFunction) => {
     if(
       _req.path.startsWith('/api/status') || 
