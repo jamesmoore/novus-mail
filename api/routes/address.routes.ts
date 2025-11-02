@@ -68,9 +68,11 @@ export function createRouter(db: Database, domainName: string) {
                 const owner = (addressRow as { owner: string | null }).owner;
                 if (owner !== req.user?.sub && owner !== null) {
                     res.status(401).send('Address not yours');
+                    return;
                 }
             } else {
                 res.status(404).send('Address not found');
+                return;
             }
         } catch (err) {
             console.error("DB update addresses fail", err)
