@@ -15,12 +15,21 @@ function ShadowEmail({ html }: { html: string }) {
 
       // base stylesheet for default look
       const baseStyle = document.createElement("style");
-      baseStyle.textContent = `
+      baseStyle.textContent = isColorSchemeAware(html) ? `
         :host {
-          all: initial;
-          color-scheme: light dark;
           font-family: system-ui, -apple-system, sans-serif;
-          display: block;
+        }
+
+        img {
+          max-width: 100%;
+          height: auto;
+        }
+      ` :
+        `
+        :host {
+          background: white;
+          color: black;
+          font-family: system-ui, -apple-system, sans-serif;
         }
 
         img {
@@ -45,7 +54,15 @@ function ShadowEmail({ html }: { html: string }) {
     shadowRef.current!.appendChild(wrapper);
   }, [html]);
 
-  return <div ref={hostRef} style={{ width: "100%" }} />;
+  const containerStyle =
+  {
+    overflow: "hidden",
+  };
+  return <div ref={hostRef} style={containerStyle} />;
 }
 
 export default ShadowEmail;
+
+function isColorSchemeAware(html: string) {
+  return html.includes("prefers-color-scheme");
+}
