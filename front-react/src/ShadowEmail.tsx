@@ -21,6 +21,14 @@ DOMPurify.addHook("afterSanitizeElements", (node) => {
       img.remove(); // strip it entirely
     }
   }
+
+  if (node.nodeName === "A") {
+    const anchor = node as HTMLAnchorElement;
+    if (anchor.hasAttribute("href")) {
+      anchor.setAttribute("target", "_blank");
+      anchor.setAttribute("rel", "noopener noreferrer");
+    }
+  }
 });
 
 function ShadowEmail({ html }: { html: string }) {
@@ -32,7 +40,12 @@ function ShadowEmail({ html }: { html: string }) {
     if (!host) return;
 
     // Always refresh sanitized HTML
-    const sanitized = DOMPurify.sanitize(html, { ADD_TAGS: ['style'], FORCE_BODY: true});
+    const sanitized = DOMPurify.sanitize(html,
+      {
+        ADD_TAGS: ['style'],
+        FORCE_BODY: true,
+        ADD_ATTR: ["target"],
+      });
 
     // ✅ Attach shadow root only once
     if (!shadowRef.current) {
@@ -81,10 +94,10 @@ function ShadowEmail({ html }: { html: string }) {
   }, [html]);
 
   const containerStyle =
-  {
-    all: "initial",
-    overflow: "hidden",
-  } as CSSProperties;
+    {
+      all: "initial",
+      overflow: "hidden",
+    } as CSSProperties;
   return <div ref={hostRef} style={containerStyle} />;
 }
 
