@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { CSSProperties, useEffect, useRef } from "react";
 import DOMPurify from "dompurify";
 
 function ShadowEmail({ html }: { html: string }) {
@@ -9,15 +9,19 @@ function ShadowEmail({ html }: { html: string }) {
     const host = hostRef.current;
     if (!host) return;
 
+    // Always refresh sanitized HTML
+    const sanitized = DOMPurify.sanitize(html, { ADD_TAGS: ['style'], FORCE_BODY: true});
+
     // ✅ Attach shadow root only once
     if (!shadowRef.current) {
       shadowRef.current = host.attachShadow({ mode: "open" });
 
       // base stylesheet for default look
       const baseStyle = document.createElement("style");
-      baseStyle.textContent = isColorSchemeAware(html) ? `
-        :host {
+      baseStyle.textContent = isColorSchemeAware(sanitized) ? `
+        #containerDiv {
           font-family: system-ui, -apple-system, sans-serif;
+          overflow: hidden;
         }
 
         img {
@@ -26,10 +30,11 @@ function ShadowEmail({ html }: { html: string }) {
         }
       ` :
         `
-        :host {
+        #containerDiv {
+          font-family: system-ui, -apple-system, sans-serif;    
           background: white;
           color: black;
-          font-family: system-ui, -apple-system, sans-serif;
+          overflow: hidden;
         }
 
         img {
@@ -40,8 +45,6 @@ function ShadowEmail({ html }: { html: string }) {
       shadowRef.current.appendChild(baseStyle);
     }
 
-    // Always refresh sanitized HTML
-    const sanitized = DOMPurify.sanitize(html);
 
     // Replace old content
     // Remove all nodes after the base <style>
@@ -50,14 +53,16 @@ function ShadowEmail({ html }: { html: string }) {
     }
 
     const wrapper = document.createElement("div");
+    wrapper.id = "containerDiv";
     wrapper.innerHTML = sanitized;
     shadowRef.current!.appendChild(wrapper);
   }, [html]);
 
   const containerStyle =
   {
+    all: "initial",
     overflow: "hidden",
-  };
+  } as CSSProperties;
   return <div ref={hostRef} style={containerStyle} />;
 }
 
