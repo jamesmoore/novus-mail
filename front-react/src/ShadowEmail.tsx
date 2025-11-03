@@ -20,6 +20,10 @@ DOMPurify.addHook("afterSanitizeElements", (node) => {
     if (tinyByAttr || tinyByStyle || invisible || trackerBySrc) {
       img.remove(); // strip it entirely
     }
+    else {
+      img.loading = "lazy";         // improve perf
+      img.referrerPolicy = "no-referrer"; // privacy
+    }
   }
 
   if (node.nodeName === "A") {
