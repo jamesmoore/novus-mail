@@ -20,11 +20,11 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "express-session": "^1.18.2",
-    "mailparser": "^3.7.5",
+    "mailparser": "^3.9.0",
     "openid-client": "^6.8.1",
     "passport": "^0.7.0",
     "passport-anonymous": "^1.0.1",
-    "smtp-server": "^3.16.0",
+    "smtp-server": "^3.16.1",
     "ws": "^8.18.3",
     "zod": "^4.1.12"
   },
@@ -37,16 +37,16 @@
     "@types/express": "^5.0.5",
     "@types/express-session": "^1.18.2",
     "@types/mailparser": "^3.4.6",
-    "@types/node": "^24.9.2",
+    "@types/node": "^24.10.0",
     "@types/passport": "^1.0.17",
     "@types/passport-anonymous": "^1.0.5",
     "@types/smtp-server": "^3.5.12",
     "@types/ws": "^8.18.1",
     "@vercel/ncc": "^0.38.4",
-    "eslint": "^9.38.0",
+    "eslint": "^9.39.1",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.2"
+    "typescript-eslint": "^8.46.3"
   }
 }
