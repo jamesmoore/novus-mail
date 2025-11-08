@@ -55,10 +55,22 @@ function ShadowEmail({ html }: { html: string }) {
     if (!shadowRef.current) {
       shadowRef.current = host.attachShadow({ mode: "open" });
 
-      // base stylesheet for default look
+      const shadow = shadowRef.current!;
+      shadow.replaceChildren(); // clears all nodes in one line
+
+      if (!isColorSchemeAware(sanitized)) {
+        const backgroundStyle = document.createElement("style");
+        backgroundStyle.textContent = `
+          .mail-container {
+            background: white;
+            color: black;
+            }`;
+        shadowRef.current.appendChild(backgroundStyle);
+      }
+
       const baseStyle = document.createElement("style");
-      baseStyle.textContent = isColorSchemeAware(sanitized) ? `
-        #containerDiv {
+      baseStyle.textContent = `
+        .mail-container {
           font-family: system-ui, -apple-system, sans-serif;
           overflow: hidden;
         }
@@ -66,33 +78,14 @@ function ShadowEmail({ html }: { html: string }) {
         img {
           max-width: 100%;
           height: auto;
-        }
-      ` :
-        `
-        #containerDiv {
-          font-family: system-ui, -apple-system, sans-serif;    
-          background: white;
-          color: black;
-          overflow: hidden;
-        }
-
-        img {
-          max-width: 100%;
-          height: auto;
-        }
-      `;
+        }`;
       shadowRef.current.appendChild(baseStyle);
     }
 
 
-    // Replace old content
-    // Remove all nodes after the base <style>
-    while (shadowRef.current!.childNodes.length > 1) {
-      shadowRef.current!.removeChild(shadowRef.current!.lastChild!);
-    }
 
     const wrapper = document.createElement("div");
-    wrapper.id = "containerDiv";
+    wrapper.classList = "mail-container";
     wrapper.innerHTML = sanitized;
     shadowRef.current!.appendChild(wrapper);
   }, [html]);
