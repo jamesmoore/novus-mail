@@ -1,10 +1,22 @@
-import { CSSProperties, useEffect, useRef } from "react";
+import { CSSProperties, useEffect, useMemo, useRef } from "react";
 import DOMPurify from "dompurify";
 
 function ShadowEmail({ html }: { html: string }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const shadowRef = useRef<ShadowRoot | null>(null);
 
+  // memoize sanitized content
+  const sanitized = useMemo(() => {
+    return DOMPurify.sanitize(html,
+      {
+        ADD_TAGS: ['style'],
+        FORCE_BODY: true,
+        ADD_ATTR: ["target"],
+      });
+  }, [html])
+
+  const lastClientWidth = useRef<number | null>(null);
+  
   useEffect(() => {
     const host = hostRef.current;
     if (!host || !shadowRef.current) return;
@@ -15,8 +27,11 @@ function ShadowEmail({ html }: { html: string }) {
 
     const checkOverflow = () => {
       const exceeds = wrapper.scrollWidth > host.clientWidth + 1; // +1 to avoid rounding blips
-      console.log( wrapper.scrollWidth, host.clientWidth, exceeds);
-      shadow.host.classList.toggle("email-overflowing", exceeds);
+      if (host.clientWidth !== lastClientWidth.current || exceeds) {
+        console.log(wrapper.scrollWidth, host.clientWidth, exceeds);
+        shadow.host.classList.toggle("email-overflowing", exceeds);
+        lastClientWidth.current = host.clientWidth;
+      }
     };
 
     checkOverflow();
@@ -27,20 +42,11 @@ function ShadowEmail({ html }: { html: string }) {
     resizeObserver.observe(host);
 
     return () => resizeObserver.disconnect();
-  }, [html]);
-
+  }, [sanitized]);
 
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
-
-    // Always refresh sanitized HTML
-    const sanitized = DOMPurify.sanitize(html,
-      {
-        ADD_TAGS: ['style'],
-        FORCE_BODY: true,
-        ADD_ATTR: ["target"],
-      });
 
     // ✅ Attach shadow root only once
     if (!shadowRef.current) {
@@ -61,32 +67,12 @@ function ShadowEmail({ html }: { html: string }) {
 
       const baseStyle = document.createElement("style");
       baseStyle.textContent = `
-        // :host {
-        //   display: block;
-        //   overflow-x: auto;
-        //   max-width: 100%;
-        // }
-
         .mail-container {
           font-family: system-ui, -apple-system, sans-serif;
           overflow: hidden;
           max-width: 100%;
         }
-
-        // img {
-        //   max-width: 100%;
-        //   height: auto;
-        // }
-        
-        // @media (max-width: 600px) {
-        //   table, td, th, img {
-        //     min-width: unset !important;
-        //     width: unset !important;
-        //     max-width: 100% !important;
-        //     height: auto;
-        //   }
-        // }
-          
+         
         :host(.email-overflowing) table,
         :host(.email-overflowing) td,
         :host(.email-overflowing) th,
@@ -96,7 +82,6 @@ function ShadowEmail({ html }: { html: string }) {
             max-width: 100% !important;
             height: auto;
         }        
-        
         `;
 
       shadowRef.current.appendChild(baseStyle);
@@ -106,7 +91,7 @@ function ShadowEmail({ html }: { html: string }) {
     wrapper.classList = "mail-container";
     wrapper.innerHTML = sanitized;
     shadowRef.current!.appendChild(wrapper);
-  }, [html]);
+  }, [sanitized]);
 
   const containerStyle =
     {
