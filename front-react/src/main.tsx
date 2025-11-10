@@ -17,6 +17,7 @@ import DeletedMailbox from './DeletedMailbox.tsx';
 import TopBarDeleted from './TopBarDeleted.tsx';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import MailboxRedirect from './MailboxRedirect.tsx';
+import './dompurify-hooks'; // imported to initialize but not referenced
 
 const queryClient = new QueryClient();
 
