@@ -118,7 +118,7 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
             </Paper>
             {
                 showMail && message && !loading &&
-                <Paper sx={{ mb: 1 }} >
+                <Paper sx={{ mb: 1, width: '100%', minWidth: 0 }} >
                     <ShadowEmail html={message.content} />
                 </Paper>
             }
