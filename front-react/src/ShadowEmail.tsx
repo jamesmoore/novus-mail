@@ -28,40 +28,15 @@ function ShadowEmail({ html }: { html: string }) {
       const shadow = shadowRef.current!;
       shadow.replaceChildren(); // clears all nodes in one line
 
-      if (!isColorSchemeAware(sanitized)) {
-        const backgroundStyle = document.createElement("style");
-        backgroundStyle.textContent = `
-          .mail-container {
-            background: white;
-            color: black;
-            }`;
-        shadowRef.current.appendChild(backgroundStyle);
-      }
-
+      const colorSchemeAware = isColorSchemeAware(sanitized);
       const baseStyle = document.createElement("style");
-      baseStyle.textContent = `
-        .mail-container {
-          font-family: system-ui, -apple-system, sans-serif;
-          overflow: hidden;
-          max-width: 100%;
-        }
-
-        :host(.email-overflowing) table,
-        :host(.email-overflowing) td,
-        :host(.email-overflowing) th,
-        :host(.email-overflowing) img {
-            min-width: unset !important;
-            width: unset !important;
-            max-width: 100% !important;
-            height: auto;
-            }        
-            `;
+      baseStyle.textContent = (colorSchemeAware ? '' : GetNonThemeStyles()) + GetStyles();
 
       shadowRef.current.appendChild(baseStyle);
     }
 
     const wrapper = document.createElement("div");
-    wrapper.classList = "mail-container";
+    wrapper.classList.add("mail-container");
     wrapper.innerHTML = sanitized;
     shadowRef.current!.appendChild(wrapper);
   }, [sanitized]);
@@ -100,13 +75,39 @@ function ShadowEmail({ html }: { html: string }) {
     {
       all: "initial",
       display: "block",
-      width: "100%",
-      overflow: "hidden",
     } as CSSProperties;
   return <div ref={hostRef} style={containerStyle} />;
 }
 
 export default ShadowEmail;
+
+function GetNonThemeStyles(): string {
+  return `.mail-container {
+    background: white;
+    color: black;
+  }
+  `;
+}
+
+function GetStyles(): string {
+  return `
+  .mail-container {
+    font-family: system-ui, -apple-system, sans-serif;
+    overflow: hidden;
+    max-width: 100%;
+  }
+    
+  :host(.email-overflowing) table,
+  :host(.email-overflowing) td,
+  :host(.email-overflowing) th,
+  :host(.email-overflowing) img {
+      min-width: unset !important;
+      width: unset !important;
+      max-width: 100% !important;
+      height: auto;
+  }        
+  `;
+}
 
 function isColorSchemeAware(html: string) {
   return html.includes("prefers-color-scheme");
