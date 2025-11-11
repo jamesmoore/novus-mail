@@ -16,33 +16,6 @@ function ShadowEmail({ html }: { html: string }) {
   }, [html])
 
   const lastClientWidth = useRef<number | null>(null);
-  
-  useEffect(() => {
-    const host = hostRef.current;
-    if (!host || !shadowRef.current) return;
-
-    const shadow = shadowRef.current;
-    const wrapper = shadow.querySelector(".mail-container") as HTMLElement | null;
-    if (!wrapper) return;
-
-    const checkOverflow = () => {
-      const exceeds = wrapper.scrollWidth > host.clientWidth + 1; // +1 to avoid rounding blips
-      if (host.clientWidth !== lastClientWidth.current || exceeds) {
-        console.log(wrapper.scrollWidth, host.clientWidth, exceeds);
-        shadow.host.classList.toggle("email-overflowing", exceeds);
-        lastClientWidth.current = host.clientWidth;
-      }
-    };
-
-    checkOverflow();
-
-    // optional: keep checking when resized
-    const resizeObserver = new ResizeObserver(checkOverflow);
-    resizeObserver.observe(wrapper);
-    resizeObserver.observe(host);
-
-    return () => resizeObserver.disconnect();
-  }, [sanitized]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -72,7 +45,7 @@ function ShadowEmail({ html }: { html: string }) {
           overflow: hidden;
           max-width: 100%;
         }
-         
+
         :host(.email-overflowing) table,
         :host(.email-overflowing) td,
         :host(.email-overflowing) th,
@@ -81,8 +54,8 @@ function ShadowEmail({ html }: { html: string }) {
             width: unset !important;
             max-width: 100% !important;
             height: auto;
-        }        
-        `;
+            }        
+            `;
 
       shadowRef.current.appendChild(baseStyle);
     }
@@ -91,6 +64,36 @@ function ShadowEmail({ html }: { html: string }) {
     wrapper.classList = "mail-container";
     wrapper.innerHTML = sanitized;
     shadowRef.current!.appendChild(wrapper);
+  }, [sanitized]);
+
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!host || !shadowRef.current) {
+      console.log("exit 1", !host, !shadowRef.current);
+      return;
+    }
+
+    const shadow = shadowRef.current;
+    const wrapper = shadow.querySelector(".mail-container") as HTMLElement | null;
+    if (!wrapper) return;
+
+    const checkOverflow = () => {
+      const exceeds = wrapper.scrollWidth > host.clientWidth + 1; // +1 to avoid rounding blips
+      console.log(wrapper.scrollWidth, host.clientWidth, exceeds);
+      if (host.clientWidth !== lastClientWidth.current || exceeds) {
+        shadow.host.classList.toggle("email-overflowing", exceeds);
+        lastClientWidth.current = host.clientWidth;
+      }
+    };
+
+    checkOverflow();
+
+    // optional: keep checking when resized
+    const resizeObserver = new ResizeObserver(checkOverflow);
+    resizeObserver.observe(wrapper);
+    resizeObserver.observe(host);
+
+    return () => resizeObserver.disconnect();
   }, [sanitized]);
 
   const containerStyle =
