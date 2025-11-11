@@ -12,6 +12,7 @@ function ShadowEmail({ html }: { html: string }) {
         ADD_TAGS: ['style'],
         FORCE_BODY: true,
         ADD_ATTR: ["target"],
+        RETURN_DOM_FRAGMENT: true,
       });
   }, [html])
 
@@ -37,7 +38,7 @@ function ShadowEmail({ html }: { html: string }) {
 
     const wrapper = document.createElement("div");
     wrapper.classList.add("mail-container");
-    wrapper.innerHTML = sanitized;
+    wrapper.appendChild(sanitized);
     shadowRef.current!.appendChild(wrapper);
 
     const checkOverflow = () => {
@@ -97,6 +98,15 @@ function GetStyles(): string {
   `;
 }
 
-function isColorSchemeAware(html: string) {
-  return html.includes("prefers-color-scheme");
+function isColorSchemeAware(fragment: DocumentFragment) {
+  const styles = fragment.querySelectorAll("style");
+
+  for (const style of styles) {
+    const css = style.textContent || "";
+    if (css.includes("prefers-color-scheme") || css.includes("light-dark")) {
+      return true;
+    }
+  }
+
+  return false;
 }
