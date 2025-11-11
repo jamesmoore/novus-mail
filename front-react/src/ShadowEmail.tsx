@@ -39,26 +39,14 @@ function ShadowEmail({ html }: { html: string }) {
     wrapper.classList.add("mail-container");
     wrapper.innerHTML = sanitized;
     shadowRef.current!.appendChild(wrapper);
-  }, [sanitized]);
-
-  useEffect(() => {
-    const host = hostRef.current;
-    if (!host || !shadowRef.current) {
-      console.log("exit 1", !host, !shadowRef.current);
-      return;
-    }
-
-    const shadow = shadowRef.current;
-    const wrapper = shadow.querySelector(".mail-container") as HTMLElement | null;
-    if (!wrapper) return;
 
     const checkOverflow = () => {
-      const exceeds = wrapper.scrollWidth > host.clientWidth + 1; // +1 to avoid rounding blips
-      console.log(wrapper.scrollWidth, host.clientWidth, exceeds);
-      if (host.clientWidth !== lastClientWidth.current || exceeds) {
-        shadow.host.classList.toggle("email-overflowing", exceeds);
-        lastClientWidth.current = host.clientWidth;
-      }
+        const exceeds = wrapper.scrollWidth > host.clientWidth + 1; // +1 to avoid rounding blips
+        console.log(wrapper.scrollWidth, host.clientWidth, exceeds);
+        if (host.clientWidth !== lastClientWidth.current || exceeds) {
+          shadowRef.current!.host.classList.toggle("email-overflowing", exceeds);
+          lastClientWidth.current = host.clientWidth;
+        }
     };
 
     checkOverflow();
