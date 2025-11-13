@@ -30,8 +30,11 @@ function ShadowEmail({ html }: { html: string }) {
       shadow.replaceChildren(); // clears all nodes in one line
 
       const colorSchemeAware = isColorSchemeAware(sanitized);
+      shadowRef.current!.host.classList.toggle("email-light", !colorSchemeAware);
+      const isUnStyled = isUnstyledEmail(sanitized);
+      shadowRef.current!.host.classList.toggle("email-unstyled", isUnStyled);
       const baseStyle = document.createElement("style");
-      baseStyle.textContent = (colorSchemeAware ? '' : GetNonThemeStyles()) + GetStyles();
+      baseStyle.textContent = GetStyles();
 
       shadowRef.current.appendChild(baseStyle);
     }
@@ -42,12 +45,12 @@ function ShadowEmail({ html }: { html: string }) {
     shadowRef.current!.appendChild(wrapper);
 
     const checkOverflow = () => {
-        const exceeds = wrapper.scrollWidth > host.clientWidth + 1; // +1 to avoid rounding blips
+      const exceeds = wrapper.scrollWidth > host.clientWidth + 1; // +1 to avoid rounding blips
+      if (host.clientWidth !== lastClientWidth.current || exceeds) {
         console.log(wrapper.scrollWidth, host.clientWidth, exceeds);
-        if (host.clientWidth !== lastClientWidth.current || exceeds) {
-          shadowRef.current!.host.classList.toggle("email-overflowing", exceeds);
-          lastClientWidth.current = host.clientWidth;
-        }
+        shadowRef.current!.host.classList.toggle("email-overflowing", exceeds);
+        lastClientWidth.current = host.clientWidth;
+      }
     };
 
     checkOverflow();
@@ -70,13 +73,6 @@ function ShadowEmail({ html }: { html: string }) {
 
 export default ShadowEmail;
 
-function GetNonThemeStyles(): string {
-  return `.mail-container {
-    background: white;
-    color: black;
-  }
-  `;
-}
 
 function GetStyles(): string {
   return `
@@ -84,8 +80,18 @@ function GetStyles(): string {
     font-family: system-ui, -apple-system, sans-serif;
     overflow: hidden;
     max-width: 100%;
+    border-radius: 4px;
   }
-    
+
+  :host(.email-unstyled) .mail-container {
+    padding: 4px;
+  }
+
+  :host(.email-light) .mail-container {
+    background: white;
+    color: black;
+  }
+
   :host(.email-overflowing) table,
   :host(.email-overflowing) td,
   :host(.email-overflowing) th,
@@ -94,7 +100,7 @@ function GetStyles(): string {
       width: unset !important;
       max-width: 100% !important;
       height: auto;
-  }        
+  }
   `;
 }
 
@@ -107,6 +113,26 @@ function isColorSchemeAware(fragment: DocumentFragment) {
       return true;
     }
   }
+
+  return false;
+}
+
+function isUnstyledEmail(fragment: DocumentFragment) {
+  // 1. Check for any <style> tag
+  if (fragment.querySelector("style")) return false;
+
+  // 2. Check for tables (typical layout elements)
+  if (fragment.querySelector("table")) return false;
+
+  // 3. Check for inline style attributes that suggest layout
+  if (fragment.querySelector("[style*='margin']") ||
+    fragment.querySelector("[style*='width']") ||
+    fragment.querySelector("[style*='max-width']")) return false;
+
+  // 4. If it's mostly paragraphs and lists, treat as unstyled
+  const meaningful = fragment.querySelectorAll("p, ul, ol, li, a, h1, h2, h3");
+  const total = fragment.querySelectorAll("*");
+  if (meaningful.length / total.length > 0.6) return true;
 
   return false;
 }
