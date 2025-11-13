@@ -118,21 +118,21 @@ function isColorSchemeAware(fragment: DocumentFragment) {
 }
 
 function isUnstyledEmail(fragment: DocumentFragment) {
-  // 1. Check for any <style> tag
+  // 1. If any <style> tag exists → definitely styled
   if (fragment.querySelector("style")) return false;
 
-  // 2. Check for tables (typical layout elements)
-  if (fragment.querySelector("table")) return false;
+  // 2. Count elements
+  const total = fragment.querySelectorAll("*").length;
 
-  // 3. Check for inline style attributes that suggest layout
-  if (fragment.querySelector("[style*='margin']") ||
-    fragment.querySelector("[style*='width']") ||
-    fragment.querySelector("[style*='max-width']")) return false;
+  if (total === 0) return true; // empty/plain
 
-  // 4. If it's mostly paragraphs and lists, treat as unstyled
-  const meaningful = fragment.querySelectorAll("p, ul, ol, li, a, h1, h2, h3, hr, br, summary, details");
-  const total = fragment.querySelectorAll("*");
-  if (meaningful.length / total.length > 0.6) return true;
+  // 3. Count elements with inline styles
+  const styled = fragment.querySelectorAll<HTMLElement>("[style]").length;
 
-  return false;
+  // 4. Heuristic threshold
+  const ratio = styled / total;
+
+  console.log("Total elements:", total, "Styled:", styled, "Ratio:", ratio);
+
+  return ratio < 0.25;
 }
