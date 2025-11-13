@@ -130,7 +130,7 @@ function isUnstyledEmail(fragment: DocumentFragment) {
     fragment.querySelector("[style*='max-width']")) return false;
 
   // 4. If it's mostly paragraphs and lists, treat as unstyled
-  const meaningful = fragment.querySelectorAll("p, ul, ol, li, a, h1, h2, h3");
+  const meaningful = fragment.querySelectorAll("p, ul, ol, li, a, h1, h2, h3, hr, br, summary, details");
   const total = fragment.querySelectorAll("*");
   if (meaningful.length / total.length > 0.6) return true;
 
