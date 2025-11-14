@@ -6,6 +6,7 @@ import { env } from '../env/env.js';
 interface Mail {
     id: string;
     sender: string;
+    sendername: string;
     recipient: string;
     subject: string;
     read: number;
@@ -55,7 +56,7 @@ export function createRouter(db: Database) {
             const sortOrder = direction === 'lt' ? 'DESC' : 'ASC';
 
             const sql = `
-              SELECT id, sender, subject, read, received 
+              SELECT id, sender, sendername, subject, read, received 
               FROM mail 
               WHERE ${whereClause}
               ORDER BY id ${sortOrder} 
@@ -269,7 +270,7 @@ export function createRouter(db: Database) {
     }
 
     function getMail(id: string) {
-        const rows = db.prepare("SELECT recipient, sender, subject, content, read, received, deleted FROM mail WHERE id = ?").all(id);
+        const rows = db.prepare("SELECT recipient, sender, sendername, subject, content, read, received, deleted FROM mail WHERE id = ?").all(id);
         const mail = rows[0] as Mail;
         return mail;
     }

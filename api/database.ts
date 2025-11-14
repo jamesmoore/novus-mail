@@ -54,6 +54,12 @@ const database = {
 				console.log("address.owner column already exists");
 			}
 
+			try {
+				db.exec("ALTER TABLE mail ADD COLUMN sendername TEXT");
+			} catch {
+				console.log("mail.sendername column already exists");
+			}
+
 			return db;
 
 		} catch (err) {

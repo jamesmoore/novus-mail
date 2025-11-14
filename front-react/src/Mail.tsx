@@ -55,6 +55,7 @@ function Mail() {
                         <MailboxItem mail={{
                             id: messageId!,
                             sender: message.sender,
+                            sendername: message.sendername,
                             subject: message.subject,
                             read: message.read,
                             received: message.received,
