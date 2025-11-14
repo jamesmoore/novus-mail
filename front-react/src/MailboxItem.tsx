@@ -90,7 +90,7 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
                 <Grid container columns={24} sx={{ ml: 1 }} flex="1 1 auto">
                     <Grid container size={{ xs: 22, md: 23 }} alignItems='center'>
                         <Grid size={{ xs: 24, md: 8 }} >
-                            <Typography sx={style}>{mail.sender}</Typography>
+                            <Typography sx={style}>{mail.sendername ?? mail.sender}</Typography>
                         </Grid>
                         <Grid
                             size={{ xs: 24, md: 13 }}>
