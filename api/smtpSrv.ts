@@ -29,6 +29,9 @@ export class SMTPServer {
 					const mail = await simpleParser(stream);
 			
 					const senderAddress = mail.from?.value?.at(0);
+
+					const senderName = senderAddress?.name;
+
 					const sender = senderAddress?.address ?? senderAddress?.name ?? 'unknown sender';
 					const subject = mail.subject ?? 'No Subject';
 					const content = mail.html ? mail.html : mail.textAsHtml;
@@ -46,7 +49,7 @@ export class SMTPServer {
 							if ((res[0] as { count: number }).count > 0) {
 			
 								const id = h.randomID();
-								db.prepare("INSERT INTO mail (id, recipient, sender, subject, content, read, received) VALUES (?, ?, ?, ?, ?, ?, ?)").run(id, recipientName, sender, subject, content, 0, mail.date?.getTime() ?? 0);
+								db.prepare("INSERT INTO mail (id, recipient, sender, sendername, subject, content, read, received) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").run(id, recipientName, sender, senderName, subject, content, 0, mail.date?.getTime() ?? 0);
 								notifier.emit('received', recipientName);
 								break;
 			

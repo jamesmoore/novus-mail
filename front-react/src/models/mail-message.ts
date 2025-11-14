@@ -1,5 +1,6 @@
 export interface MailMessage {
     sender: string;
+    sendername: string;
     recipient: string;
     subject: string;
     content: string;
