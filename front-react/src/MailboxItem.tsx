@@ -89,7 +89,7 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
             >
                 <Grid container columns={24} sx={{ ml: 1 }} flex="1 1 auto">
                     <Grid container size={{ xs: 22, md: 23 }} alignItems='center'>
-                        <Grid size={{ xs: 24, md: 8 }} >
+                        <Grid size={{ xs: 24, md: 6 }} >
                             {
                                 mail.sendername ?
                                     <Tooltip title={mail.sender}>
@@ -101,7 +101,7 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
 
                         </Grid>
                         <Grid
-                            size={{ xs: 24, md: 13 }}>
+                            size={{ xs: 24, md: 15 }}>
                             <Typography sx={style} color={mail.read ? "textPrimary" : "primary"}>{mail.subject}</Typography>
                         </Grid>
                         <Grid container

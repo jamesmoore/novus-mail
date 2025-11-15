@@ -1,3 +1,4 @@
+import emailStyles from "./shadow-email.css?inline";
 import { CSSProperties, useEffect, useMemo, useRef } from "react";
 import DOMPurify from "dompurify";
 
@@ -22,7 +23,7 @@ function ShadowEmail({ html }: { html: string }) {
     const host = hostRef.current;
     if (!host) return;
 
-    // ✅ Attach shadow root only once
+    // Attach shadow root only once
     if (!shadowRef.current) {
       shadowRef.current = host.attachShadow({ mode: "open" });
 
@@ -34,7 +35,7 @@ function ShadowEmail({ html }: { html: string }) {
       const isUnStyled = isUnstyledEmail(sanitized);
       shadowRef.current!.host.classList.toggle("email-unstyled", isUnStyled);
       const baseStyle = document.createElement("style");
-      baseStyle.textContent = GetStyles();
+      baseStyle.textContent = emailStyles;
 
       shadowRef.current.appendChild(baseStyle);
     }
@@ -72,37 +73,6 @@ function ShadowEmail({ html }: { html: string }) {
 }
 
 export default ShadowEmail;
-
-
-function GetStyles(): string {
-  return `
-  .mail-container {
-    font-family: system-ui, -apple-system, sans-serif;
-    overflow: hidden;
-    max-width: 100%;
-    border-radius: 4px;
-  }
-
-  :host(.email-unstyled) .mail-container {
-    padding: 4px;
-  }
-
-  :host(.email-light) .mail-container {
-    background: white;
-    color: black;
-  }
-
-  :host(.email-overflowing) table,
-  :host(.email-overflowing) td,
-  :host(.email-overflowing) th,
-  :host(.email-overflowing) img {
-      min-width: unset !important;
-      width: unset !important;
-      max-width: 100% !important;
-      height: auto;
-  }
-  `;
-}
 
 function isColorSchemeAware(fragment: DocumentFragment) {
   const styles = fragment.querySelectorAll("style");
