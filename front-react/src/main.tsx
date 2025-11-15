@@ -5,7 +5,6 @@ import CssBaseline from '@mui/material/CssBaseline';
 
 import Layout from './Layout.tsx'
 import Manage from './Manage.tsx';
-import Mail from './Mail.tsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 
@@ -18,6 +17,7 @@ import DeletedMailbox from './DeletedMailbox.tsx';
 import TopBarDeleted from './TopBarDeleted.tsx';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import MailboxRedirect from './MailboxRedirect.tsx';
+import './dompurify-hooks'; // imported to initialize but not referenced
 
 const queryClient = new QueryClient();
 
@@ -35,13 +35,11 @@ createRoot(document.getElementById('app')!).render(
       <WebSocketNotificationProvider>
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools initialIsOpen={false} />
-          {/* <App /> */}
           <Router>
             <Routes>
               <Route path="/" element={<MailboxRedirect />} />
               <Route path="/manage" element={<Layout bodyChildren={<Manage />} topBarChildren={<TopBarSettings />} />} />
               <Route path="/deleted" element={<Layout bodyChildren={<DeletedMailbox />} topBarChildren={<TopBarDeleted />} />} />
-              <Route path="/mail/:address/:messageId" element={<Layout bodyChildren={<Mail />} topBarChildren={<TopBarAddress />} />} />
               <Route path="/inbox/:address" element={<Layout bodyChildren={<Mailbox />} topBarChildren={<TopBarAddress />} />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>

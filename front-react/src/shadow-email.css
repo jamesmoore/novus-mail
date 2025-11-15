@@ -1,0 +1,25 @@
+.mail-container {
+    font-family: system-ui, -apple-system, sans-serif;
+    overflow: hidden;
+    max-width: 100%;
+    border-radius: 4px;
+}
+
+:host(.email-unstyled) .mail-container {
+    padding: 4px;
+}
+
+:host(.email-light) .mail-container {
+    background: white;
+    color: black;
+}
+
+:host(.email-overflowing) table,
+:host(.email-overflowing) td,
+:host(.email-overflowing) th,
+:host(.email-overflowing) img {
+    min-width: unset !important;
+    width: unset !important;
+    max-width: 100% !important;
+    height: auto;
+}
