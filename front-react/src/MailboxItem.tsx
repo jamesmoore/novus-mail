@@ -6,6 +6,9 @@ import { Mail } from "./models/mail";
 import { isEnterKeyUp, isLeftMouseClick } from "./Events";
 import humanizeDuration from "humanize-duration";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchMail } from "./api-client";
+import ShadowEmail from "./ShadowEmail";
 
 interface MailboxItemProps {
     mail: Mail;
@@ -20,9 +23,12 @@ function timeSince(timeStamp: number) {
 function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
 
     const [hover, setHover] = useState(false);
+    const [showMail, setShowMail] = useState(false);
 
     async function mailClicked(e: React.MouseEvent<HTMLDivElement>, itemKey: string) {
         if (isLeftMouseClick(e) && onSelect) {
+            const newState = !showMail;
+            setShowMail(newState);
             onSelect(itemKey);
         }
     }
@@ -47,6 +53,15 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
         }
     }
 
+    const { data: message, isLoading: loading, error } = useQuery(
+        {
+            queryKey: ["mail", mail.id],
+            queryFn: () => mail.id ? fetchMail(mail.id) : undefined,
+            enabled: showMail,
+        }
+    );
+
+
     const cursor = onSelect ? "pointer" : "default";
     const fontWeight = mail.read ? 400 : 700;
     const style: SxProps<Theme> = {
@@ -57,49 +72,71 @@ function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
     };
 
     return (
-        <Paper
-            sx={{
-                "&:hover": { cursor: cursor },
-                maxWidth:"100%"
-            }}
-            elevation={hover ? 3 : 1}
-            tabIndex={1}
-            role="button"
-            onKeyUp={(e) => mailKeyUp(e, mail.id)}
-            onClick={(e) => mailClicked(e, mail.id)}
-            onPointerEnter={() => { setHover(true); }}
-            onPointerLeave={() => { setHover(false); }}
-            key={mail.id}
-        >
-            <Grid container columns={24} sx={{ ml: 1 }} flex="1 1 auto">
-                <Grid container size={{ xs: 22, md: 23 }} alignItems='center'>
-                    <Grid size={{ xs: 24, md: 8 }} >
-                        <Typography sx={style}>{mail.sendername ?? mail.sender}</Typography>
+        <>
+            <Paper
+                sx={{
+                    "&:hover": { cursor: cursor },
+                    maxWidth: "100%"
+                }}
+                elevation={hover ? 3 : 1}
+                tabIndex={1}
+                role="button"
+                onKeyUp={(e) => mailKeyUp(e, mail.id)}
+                onClick={(e) => mailClicked(e, mail.id)}
+                onPointerEnter={() => { setHover(true); }}
+                onPointerLeave={() => { setHover(false); }}
+                key={mail.id}
+            >
+                <Grid container columns={24} sx={{ ml: 1 }} flex="1 1 auto">
+                    <Grid container size={{ xs: 22, md: 23 }} alignItems='center'>
+                        <Grid size={{ xs: 24, md: 6 }} >
+                            {
+                                mail.sendername ?
+                                    <Tooltip title={mail.sender}>
+                                        <Typography sx={style}>{mail.sendername}</Typography>
+                                    </Tooltip>
+                                    :
+                                    <Typography sx={style}>{mail.sender}</Typography>
+                            }
+
+                        </Grid>
+                        <Grid
+                            size={{ xs: 24, md: 15 }}>
+                            <Typography sx={style} color={mail.read ? "textPrimary" : "primary"}>{mail.subject}</Typography>
+                        </Grid>
+                        <Grid container
+                            size={{ md: 3 }}
+                            justifyContent='right'
+                            sx={style}
+                        >
+                            {mail.received !== 0 &&
+                                <Tooltip title={new Date(mail.received).toLocaleString()}>
+                                    <Typography>{timeSince(mail.received)}</Typography>
+                                </Tooltip>
+                            }
+                        </Grid>
                     </Grid>
-                    <Grid
-                        size={{ xs: 24, md: 13 }}>
-                        <Typography sx={style} color={mail.read ? "textPrimary" : "primary"}>{mail.subject}</Typography>
-                    </Grid>
-                    <Grid container
-                        size={{ md: 3 }}
-                        justifyContent='right'
-                        sx={style}
-                    >
-                        {mail.received !== 0 &&
-                            <Tooltip title={new Date(mail.received).toLocaleString()}>
-                                <Typography>{timeSince(mail.received)}</Typography>
-                            </Tooltip>
-                        }
+                    <Grid container size={{ xs: 2, md: 1 }} justifyContent='right' alignItems='center'>
+                        <IconButton aria-label="delete" onKeyUp={(e) => deleteKeyUp(e, mail.id)} onClick={(e) => deleteClicked(e, mail.id)} >
+                            {!hover && <DeleteOutlineIcon color="action" opacity={0.3} />}
+                            {hover && <DeleteIcon color="error" />}
+                        </IconButton>
                     </Grid>
                 </Grid>
-                <Grid container size={{ xs: 2, md: 1 }} justifyContent='right' alignItems='center'>
-                    <IconButton aria-label="delete" onKeyUp={(e) => deleteKeyUp(e, mail.id)} onClick={(e) => deleteClicked(e, mail.id)} >
-                        {!hover && <DeleteOutlineIcon color="action" opacity={0.3} />}
-                        {hover && <DeleteIcon color="error" />}
-                    </IconButton>
-                </Grid>
-            </Grid>
-        </Paper>
+            </Paper>
+            {
+                showMail && message && !loading &&
+                <Paper sx={{ mb: 1, width: '100%', minWidth: 0 }} >
+                    <ShadowEmail html={message.content} />
+                </Paper>
+            }
+            {
+                error &&
+                <Paper sx={{ mb: 1 }} >
+                    {error.message}
+                </Paper>
+            }
+        </>
     )
 }
 
