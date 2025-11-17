@@ -9,6 +9,7 @@ import { env } from '../env/env.js';
 import session from 'express-session';
 // @ts-expect-error missing types - no @types/connect-loki package
 import LokiStore from 'connect-loki';
+import { ensureCsrfToken } from './csrf.middleware.js';
 
 export function createRouter() {
 
@@ -20,19 +21,22 @@ export function createRouter() {
 
     router.use(cookieParser())
     router.use(
-        session({
+        (session as unknown as (options?: any) => any)({
             saveUninitialized: false,
             resave: true,
             secret: env.SESSION_SECRET,
             store: new lokiStore({
                 ttl: 3600 * 24 * 7,
                 path: './data/session-store.db',
-            }) as session.Store,
+            }),
             cookie: {
                 secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                httpOnly: true,
             },
-        }),
+        })
     )
+    router.use(ensureCsrfToken);
     router.use(passport.initialize());
     router.use(passport.session());
     router.use(passport.authenticate('session'))
@@ -82,6 +86,12 @@ export function createRouter() {
             res.redirect('/');
         }
     );
+
+    router.get('/auth/csrf-token', (req, res) => {
+        res.status(200).json({
+            csrfToken: req.session?.csrfToken,
+        });
+    })
 
     router.get('/auth/user', (req, res) => {
         res.status(200).json({
