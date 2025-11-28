@@ -5,6 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 
 import Layout from './Layout.tsx'
 import Manage from './Manage.tsx';
+import Mail from './Mail.tsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 
