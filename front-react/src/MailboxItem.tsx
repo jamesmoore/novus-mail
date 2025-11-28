@@ -9,27 +9,39 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMail } from "./api-client";
 import ShadowEmail from "./ShadowEmail";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface MailboxItemProps {
     mail: Mail;
     onSelect?: (id: string) => void;
     onDelete?: (id: string) => void;
+    opened: boolean;
 }
 
 function timeSince(timeStamp: number) {
     return humanizeDuration(new Date().getTime() - timeStamp, { largest: 1, round: true });
 }
 
-function MailboxItem({ mail, onSelect, onDelete }: MailboxItemProps) {
+function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
 
     const [hover, setHover] = useState(false);
-    const [showMail, setShowMail] = useState(false);
+    const [showMail, setShowMail] = useState(opened);
+    const navigate = useNavigate();
+    const { address: selectedAddress } = useParams();
+    const showInline = true;
 
     async function mailClicked(e: React.MouseEvent<HTMLDivElement>, itemKey: string) {
-        if (isLeftMouseClick(e) && onSelect) {
-            const newState = !showMail;
-            setShowMail(newState);
-            onSelect(itemKey);
+        if (showInline) {
+            if (isLeftMouseClick(e) && onSelect) {
+                const newState = !showMail;
+                setShowMail(newState);
+                onSelect(itemKey);
+            }
+        }
+        else {
+            if (!showMail) {
+                navigate(`/mail/${selectedAddress}/${mail.id}`);
+            }
         }
     }
 
