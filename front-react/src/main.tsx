@@ -18,7 +18,6 @@ import TopBarDeleted from './TopBarDeleted.tsx';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import MailboxRedirect from './MailboxRedirect.tsx';
 import './dompurify-hooks'; // imported to initialize but not referenced
-import Mail from './Mail.tsx';
 
 const queryClient = new QueryClient();
 
