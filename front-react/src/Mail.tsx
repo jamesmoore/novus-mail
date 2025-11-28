@@ -2,9 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom'
 import { deleteMail, fetchMail } from './api-client';
 import { useQuery } from '@tanstack/react-query';
-import { Box, CircularProgress, Paper } from '@mui/material';
-import Grid from '@mui/material/Grid';
-import applyEmailTemplate from './email-wrapper';
+import { Box, CircularProgress } from '@mui/material';
 import MailboxItem from './MailboxItem';
 import { useInvalidateMailItemsCache } from './useMailItems';
 import FadeDelay from './FadeDelay';
@@ -50,26 +48,14 @@ function Mail() {
     return (
         <>
             {message &&
-                <Grid display="flex" flexDirection="column" height="100%">
-                    <Grid flex="0 0 auto">
-                        <MailboxItem mail={{
-                            id: messageId!,
-                            sender: message.sender,
-                            sendername: message.sendername,
-                            subject: message.subject,
-                            read: message.read,
-                            received: message.received,
-                        }} onDelete={onMailItemDelete} />
-                    </Grid>
-                    <Paper sx={{ mb: 1, flexGrow: 1, flexShrink: 1, display: "flex", flexDirection: "column", height: "100%" }} >
-                        <iframe
-                            height="100%"
-                            srcDoc={applyEmailTemplate(message.content)}
-                            style={{ border: "none", backgroundColor: "white", borderRadius: "4px", }}
-                            sandbox="allow-popups allow-popups-to-escape-sandbox"
-                        ></iframe>
-                    </Paper>
-                </Grid>
+                <MailboxItem mail={{
+                    id: messageId!,
+                    sender: message.sender,
+                    sendername: message.sendername,
+                    subject: message.subject,
+                    read: message.read,
+                    received: message.received,
+                }} onDelete={onMailItemDelete} opened={true} />
             }
         </>
     );

@@ -18,6 +18,7 @@ import DeletedMailbox from './DeletedMailbox.tsx';
 import TopBarDeleted from './TopBarDeleted.tsx';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import MailboxRedirect from './MailboxRedirect.tsx';
+import './dompurify-hooks'; // imported to initialize but not referenced
 
 const queryClient = new QueryClient();
 
@@ -35,7 +36,6 @@ createRoot(document.getElementById('app')!).render(
       <WebSocketNotificationProvider>
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools initialIsOpen={false} />
-          {/* <App /> */}
           <Router>
             <Routes>
               <Route path="/" element={<MailboxRedirect />} />

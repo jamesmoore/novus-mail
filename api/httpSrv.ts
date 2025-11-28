@@ -30,7 +30,7 @@ export class HttpServer {
 
 		const app = express();
 
-		app.set('trust proxy',env.TRUST_PROXY);
+		app.set('trust proxy', env.TRUST_PROXY);
 
 		app.use(express.json());
 
@@ -46,8 +46,6 @@ export class HttpServer {
 
 		app.use('/', createAuthRouter());
 
-		const authMiddleware = passportConfig.middleware;
-
 		// app.get('/', (_req, res) => {
 		// 	res.redirect('/index.html');
 		// })
@@ -61,6 +59,8 @@ export class HttpServer {
 				}
 			});
 		})
+
+		const authMiddleware = passportConfig.middleware;
 
 		app.use(authMiddleware, express.static(staticContentPath));
 

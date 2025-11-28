@@ -61,7 +61,12 @@ function MailboxItems({
                     mails && mails.pages && mails.pages.map((mailPage) => {
                         return mailPage.data.map((mail) =>
                         (
-                            <MailboxItem key={mail.id} mail={mail} onDelete={() => onMailItemDelete(mail)} onSelect={() => onMailItemSelect(mail)} />
+                            <MailboxItem
+                                key={mail.id} 
+                                mail={mail} 
+                                onDelete={() => onMailItemDelete(mail)} 
+                                onSelect={() => onMailItemSelect(mail)} 
+                                opened={false}/>
                         ))
                     }
                     )
