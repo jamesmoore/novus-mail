@@ -31,7 +31,7 @@ function MailboxRedirect() {
       return;
     }
 
-    if (!user?.isAuthenticated && user?.requiresAuth) {
+    if (!user.isAuthenticated && user.requiresAuth) {
       navigate('/login')
     }
 

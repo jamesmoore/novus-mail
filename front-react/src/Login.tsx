@@ -17,7 +17,7 @@ function Login() {
             return;
         }
 
-        if (user?.isAuthenticated || !user?.requiresAuth) {
+        if (user.isAuthenticated || !user.requiresAuth) {
             navigate('/')
         }
 
