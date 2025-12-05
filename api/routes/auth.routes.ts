@@ -90,6 +90,7 @@ export function createRouter() {
             sub: req.user?.sub,
             picture: req.user?.picture,
             isAuthenticated: req.isAuthenticated(),
+            requiresAuth: passportConfig.strategy.name !== 'anonymous',
         });
     })
 

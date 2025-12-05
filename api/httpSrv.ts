@@ -60,10 +60,9 @@ export class HttpServer {
 			});
 		})
 
+		app.use(express.static(staticContentPath));
+
 		const authMiddleware = passportConfig.middleware;
-
-		app.use(authMiddleware, express.static(staticContentPath));
-
 		app.use('/api', authMiddleware, createAddressRouter(this.db, this.domainName));
 		app.use('/api', authMiddleware, createMailRouter(this.db));
 		app.use('/api', authMiddleware, createStatusRouter(this.db));
