@@ -19,6 +19,7 @@ import TopBarDeleted from './TopBarDeleted.tsx';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import MailboxRedirect from './MailboxRedirect.tsx';
 import './dompurify-hooks'; // imported to initialize but not referenced
+import Login from './Login.tsx';
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ createRoot(document.getElementById('app')!).render(
           <Router>
             <Routes>
               <Route path="/" element={<MailboxRedirect />} />
+              <Route path="/login" element={<Login />} />
               <Route path="/manage" element={<Layout bodyChildren={<Manage />} topBarChildren={<TopBarSettings />} />} />
               <Route path="/deleted" element={<Layout bodyChildren={<DeletedMailbox />} topBarChildren={<TopBarDeleted />} />} />
               <Route path="/mail/:address/:messageId" element={<Layout bodyChildren={<Mail />} topBarChildren={<TopBarAddress />} />} />
