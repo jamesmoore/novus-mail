@@ -1,5 +1,5 @@
 import { Box, Button } from "@mui/material";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { User } from "./models/user";
 import { fetchUser } from "./api-client";
 import { useNavigate } from "react-router-dom";
@@ -21,7 +21,7 @@ function Login() {
             navigate('/')
         }
 
-    }, [user]);
+    }, [user, navigate]);
 
     return <>
 
