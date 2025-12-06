@@ -20,7 +20,6 @@ function MailboxRedirect() {
   const { data: unreadCounts, isLoading: isUnreadLoading } = useUnreadCounts();
 
   useEffect(() => {
-
     if (isAddressesLoading || isUnreadLoading) return;
 
     if (!addressResponse || !unreadCounts) return;
