@@ -30,6 +30,8 @@ export function createRouter() {
             }) as session.Store,
             cookie: {
                 secure: process.env.NODE_ENV === 'production',
+                maxAge: 3600 * 1000 * 24 * 7,
+                
             },
         }),
     )
