@@ -23,12 +23,18 @@ function Login() {
 
     }, [user, navigate]);
 
-    return <>
-
-        <Box alignContent={"center"} alignItems={"center"} >
-            <Button fullWidth={false} onClick={doLogin} >Login {user ? <>with {user.strategy} </> : <></>} </Button>
+    return (
+        <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            height="100vh"
+        >
+            <Button onClick={doLogin}>
+                Login {user ? <>with {user.strategy}</> : null}
+            </Button>
         </Box>
-    </>
+    );
 }
 
 function doLogin() {
