@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useAddressResponse from "./useAddressResponse";
 import useUnreadCounts from "./useUnreadCounts";
 import { AddressesResponse } from "./models/addresses-response";
 import { UnreadCount } from "./models/unread-count";
-import { fetchUser } from "./api-client";
-import { User } from "./models/user";
+import useUser from "./useUser";
 
 function getFirstUnreadOrDefault(
   unreadCounts?: UnreadCount[],
@@ -18,16 +17,12 @@ function getFirstUnreadOrDefault(
 
 function MailboxRedirect() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User>();
-  useEffect(() => {
-    fetchUser().then((p) => setUser(p));
-  }, []);
-
+  const { data: user, isLoading: isUserLoading } = useUser();
   const { data: addressResponse, isLoading: isAddressesLoading } = useAddressResponse();
   const { data: unreadCounts, isLoading: isUnreadLoading } = useUnreadCounts();
 
   useEffect(() => {
-    if (!user) {
+    if (isUserLoading || !user) {
       return;
     }
 
@@ -43,7 +38,7 @@ function MailboxRedirect() {
     if (firstUnread) {
       navigate(`/inbox/${firstUnread}`, { replace: true });
     }
-  }, [unreadCounts, addressResponse, isAddressesLoading, isUnreadLoading, navigate, user]);
+  }, [unreadCounts, addressResponse, isAddressesLoading, isUnreadLoading, navigate, user, isUserLoading]);
 
   return null;
 }

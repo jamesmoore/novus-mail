@@ -1,27 +1,23 @@
-import { Box, Button } from "@mui/material";
-import { useEffect, useState } from "react";
-import { User } from "./models/user";
-import { fetchUser } from "./api-client";
+import { Box, Button, CircularProgress } from "@mui/material";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import useUser from "./useUser";
 
-function Login() {
+export default function Login() {
     const navigate = useNavigate();
-    const [user, setUser] = useState<User>();
-    useEffect(() => {
-        fetchUser().then((p) => setUser(p));
-    }, []);
+    const { data: user, isLoading } = useUser();
 
     useEffect(() => {
-
-        if (!user) {
-            return;
-        }
+        if (isLoading || !user) return;
 
         if (user.isAuthenticated || !user.requiresAuth) {
-            navigate('/')
+            navigate("/");
         }
+    }, [isLoading, user, navigate]);
 
-    }, [user, navigate]);
+    const doLogin = () => {
+        window.location.href = "/login";
+    };
 
     return (
         <Box
@@ -30,17 +26,13 @@ function Login() {
             alignItems="center"
             height="100vh"
         >
-            <Button onClick={doLogin}>
-                Login {user ? <>with {user.strategy}</> : null}
-            </Button>
+            {isLoading ? (
+                <CircularProgress />
+            ) : (
+                <Button onClick={doLogin}>
+                    Login {user && <>with {user.strategy}</>}
+                </Button>
+            )}
         </Box>
     );
 }
-
-function doLogin() {
-
-    window.location.href = '/login';
-
-}
-
-export default Login;
