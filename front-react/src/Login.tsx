@@ -1,21 +1,12 @@
-import { Box, Button, CircularProgress } from "@mui/material";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import useUser from "./useUser";
+import { Box, Button } from "@mui/material";
 import LoginIcon from '@mui/icons-material/Login';
 
-export default function Login() {
-    const navigate = useNavigate();
-    const { data: user, isLoading } = useUser();
+interface LoginProps {
+    strategy: string,
+    loading: boolean,
+}
 
-    useEffect(() => {
-        if (isLoading || !user) return;
-
-        if (user.isAuthenticated || !user.requiresAuth) {
-            navigate("/");
-        }
-    }, [isLoading, user, navigate]);
-
+export default function Login({ strategy, loading }: LoginProps) {
     const doLogin = () => {
         window.location.href = "/login";
     };
@@ -27,13 +18,9 @@ export default function Login() {
             alignItems="center"
             height="100vh"
         >
-            {isLoading ? (
-                <CircularProgress />
-            ) : (
-                <Button onClick={doLogin} variant="contained" loading={isLoading} endIcon={<LoginIcon />}>
-                    Login {user && <>with {user.strategy}</>}
-                </Button>
-            )}
+            <Button onClick={doLogin} variant="contained" loading={loading} endIcon={<LoginIcon />}>
+                Login with {strategy}
+            </Button>
         </Box>
     );
 }

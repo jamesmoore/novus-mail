@@ -2,13 +2,10 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import CssBaseline from '@mui/material/CssBaseline';
-
 import Layout from './Layout.tsx'
 import Manage from './Manage.tsx';
 import Mail from './Mail.tsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Mailbox from './Mailbox.tsx';
 import TopBarAddress from './TopBarAddress.tsx';
@@ -17,9 +14,8 @@ import TopBarSettings from './TopBarSettings.tsx';
 import DeletedMailbox from './DeletedMailbox.tsx';
 import TopBarDeleted from './TopBarDeleted.tsx';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import MailboxRedirect from './MailboxRedirect.tsx';
 import './dompurify-hooks'; // imported to initialize but not referenced
-import Login from './Login.tsx';
+import Root from './Root.tsx';
 
 const queryClient = new QueryClient();
 
@@ -39,8 +35,7 @@ createRoot(document.getElementById('app')!).render(
           <ReactQueryDevtools initialIsOpen={false} />
           <Router>
             <Routes>
-              <Route path="/" element={<MailboxRedirect />} />
-              <Route path="/login" element={<Login />} />
+              <Route path="/" element={<Root />} />
               <Route path="/manage" element={<Layout bodyChildren={<Manage />} topBarChildren={<TopBarSettings />} />} />
               <Route path="/deleted" element={<Layout bodyChildren={<DeletedMailbox />} topBarChildren={<TopBarDeleted />} />} />
               <Route path="/mail/:address/:messageId" element={<Layout bodyChildren={<Mail />} topBarChildren={<TopBarAddress />} />} />

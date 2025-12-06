@@ -4,7 +4,6 @@ import useAddressResponse from "./useAddressResponse";
 import useUnreadCounts from "./useUnreadCounts";
 import { AddressesResponse } from "./models/addresses-response";
 import { UnreadCount } from "./models/unread-count";
-import useUser from "./useUser";
 
 function getFirstUnreadOrDefault(
   unreadCounts?: UnreadCount[],
@@ -17,18 +16,10 @@ function getFirstUnreadOrDefault(
 
 function MailboxRedirect() {
   const navigate = useNavigate();
-  const { data: user, isLoading: isUserLoading } = useUser();
   const { data: addressResponse, isLoading: isAddressesLoading } = useAddressResponse();
   const { data: unreadCounts, isLoading: isUnreadLoading } = useUnreadCounts();
 
   useEffect(() => {
-    if (isUserLoading || !user) {
-      return;
-    }
-
-    if (!user.isAuthenticated && user.requiresAuth) {
-      navigate('/login')
-    }
 
     if (isAddressesLoading || isUnreadLoading) return;
 
@@ -38,7 +29,7 @@ function MailboxRedirect() {
     if (firstUnread) {
       navigate(`/inbox/${firstUnread}`, { replace: true });
     }
-  }, [unreadCounts, addressResponse, isAddressesLoading, isUnreadLoading, navigate, user, isUserLoading]);
+  }, [unreadCounts, addressResponse, isAddressesLoading, isUnreadLoading, navigate]);
 
   return null;
 }
