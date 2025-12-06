@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { addAddress as apiAddAddress, deleteAddress as apiDeleteAddress, fetchUser, getAddress, updateAddress } from './api-client';
+import { addAddress as apiAddAddress, deleteAddress as apiDeleteAddress, getAddress, updateAddress } from './api-client';
 import { Avatar, Button, FormControl, FormControlLabel, IconButton, Paper, Switch, TextField, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import useAddressResponse from './useAddressResponse';
@@ -9,7 +9,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import DeleteForever from '@mui/icons-material/DeleteForever';
 import AddIcon from '@mui/icons-material/Add';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
-import { User } from './models/user';
+import useUser from './useUser';
 
 function Manage() {
     const [newAddressText, setNewAddressText] = useState('');
@@ -27,10 +27,7 @@ function Manage() {
 
     const [addressExists, setAddressExists] = useState(false);
 
-    const [user, setUser] = useState<User>();
-    useEffect(() => {
-        fetchUser().then((p) => setUser(p));
-    }, []);
+    const { data: user } = useUser();
 
     useEffect(() => {
         let cancelled = false;
