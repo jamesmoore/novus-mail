@@ -28,10 +28,11 @@ export function createRouter() {
                 ttl: 3600 * 24 * 7,
                 path: './data/session-store.db',
             }) as session.Store,
+            rolling: true,
             cookie: {
                 secure: process.env.NODE_ENV === 'production',
                 maxAge: 3600 * 1000 * 24 * 7,
-                
+                httpOnly: true,
             },
         }),
     )
