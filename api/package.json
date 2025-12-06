@@ -14,7 +14,6 @@
   "dependencies": {
     "@t3-oss/env-core": "^0.13.8",
     "better-sqlite3": "^12.5.0",
-    "connect-ensure-login": "^0.1.1",
     "connect-loki": "^1.2.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
