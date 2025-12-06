@@ -2,6 +2,7 @@ import { Box, Button, CircularProgress } from "@mui/material";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useUser from "./useUser";
+import LoginIcon from '@mui/icons-material/Login';
 
 export default function Login() {
     const navigate = useNavigate();
@@ -29,7 +30,7 @@ export default function Login() {
             {isLoading ? (
                 <CircularProgress />
             ) : (
-                <Button onClick={doLogin}>
+                <Button onClick={doLogin} variant="contained" loading={isLoading} endIcon={<LoginIcon />}>
                     Login {user && <>with {user.strategy}</>}
                 </Button>
             )}
