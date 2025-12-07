@@ -5,7 +5,11 @@ import MailboxRedirect from "./MailboxRedirect";
 function Root() {
     const { data: user, isLoading: isUserLoading } = useUser();
 
-    return (!user || !user.isAuthenticated && user.requiresAuth) ?
+    const notLoggedIn = !user || !user.isAuthenticated && user.requiresAuth;
+
+    console.log("Root/Needs login: ", notLoggedIn);
+
+    return notLoggedIn ?
         <Login strategy={user?.strategy ?? "..."} loading={isUserLoading} /> :
         <MailboxRedirect />;
 }
