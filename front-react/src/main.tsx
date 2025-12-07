@@ -16,6 +16,7 @@ import TopBarDeleted from './TopBarDeleted.tsx';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import './dompurify-hooks'; // imported to initialize but not referenced
 import Root from './Root.tsx';
+import AuthListener from './AuthListener.tsx';
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ createRoot(document.getElementById('app')!).render(
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools initialIsOpen={false} />
           <Router>
+            <AuthListener />
             <Routes>
               <Route path="/" element={<Root />} />
               <Route path="/manage" element={<Layout bodyChildren={<Manage />} topBarChildren={<TopBarSettings />} />} />
