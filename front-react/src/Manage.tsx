@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { addAddress as apiAddAddress, deleteAddress as apiDeleteAddress, getAddress, updateAddress } from './api-client';
+import { addAddress as apiAddAddress, deleteAddress as apiDeleteAddress, getAddress, logout, updateAddress } from './api-client';
 import { Avatar, Button, FormControl, FormControlLabel, IconButton, Paper, Switch, TextField, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import useAddressResponse from './useAddressResponse';
@@ -101,8 +101,14 @@ function Manage() {
         )
     }
 
-    const doLogout = () => {
-        window.location.href = "/logout";
+    const doLogout = async () => {
+        const logoutResponse = await logout();
+        if (logoutResponse.logoutUrl) {
+            window.location.href = "/logout";
+        }
+        else {
+            window.location.href = "/";
+        }
     };
 
     if (error) {

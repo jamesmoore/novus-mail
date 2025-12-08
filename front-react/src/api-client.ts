@@ -1,4 +1,5 @@
 import { AddressesResponse } from "./models/addresses-response";
+import { Logout } from "./models/logout";
 import { MailMessage } from "./models/mail-message";
 import { MailResponse } from "./models/mail-response";
 import { UnreadCount } from "./models/unread-count";
@@ -182,6 +183,14 @@ const fetchUser = async () => {
     return response.json() as Promise<User>;
 };
 
+const logout = async () => {
+    const response = await apiFetch(`${BaseUrl}/logout`, {
+        method: 'GET',
+        headers: defaultHeaders,
+    });
+    return response.json() as Promise<Logout>;
+};
+
 export {
     fetchDomain,
     fetchAddress,
@@ -199,4 +208,5 @@ export {
     fetchUnreadCounts,
     readAllMail,
     fetchUser,
+    logout,
 };
