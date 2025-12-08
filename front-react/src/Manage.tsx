@@ -104,7 +104,7 @@ function Manage() {
     const doLogout = async () => {
         const logoutResponse = await logout();
         if (logoutResponse.logoutUrl) {
-            window.location.href = "/logout";
+            window.location.href = logoutResponse.logoutUrl;
         }
         else {
             window.location.href = "/";
