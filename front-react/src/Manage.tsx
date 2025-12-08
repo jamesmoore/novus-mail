@@ -10,6 +10,7 @@ import DeleteForever from '@mui/icons-material/DeleteForever';
 import AddIcon from '@mui/icons-material/Add';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import useUser from './useUser';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 function Manage() {
     const [newAddressText, setNewAddressText] = useState('');
@@ -100,6 +101,10 @@ function Manage() {
         )
     }
 
+    const doLogout = () => {
+        window.location.href = "/logout";
+    };
+
     if (error) {
         return <div>{error.message}</div>;
     }
@@ -115,9 +120,16 @@ function Manage() {
                         }} >
                             <Typography>User</Typography>
                         </Grid>
-                        <Grid size={{ xs: 12, md: 9 }} display={'flex'} flexDirection={'row'} alignItems={'center'} columnGap={1}>
-                            <Avatar src={user.picture} />
-                            <Typography>{user.email ?? 'Anon'} ({user.strategy})</Typography>
+                        <Grid container size={{ xs: 12, md: 9 }} flexDirection={'row'} >
+                            <Grid container direction="row" alignItems={'center'} flex="0 0 auto" size={{ xs: 12, md: 9 }} columnGap={1}>
+                                <Avatar src={user.picture} />
+                                <Typography>{user.email ?? 'Anon'} ({user.strategy})</Typography>
+                            </Grid>
+                            <Grid display={'flex'} size={{ xs: 12, md: 3 }} justifyContent={'right'} sx={{
+                                mt: { xs: 2, md: 0 }
+                            }}>
+                                <Button fullWidth={true} onClick={doLogout} startIcon={<LogoutIcon />}>Logout</Button>
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Paper>
@@ -156,7 +168,8 @@ function Manage() {
                     </Grid>
                 </Grid>
             </Paper>
-            {(addressesResponse?.addresses?.length ?? 0) > 0 &&
+            {
+                (addressesResponse?.addresses?.length ?? 0) > 0 &&
                 <Paper>
                     <Grid container m={1} p={1} >
                         <Grid container mt={2} mb={2} size={{ xs: 12, md: 3 }} >
@@ -212,7 +225,7 @@ function Manage() {
                 </Paper>
             }
 
-        </Grid>
+        </Grid >
     );
 }
 

@@ -7,8 +7,6 @@ function Root() {
 
     const notLoggedIn = !user || isLoading || isRefetching || !user.isAuthenticated && user.requiresAuth;
 
-    console.log("Root/Needs login: ", notLoggedIn, " isRefecting: " + isRefetching);
-
     return notLoggedIn ?
         <Login strategy={user?.strategy ?? "..."} loading={isLoading || isRefetching} /> :
         <MailboxRedirect />;
