@@ -127,14 +127,14 @@ function Manage() {
                             <Typography>User</Typography>
                         </Grid>
                         <Grid container size={{ xs: 12, md: 9 }} flexDirection={'row'} >
-                            <Grid container direction="row" alignItems={'center'} flex="0 0 auto" size={{ xs: 12, md: 9 }} columnGap={1}>
+                            <Grid container direction="row" alignItems={'center'} flex="0 0 auto" size={{ xs: 12, md: 10 }} columnGap={1}>
                                 <Avatar src={user.picture} />
                                 <Typography>{user.email ?? 'Anon'} ({user.strategy})</Typography>
                             </Grid>
-                            <Grid display={'flex'} size={{ xs: 12, md: 3 }} justifyContent={'right'} sx={{
+                            <Grid display={'flex'} size={{ xs: 12, md: 2 }} justifyContent={'right'} sx={{
                                 mt: { xs: 2, md: 0 }
                             }}>
-                                <Button fullWidth={true} onClick={doLogout} startIcon={<LogoutIcon />}>Logout</Button>
+                                <Button  disabled={!user.requiresAuth} fullWidth={true} onClick={doLogout} startIcon={<LogoutIcon />}>Logout</Button>
                             </Grid>
                         </Grid>
                     </Grid>
