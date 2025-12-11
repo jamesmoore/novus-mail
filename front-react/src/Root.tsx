@@ -5,8 +5,7 @@ import MailboxRedirect from "./MailboxRedirect";
 function Root() {
     const { data: user, isLoading, isRefetching } = useUser();
 
-    // True only when we have no user info AND React Query is fetching/refetching
-    const loadingInitial = isLoading || (!user && isRefetching);
+    const loadingInitial = !user || isLoading || isRefetching;
 
     if (loadingInitial) {
         return <Login loading={true} strategy="..." />;
