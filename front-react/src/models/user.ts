@@ -4,4 +4,5 @@ export interface User {
     sub: string;
     isAuthenticated: boolean;
     picture?: string;
+    requiresAuth: boolean;
 }

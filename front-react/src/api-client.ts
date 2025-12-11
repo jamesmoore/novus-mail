@@ -1,4 +1,5 @@
 import { AddressesResponse } from "./models/addresses-response";
+import { Logout } from "./models/logout";
 import { MailMessage } from "./models/mail-message";
 import { MailResponse } from "./models/mail-response";
 import { UnreadCount } from "./models/unread-count";
@@ -12,8 +13,23 @@ const defaultHeaders = {
 const BaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
 const ApiUrl = `${BaseUrl}/api`;
 
+async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+    const res = await fetch(input, init);
+
+    if (res.status === 401) {
+        window.dispatchEvent(new Event("auth-lost"));
+        throw new Error("UNAUTHENTICATED");
+    }
+
+    if (!res.ok) {
+        throw new Error(`API error ${res.status}`);
+    }
+
+    return res;
+}
+
 const fetchDomain = async () => {
-    const response = await fetch(`${ApiUrl}/domain`, {
+    const response = await apiFetch(`${ApiUrl}/domain`, {
         method: 'GET',
         headers: defaultHeaders,
     });
@@ -21,7 +37,7 @@ const fetchDomain = async () => {
 };
 
 const fetchAddress = async () => {
-    const response = await fetch(`${ApiUrl}/addresses`, {
+    const response = await apiFetch(`${ApiUrl}/addresses`, {
         method: 'GET',
         headers: defaultHeaders,
     });
@@ -29,7 +45,7 @@ const fetchAddress = async () => {
 };
 
 const getAddress = async (newAddressText: string) => {
-    const response = await fetch(`${ApiUrl}/address/${newAddressText}`, {
+    const response = await apiFetch(`${ApiUrl}/address/${newAddressText}`, {
         method: 'GET',
         headers: defaultHeaders
     });
@@ -42,7 +58,7 @@ const getAddress = async (newAddressText: string) => {
 }
 
 const addAddress = async (newAddressText: string) => {
-    const response = await fetch(`${ApiUrl}/address/${newAddressText}`, {
+    const response = await apiFetch(`${ApiUrl}/address/${newAddressText}`, {
         method: 'PUT',
         headers: defaultHeaders
     });
@@ -50,7 +66,7 @@ const addAddress = async (newAddressText: string) => {
 }
 
 const deleteAddress = async (selectedAddress: string) => {
-    const response = await fetch(`${ApiUrl}/address/${selectedAddress}`, {
+    const response = await apiFetch(`${ApiUrl}/address/${selectedAddress}`, {
         method: 'DELETE',
         headers: defaultHeaders
     });
@@ -58,7 +74,7 @@ const deleteAddress = async (selectedAddress: string) => {
 }
 
 const updateAddress = async (selectedAddress: string, makePrivate: boolean) => {
-    const response = await fetch(`${ApiUrl}/address/${selectedAddress}`, {
+    const response = await apiFetch(`${ApiUrl}/address/${selectedAddress}`, {
         method: 'POST',
         body: JSON.stringify(
             {
@@ -71,7 +87,7 @@ const updateAddress = async (selectedAddress: string, makePrivate: boolean) => {
 }
 
 const fetchMails = async (selectedAddress: string, cursorId: string) => {
-    const response = await fetch(`${ApiUrl}/mails`, {
+    const response = await apiFetch(`${ApiUrl}/mails`, {
         method: 'POST',
         body: JSON.stringify(
             {
@@ -85,7 +101,7 @@ const fetchMails = async (selectedAddress: string, cursorId: string) => {
 };
 
 const fetchDeletedMails = async (cursorId: string) => {
-    const response = await fetch(`${ApiUrl}/mails`, {
+    const response = await apiFetch(`${ApiUrl}/mails`, {
         method: 'POST',
         body: JSON.stringify(
             {
@@ -99,7 +115,7 @@ const fetchDeletedMails = async (cursorId: string) => {
 };
 
 const fetchMail = async (id: string) => {
-    const response = await fetch(`${ApiUrl}/mail/${id}`, {
+    const response = await apiFetch(`${ApiUrl}/mail/${id}`, {
         method: 'GET',
         headers: defaultHeaders,
     });
@@ -107,28 +123,28 @@ const fetchMail = async (id: string) => {
 }
 
 const deleteMail = async (id: string) => {
-    await fetch(`${ApiUrl}/mail/${id}`, {
+    await apiFetch(`${ApiUrl}/mail/${id}`, {
         method: 'DELETE',
         headers: defaultHeaders,
     })
 };
 
 const deleteMails = async (address: string) => {
-    await fetch(`${ApiUrl}/mails/${address}`, {
+    await apiFetch(`${ApiUrl}/mails/${address}`, {
         method: 'DELETE',
         headers: defaultHeaders,
     })
 };
 
 const emptyDeletedMails = async () => {
-    await fetch(`${ApiUrl}/emptyDeletedMails`, {
+    await apiFetch(`${ApiUrl}/emptyDeletedMails`, {
         method: 'POST',
         headers: defaultHeaders,
     })
 };
 
 const readMail = async (id: string) => {
-    await fetch(`${ApiUrl}/readMail`, {
+    await apiFetch(`${ApiUrl}/readMail`, {
         method: 'POST',
         body: JSON.stringify(
             {
@@ -140,7 +156,7 @@ const readMail = async (id: string) => {
 };
 
 const readAllMail = async (address: string) => {
-    await fetch(`${ApiUrl}/readAllMail`, {
+    await apiFetch(`${ApiUrl}/readAllMail`, {
         method: 'POST',
         body: JSON.stringify(
             {
@@ -152,7 +168,7 @@ const readAllMail = async (address: string) => {
 };
 
 const fetchUnreadCounts = async () => {
-    const response = await fetch(`${ApiUrl}/unreadCounts`, {
+    const response = await apiFetch(`${ApiUrl}/unreadCounts`, {
         method: 'GET',
         headers: defaultHeaders,
     });
@@ -160,11 +176,19 @@ const fetchUnreadCounts = async () => {
 };
 
 const fetchUser = async () => {
-    const response = await fetch(`${BaseUrl}/auth/user`, {
+    const response = await apiFetch(`${BaseUrl}/auth/user`, {
         method: 'GET',
         headers: defaultHeaders,
     });
     return response.json() as Promise<User>;
+};
+
+const logout = async () => {
+    const response = await apiFetch(`${BaseUrl}/logout`, {
+        method: 'GET',
+        headers: defaultHeaders,
+    });
+    return response.json() as Promise<Logout>;
 };
 
 export {
@@ -184,4 +208,5 @@ export {
     fetchUnreadCounts,
     readAllMail,
     fetchUser,
+    logout,
 };
