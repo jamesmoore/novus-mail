@@ -18,11 +18,6 @@ async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Promise<R
 
     if (res.status === 401) {
         window.dispatchEvent(new Event("auth-lost"));
-        throw new Error("UNAUTHENTICATED");
-    }
-
-    if (!res.ok) {
-        throw new Error(`API error ${res.status}`);
     }
 
     return res;
