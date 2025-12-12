@@ -5,7 +5,6 @@ import { ClientSecretBasic, Configuration, discovery, fetchUserInfo } from 'open
 import { StrategyOptionsWithRequest, VerifyFunctionWithRequest } from 'openid-client/passport';
 import { Strategy as AnonymousStrategy } from 'passport-anonymous';
 import { env } from '../env/env.js';
-import { ensureLoggedIn } from 'connect-ensure-login';
 import { Request, Response, NextFunction } from 'express';
 import CustomStrategy from './custom-strategy.js';
 
@@ -63,10 +62,13 @@ const verify: VerifyFunctionWithRequest = (req, tokens, verified) => {
 export const passportConfig = oidcEnabled ? {
   strategy: new CustomStrategy(oidcStrategyOptions, verify),
   middleware: (_req: Request, res: Response, next: NextFunction) => {
-    if(
-      _req.path.startsWith('/api/status') || 
-      _req.path.startsWith('/status')) return next();
-    return ensureLoggedIn('/login')(_req, res, next);
+    if (
+      _req.isAuthenticated() ||
+      _req.path.startsWith('/api/status') ||
+      _req.path.startsWith('/status')
+    ) 
+    return next();
+    res.status(401).send();
   }
 } : {
   strategy: new AnonymousStrategy(),

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { addAddress as apiAddAddress, deleteAddress as apiDeleteAddress, fetchUser, getAddress, updateAddress } from './api-client';
+import { addAddress as apiAddAddress, deleteAddress as apiDeleteAddress, getAddress, logout, updateAddress } from './api-client';
 import { Avatar, Button, FormControl, FormControlLabel, IconButton, Paper, Switch, TextField, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import useAddressResponse from './useAddressResponse';
@@ -9,7 +9,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import DeleteForever from '@mui/icons-material/DeleteForever';
 import AddIcon from '@mui/icons-material/Add';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
-import { User } from './models/user';
+import useUser from './useUser';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 function Manage() {
     const [newAddressText, setNewAddressText] = useState('');
@@ -27,10 +28,7 @@ function Manage() {
 
     const [addressExists, setAddressExists] = useState(false);
 
-    const [user, setUser] = useState<User>();
-    useEffect(() => {
-        fetchUser().then((p) => setUser(p));
-    }, []);
+    const { data: user } = useUser();
 
     useEffect(() => {
         let cancelled = false;
@@ -103,6 +101,16 @@ function Manage() {
         )
     }
 
+    const doLogout = async () => {
+        const logoutResponse = await logout();
+        if (logoutResponse.logoutUrl) {
+            window.location.href = logoutResponse.logoutUrl;
+        }
+        else {
+            window.location.href = "/";
+        }
+    };
+
     if (error) {
         return <div>{error.message}</div>;
     }
@@ -118,9 +126,16 @@ function Manage() {
                         }} >
                             <Typography>User</Typography>
                         </Grid>
-                        <Grid size={{ xs: 12, md: 9 }} display={'flex'} flexDirection={'row'} alignItems={'center'} columnGap={1}>
-                            <Avatar src={user.picture} />
-                            <Typography>{user.email ?? 'Anon'} ({user.strategy})</Typography>
+                        <Grid container size={{ xs: 12, md: 9 }} flexDirection={'row'} >
+                            <Grid container direction="row" alignItems={'center'} flex="0 0 auto" size={{ xs: 12, md: 10 }} columnGap={1}>
+                                <Avatar src={user.picture} />
+                                <Typography>{user.email ?? 'Anon'} ({user.strategy})</Typography>
+                            </Grid>
+                            <Grid display={'flex'} size={{ xs: 12, md: 2 }} justifyContent={'right'} sx={{
+                                mt: { xs: 2, md: 0 }
+                            }}>
+                                <Button  disabled={!user.requiresAuth} fullWidth={true} onClick={doLogout} startIcon={<LogoutIcon />}>Logout</Button>
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Paper>
@@ -159,7 +174,8 @@ function Manage() {
                     </Grid>
                 </Grid>
             </Paper>
-            {(addressesResponse?.addresses?.length ?? 0) > 0 &&
+            {
+                (addressesResponse?.addresses?.length ?? 0) > 0 &&
                 <Paper>
                     <Grid container m={1} p={1} >
                         <Grid container mt={2} mb={2} size={{ xs: 12, md: 3 }} >
@@ -215,7 +231,7 @@ function Manage() {
                 </Paper>
             }
 
-        </Grid>
+        </Grid >
     );
 }
 
