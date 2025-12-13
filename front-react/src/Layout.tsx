@@ -101,7 +101,7 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
     <>
       <Toolbar />
       <Divider />
-      <List>
+      <List disablePadding>
         {mailboxes.map((mailbox) => (
           <ListItem key={mailbox.address} disablePadding>
             <ListItemButton
