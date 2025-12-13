@@ -18,7 +18,7 @@ export default function Login({ strategy, loading }: LoginProps) {
             alignItems="center"
             height="100vh"
         >
-            <Button onClick={doLogin} variant="contained" loading={loading} endIcon={<LoginIcon />}>
+            <Button onClick={doLogin} variant="contained" loading={loading} startIcon={<LoginIcon />}>
                 Login with {strategy}
             </Button>
         </Box>
