@@ -7,34 +7,27 @@ export interface RootProps {
 }
 
 function Root({ children }: RootProps) {
-    const { data: user, isLoading, refetch} = useUser();
+    const { data: user, isLoading, refetch } = useUser();
 
     useEffect(() => {
-        function handler() {
-            console.log('auth lost handler');
+        const handler = () => {
             refetch();
-        }
+        };
 
         window.addEventListener("auth-lost", handler);
-        return () => {
-            window.removeEventListener("auth-lost", handler);
-        };
+        return () => window.removeEventListener("auth-lost", handler);
     }, [refetch]);
 
-    const loadingInitial = !user || isLoading;
-
-    if (loadingInitial) {
+    // Only block on first-ever load
+    if (isLoading && !user) {
         return <Login loading={true} strategy="..." />;
     }
 
-    const authenticated = user?.isAuthenticated;
-    const requiresAuth = user?.requiresAuth;
-
-    if (!authenticated && requiresAuth) {
+    if (user && !user.isAuthenticated && user.requiresAuth) {
         return <Login strategy={user.strategy} loading={false} />;
     }
 
-    return children;
+    return <>{children}</>;
 }
 
 export default Root;
