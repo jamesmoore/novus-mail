@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { addAddress as apiAddAddress, deleteAddress as apiDeleteAddress, getAddress, logout, updateAddress } from './api-client';
-import { Paper } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import useAddressResponse from './useAddressResponse';
 import useDomain from './useDomain';
@@ -115,6 +114,8 @@ function Manage() {
         return <div>{error.message}</div>;
     }
 
+    const paperClassName = "rounded-sm paper-background shadow-sm";
+
     return (
         <Grid>
             {/*
@@ -124,7 +125,7 @@ function Manage() {
             */}
             <SnackbarProvider />
             {
-                user && <Paper>
+                user && <div className={paperClassName}>
                     <Grid container mb={1} ml={1} mr={1} p={1}>
                         <Grid size={{ xs: 12, md: 3 }} display={'flex'} alignItems={'center'} sx={{
                             mb: { xs: 1, md: 0 }
@@ -152,11 +153,11 @@ function Manage() {
                             </Grid>
                         </Grid>
                     </Grid>
-                </Paper>
+                </div>
             }
-            <Paper>
+            <div className={paperClassName}>
                 <Grid container m={1} p={1}>
-                    <Grid size={{ xs: 12, md: 3 }}>
+                    <Grid mt={1} size={{ xs: 12, md: 3 }}>
                         New address
                     </Grid>
                     <Grid container size={{ xs: 12, md: 9 }} flexDirection={'row'}>
@@ -182,10 +183,10 @@ function Manage() {
                         </Grid>
                     </Grid>
                 </Grid>
-            </Paper>
+            </div>
             {
                 (addressesResponse?.addresses?.length ?? 0) > 0 &&
-                <Paper>
+                <div className={paperClassName}>
                     <Grid container m={1} p={1} >
                         <Grid container mt={2} mb={2} size={{ xs: 12, md: 3 }} >
                             Manage addresses
@@ -236,13 +237,9 @@ function Manage() {
                             }
                         </Grid>
                     </Grid>
-                </Paper>
+                </div>
             }
-
         </Grid >
-
-
-
     );
 }
 

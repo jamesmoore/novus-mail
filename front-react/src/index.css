@@ -134,3 +134,7 @@ input::-moz-selection {
   background-color: rgb(59 130 246 / 0.35);
   color: inherit;
 }
+
+.paper-background {
+  background-color: oklch(1 0 0 / 5%);
+}
