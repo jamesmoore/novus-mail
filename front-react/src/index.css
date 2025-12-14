@@ -121,3 +121,16 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+/* Temp MUI compatability styling */
+
+input::selection {
+  background-color: rgb(59 130 246 / 0.35); /* Tailwind blue-500 @ 35% */
+  color: inherit;
+}
+
+input::-moz-selection {
+  background-color: rgb(59 130 246 / 0.35);
+  color: inherit;
+}
