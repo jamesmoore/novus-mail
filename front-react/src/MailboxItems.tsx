@@ -78,7 +78,7 @@ function MailboxItems({
                         <Box sx={{ width: '100%' }}><LinearProgress color="primary" /></Box>
                     </FadeDelay>
 
-                    {!hasNextPage && !isFetching && <Divider component="div" sx={{ width: "100%" }}><Typography variant='body1'>No more mail</Typography></Divider>}
+                    {!hasNextPage && !isFetching && <Divider component="div" sx={{ width: "100%" }}><Typography variant='body1' color="textDisabled">No more mail</Typography></Divider>}
                 </Box>
             </>
         );
