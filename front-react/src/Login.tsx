@@ -1,5 +1,6 @@
-import { Box, Button } from "@mui/material";
-import LoginIcon from '@mui/icons-material/Login';
+import { Box } from "@mui/material";
+import { Button } from "./components/ui/button";
+import { LogIn } from "lucide-react";
 
 interface LoginProps {
     strategy: string,
@@ -18,7 +19,8 @@ export default function Login({ strategy, loading }: LoginProps) {
             alignItems="center"
             height="100vh"
         >
-            <Button onClick={doLogin} variant="contained" loading={loading} startIcon={<LoginIcon />}>
+            <Button onClick={doLogin} disabled={loading}>
+                <LogIn />
                 Login with {strategy}
             </Button>
         </Box>

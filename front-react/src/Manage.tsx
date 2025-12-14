@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { addAddress as apiAddAddress, deleteAddress as apiDeleteAddress, getAddress, logout, updateAddress } from './api-client';
-import { Avatar, Button, FormControl, FormControlLabel, IconButton, Paper, Switch, TextField, Typography } from '@mui/material';
+import { Avatar, FormControl, FormControlLabel, IconButton, Paper, Switch, TextField, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import useAddressResponse from './useAddressResponse';
 import useDomain from './useDomain';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DeleteForever from '@mui/icons-material/DeleteForever';
-import AddIcon from '@mui/icons-material/Add';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import useUser from './useUser';
-import LogoutIcon from '@mui/icons-material/Logout';
+import { Button } from './components/ui/button';
+import { LogOut, Plus } from 'lucide-react';
 
 function Manage() {
     const [newAddressText, setNewAddressText] = useState('');
@@ -117,6 +117,11 @@ function Manage() {
 
     return (
         <Grid>
+            {/*
+            <h1 className="text-3xl font-bold underline">
+                Hello world!
+            </h1>
+            */}
             <SnackbarProvider />
             {
                 user && <Paper>
@@ -134,7 +139,9 @@ function Manage() {
                             <Grid display={'flex'} size={{ xs: 12, md: 2 }} justifyContent={'right'} sx={{
                                 mt: { xs: 2, md: 0 }
                             }}>
-                                <Button  disabled={!user.requiresAuth} fullWidth={true} onClick={doLogout} startIcon={<LogoutIcon />}>Logout</Button>
+                                <Button disabled={!user.requiresAuth} onClick={doLogout}>
+                                    <LogOut />Logout
+                                </Button>
                             </Grid>
                         </Grid>
                     </Grid>
@@ -168,8 +175,9 @@ function Manage() {
                         <Grid display={'flex'} size={{ xs: 12, md: 2 }} justifyContent={'right'} sx={{
                             mt: { xs: 2, md: 0 }
                         }}>
-
-                            <Button fullWidth={true} disabled={newAddressText === '' || isValidAddress === false || addressExists} onClick={addAddress} startIcon={<AddIcon />} >Add</Button>
+                            <Button disabled={newAddressText === '' || isValidAddress === false || addressExists} onClick={addAddress}>
+                                <Plus />Add
+                            </Button>
                         </Grid>
                     </Grid>
                 </Grid>
@@ -232,6 +240,9 @@ function Manage() {
             }
 
         </Grid >
+
+
+
     );
 }
 
