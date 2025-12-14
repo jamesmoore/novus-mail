@@ -17,6 +17,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import './dompurify-hooks'; // imported to initialize but not referenced
 import Root from './Root.tsx';
 import MailboxRedirect from './MailboxRedirect.tsx';
+import './index.css'
 
 const queryClient = new QueryClient();
 
