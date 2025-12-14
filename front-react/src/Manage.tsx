@@ -31,17 +31,22 @@ function Manage() {
     const { data: user } = useUser();
 
     useEffect(() => {
-        if (newAddressText.trim() === '') {
-            setAddressExists(false);
-            return;
+        let cancelled = false;
+        async function checkAddress() {
+            if (newAddressText.trim() === '') {
+                setAddressExists((prev) => prev ? false : prev);
+                return;
+            }
+
+            const result = await getAddress(newAddressText);
+            if (!cancelled) {
+                setAddressExists(result !== '');
+            }
         }
 
-        const handle = setTimeout(async () => {
-            const result = await getAddress(newAddressText);
-            setAddressExists(result !== '');
-        }, 300); // 👈 debounce
+        checkAddress();
 
-        return () => clearTimeout(handle);
+        return () => { cancelled = true; };
     }, [newAddressText]);
 
     function addAddress() {
@@ -162,11 +167,10 @@ function Manage() {
                                 value={newAddressText}
                                 placeholder="New address"
                                 style={{ flex: 1 }}
-                            //error={newAddressText !== '' && (isValidAddress === false || addressExists)}
-                            // helperText={newAddressText !== '' && isValidAddress === false ? 'Invalid email address' :
-                            //     addressExists ? 'Address exists' : ''
-                            // }
+                                aria-invalid={newAddressText !== '' && (isValidAddress === false || addressExists)}
                             />
+                            {newAddressText !== '' && isValidAddress === false && <p className='text-muted-foreground text-red-700 text-xs'>This email is invalid.</p>}
+                            {newAddressText !== '' && addressExists && <p className='text-muted-foreground text-red-700 text-xs'>Address exists.</p>}
                             @{domainName}
                         </Grid>
                         <Grid display={'flex'} size={{ xs: 12, md: 2 }} justifyContent={'right'} sx={{
