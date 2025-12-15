@@ -127,7 +127,7 @@ function Manage() {
                         <div className='flex items-center w-full md:w-3/12'>
                             User
                         </div>
-                        <div className='flex items-center flex-1 gap-1 mt-2 md:mt-0' >
+                        <div className='flex items-center flex-1 gap-1 mt-2 md:mt-0 whitespace-nowrap' >
                             {user.picture ?
                                 <Avatar>
                                     <AvatarImage
