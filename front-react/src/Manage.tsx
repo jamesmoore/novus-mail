@@ -5,7 +5,7 @@ import useDomain from './useDomain';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import useUser from './useUser';
 import { Button } from './components/ui/button';
-import { LogOut, Plus, Trash, User, X } from 'lucide-react';
+import { CircleAlert, LogOut, Plus, Trash, User, X } from 'lucide-react';
 import { Input } from './components/ui/input';
 import { Switch } from './components/ui/switch';
 import { Avatar, AvatarImage } from './components/ui/avatar';
@@ -115,6 +115,9 @@ function Manage() {
 
     const paperClassName = "rounded-sm paper-background shadow-sm";
 
+    const addressIsInvalid = useMemo(() => newAddressText !== '' && (isValidAddress === false || addressExists),
+        [newAddressText, isValidAddress, addressExists]);
+
     return (
         <>
             <SnackbarProvider />
@@ -124,7 +127,7 @@ function Manage() {
                         <div className='flex items-center w-full md:w-3/12'>
                             User
                         </div>
-                        <div className='flex items-center w-7/12 gap-1 mt-2 md:mt-0' >
+                        <div className='flex items-center flex-1 gap-1 mt-2 md:mt-0' >
                             {user.picture ?
                                 <Avatar>
                                     <AvatarImage
@@ -154,16 +157,19 @@ function Manage() {
                             onChange={event => setNewAddressText(event.target.value)}
                             value={newAddressText}
                             placeholder="New address"
-                            aria-invalid={newAddressText !== '' && (isValidAddress === false || addressExists)}
+                            aria-invalid={addressIsInvalid}
                         />
-                        {newAddressText !== '' && isValidAddress === false && <div className='text-red-700 text-sm mt-1 w-full'>This email is invalid.</div>}
-                        {newAddressText !== '' && addressExists && <div className='text-red-700 text-sm mt-1 w-full'>Address exists.</div>}
+                        {addressIsInvalid &&
+                            <div className='flex flex-row items-center text-red-700 text-sm mt-1 w-full whitespace-nowrap'>
+                                <CircleAlert />&nbsp;{addressExists ? 'Address exists.' : 'This email is invalid.'}
+                            </div>
+                        }
                     </div>
                     <div className='flex items-center mt-2 md:mt-0'>
                         @{domainName}
                     </div>
                     <div className='flex ml-auto sm:w-2/12 justify-end mt-2 md:mt-0' >
-                        <Button disabled={newAddressText === '' || isValidAddress === false || addressExists} onClick={addAddress}>
+                        <Button disabled={newAddressText === '' || addressIsInvalid} onClick={addAddress}>
                             <Plus />Add
                         </Button>
                     </div>
