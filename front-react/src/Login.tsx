@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import { Button } from "./components/ui/button";
 import { LogIn } from "lucide-react";
 
@@ -13,16 +12,13 @@ export default function Login({ strategy, loading }: LoginProps) {
     };
 
     return (
-        <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            height="100vh"
+        <div
+            className="flex justify-center items-center h-screen"
         >
             <Button onClick={doLogin} disabled={loading}>
                 <LogIn />
                 Login with {strategy}
             </Button>
-        </Box>
+        </div>
     );
 }
