@@ -133,7 +133,7 @@ function Manage() {
                                     />
                                 </Avatar>
                                 : <User />}
-                            {user.email ?? 'Anon'} ({user.strategy})
+                            {`${user.email ?? 'Anon'} (${user.strategy})`}
                         </div>
                         <div className='flex ml-auto w-2/12 justify-end' >
                             <Button disabled={!user.requiresAuth} onClick={doLogout}>
