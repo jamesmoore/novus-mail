@@ -5,7 +5,7 @@ import useDomain from './useDomain';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import useUser from './useUser';
 import { Button } from './components/ui/button';
-import { LogOut, Plus, Trash, User, X } from 'lucide-react';
+import { Info, LogOut, Plus, Trash, User, X } from 'lucide-react';
 import { Input } from './components/ui/input';
 import { Switch } from './components/ui/switch';
 import { Avatar, AvatarImage } from './components/ui/avatar';
@@ -124,23 +124,21 @@ function Manage() {
                         <div className='flex items-center w-full md:w-3/12'>
                             User
                         </div>
-                        <div className='flex w-full md:w-9/12'  >
-                            <div className='flex items-center w-full md:w-10/12 gap-1' >
-                                {user.picture ?
-                                    <Avatar>
-                                        <AvatarImage
-                                            src={user.picture}
-                                            alt={user.email}
-                                        />
-                                    </Avatar>
-                                    : <User />}
-                                {user.email ?? 'Anon'} ({user.strategy})
-                            </div>
-                            <div className='flex w-full md:w-2/12 justify-end' >
-                                <Button disabled={!user.requiresAuth} onClick={doLogout}>
-                                    <LogOut />Logout
-                                </Button>
-                            </div>
+                        <div className='flex items-center w-7/12 gap-1 mt-2 md:mt-0' >
+                            {user.picture ?
+                                <Avatar>
+                                    <AvatarImage
+                                        src={user.picture}
+                                        alt={user.email}
+                                    />
+                                </Avatar>
+                                : <User />}
+                            {user.email ?? 'Anon'} ({user.strategy})
+                        </div>
+                        <div className='flex ml-auto w-2/12 justify-end' >
+                            <Button disabled={!user.requiresAuth} onClick={doLogout}>
+                                <LogOut />Logout
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -150,24 +148,24 @@ function Manage() {
                     <div className='flex items-center w-full md:w-3/12'>
                         New address
                     </div>
-                    <div className='flex w-full md:w-9/12'>
-                        <div className='flex items-center w-full md:w-10/12 '>
-                            <Input
-                                type="text"
-                                onChange={event => setNewAddressText(event.target.value)}
-                                value={newAddressText}
-                                placeholder="New address"
-                                aria-invalid={newAddressText !== '' && (isValidAddress === false || addressExists)}
-                            />
-                            {newAddressText !== '' && isValidAddress === false && <p className='text-red-700 text-xs'>This email is invalid.</p>}
-                            {newAddressText !== '' && addressExists && <p className='text-red-700 text-xs'>Address exists.</p>}
-                            @{domainName}
-                        </div>
-                        <div className='flex w-full md:w-2/12 justify-end' >
-                            <Button disabled={newAddressText === '' || isValidAddress === false || addressExists} onClick={addAddress}>
-                                <Plus />Add
-                            </Button>
-                        </div>
+                    <div className='flex flex-col mt-2 w-6/12 md:w-3/12 md:mt-0'>
+                        <Input
+                            type="text"
+                            onChange={event => setNewAddressText(event.target.value)}
+                            value={newAddressText}
+                            placeholder="New address"
+                            aria-invalid={newAddressText !== '' && (isValidAddress === false || addressExists)}
+                        />
+                        {newAddressText !== '' && isValidAddress === false && <div className='text-red-700 text-sm mt-1 w-full'>This email is invalid.</div>}
+                        {newAddressText !== '' && addressExists && <div className='text-red-700 text-sm mt-1 w-full'>Address exists.</div>}
+                    </div>
+                    <div className='flex items-center mt-2 md:mt-0'>
+                        @{domainName}
+                    </div>
+                    <div className='flex ml-auto sm:w-2/12 justify-end mt-2 md:mt-0' >
+                        <Button disabled={newAddressText === '' || isValidAddress === false || addressExists} onClick={addAddress}>
+                            <Plus />Add
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -175,7 +173,7 @@ function Manage() {
                 (addressesResponse?.addresses?.length ?? 0) > 0 &&
                 <div className={paperClassName}>
                     <div className="flex flex-wrap m-1 ml-2 p-1 ">
-                        <div className='flex w-full md:w-3/12 mt-1'>
+                        <div className='w-full md:w-3/12 mt-1'>
                             Manage addresses
                         </div>
                         <div className='flex flex-col w-full md:w-9/12'>
