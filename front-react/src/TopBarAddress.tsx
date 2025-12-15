@@ -1,12 +1,11 @@
-import ContentCopy from "@mui/icons-material/ContentCopy";
-import DoneAllIcon from '@mui/icons-material/DoneAll';
-import { IconButton, Tooltip, Typography, useTheme } from "@mui/material";
 import useDomain from "./useDomain";
 import { useParams } from "react-router-dom";
 import { deleteMails, readAllMail } from "./api-client";
 import useUnreadCounts from "./useUnreadCounts";
 import { useInvalidateDeletedMailItemsCache, useMailItems } from "./useMailItems";
-import DeleteIcon from '@mui/icons-material/Delete';
+import { CheckCheck, Copy, Trash } from 'lucide-react';
+import { Button } from "./components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip";
 
 const handleCopy = async (text: string) => {
     try {
@@ -23,7 +22,6 @@ function TopBarAddress() {
     const { refetch: refetchUread } = useUnreadCounts();
     const { refetch, data, hasNextPage } = useMailItems(selectedAddress);
     const { invalidate: invalidateDeleted } = useInvalidateDeletedMailItemsCache();
-    const theme = useTheme();
 
     async function copyClicked() {
         await handleCopy(getFullAddress());
@@ -55,24 +53,34 @@ function TopBarAddress() {
     return (
         selectedAddress &&
         <>
-            <Typography variant="h6" noWrap component="div">
+            <div>
                 {getFullAddress()}
-            </Typography>
-            <Tooltip title="Copy">
-                <IconButton onClick={copyClicked}>
-                    <ContentCopy />
-                </IconButton>
+            </div>
+            <Tooltip>
+                <TooltipContent>
+                    <p>Copy</p>
+                </TooltipContent>
+                <TooltipTrigger asChild>
+                    <Button className='ml-1' onClick={copyClicked}>
+                        <Copy />
+                    </Button>
+                </TooltipTrigger>
             </Tooltip>
 
-            <IconButton sx={{ "&:hover": { color: theme.palette.error.main }, marginLeft: 'auto' }} disabled={total === 0} onClick={onDeleteAllMails} >
-                <DeleteIcon />
-            </IconButton>
-            <Tooltip title="Mark all as read" >
-                <IconButton onClick={onMarkAllAsRead} disabled={total === 0}>
-                    <DoneAllIcon sx={{ "&:hover": { color: theme.palette.primary.main } }} />
-                </IconButton>
+            <Button className='ml-auto hover:bg-red-700' disabled={total === 0} onClick={onDeleteAllMails} >
+                <Trash />
+            </Button>
+            <Tooltip >
+                <TooltipContent>
+                    <p>Mark all as read</p>
+                </TooltipContent>
+                <TooltipTrigger asChild>
+                    <Button className='ml-1' onClick={onMarkAllAsRead} disabled={total === 0}>
+                        <CheckCheck />
+                    </Button>
+                </TooltipTrigger>
             </Tooltip>
-            <Typography sx={{ ml: 1 }}>{text}</Typography>
+            <div className='ml-1' >{text}</div>
         </>
     )
 }
