@@ -138,3 +138,13 @@ input::-moz-selection {
 .paper-background {
   background-color: oklch(1 0 0 / 5%);
 }
+
+.delayed-fade-in {
+  animation: delayedFadeIn 5s;
+}
+
+@keyframes delayedFadeIn {
+  0% { opacity: 0; }
+  20% { opacity:0; }
+  100% { opacity: 1; }
+}

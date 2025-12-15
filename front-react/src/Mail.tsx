@@ -2,10 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom'
 import { deleteMail, fetchMail } from './api-client';
 import { useQuery } from '@tanstack/react-query';
-import { Box, CircularProgress } from '@mui/material';
 import MailboxItem from './MailboxItem';
 import { useInvalidateMailItemsCache } from './useMailItems';
-import FadeDelay from './FadeDelay';
+import LoadingSpinner from './LoadingSpinner';
 
 function Mail() {
     const navigate = useNavigate();
@@ -38,11 +37,9 @@ function Mail() {
     }
 
     if (loading) {
-        return (<FadeDelay isLoading={loading}>
-            <Box flex="1 0 auto" display="flex" justifyContent={'center'} alignItems={'center'}>
-                <CircularProgress color="primary" />
-            </Box>
-        </FadeDelay>)
+        return (
+            <LoadingSpinner />
+        )
     }
 
     return (

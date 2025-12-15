@@ -1,6 +1,6 @@
 import { useState, ReactNode, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { AppBar, Badge, Box, CircularProgress, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
+import { AppBar, Badge, Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import useAddressResponse from './useAddressResponse';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -11,7 +11,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import useUnreadCounts from './useUnreadCounts';
 import { useWebSocketNotifier, WebSocketMessage } from './useWebSocketNotifier';
 import { useMailItems, useInvalidateMailItemsCache } from './useMailItems';
-import FadeDelay from './FadeDelay';
+import LoadingSpinner from './LoadingSpinner';
 
 export interface LayoutProps {
   bodyChildren?: ReactNode;
@@ -138,7 +138,7 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
           </ListItemIcon>
           <ListItemText primary={"Deleted mail"} />
         </ListItemButton>
-      </ListItem>      
+      </ListItem>
       <Divider />
       <ListItem disablePadding>
         <ListItemButton onClick={() => {
@@ -160,16 +160,14 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
 
   if (addressIsLoading) {
     return (
-      <FadeDelay isLoading={addressIsLoading}>
-        <Box flex="1 0 auto" display="flex" justifyContent={'center'} alignItems={'center'} height="100dvh">
-          <CircularProgress color="primary" />
-        </Box>
-      </FadeDelay>
+      <div className='flex h-dvh'>
+        <LoadingSpinner />
+      </div>
     )
   }
 
   return (
-    <Box sx={{ display: 'flex', height: "100dvh" }}>
+    <div className='flex h-dvh'>
       <AppBar
         position="fixed"
         sx={{
@@ -242,7 +240,7 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
           {bodyChildren}
         </Grid>
       </Box>
-    </Box>
+    </div>
   );
 }
 

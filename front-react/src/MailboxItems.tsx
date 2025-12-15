@@ -1,11 +1,11 @@
-import { Box, CircularProgress, Divider, LinearProgress, Typography } from "@mui/material";
-import FadeDelay from "./FadeDelay";
+import { Box, Divider, Typography } from "@mui/material";
 import MailboxItem from "./MailboxItem";
 import { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult } from "@tanstack/react-query";
 import { MailResponse } from "./models/mail-response";
 import { useInView } from "react-intersection-observer";
 import { useEffect } from "react";
 import { Mail } from "./models/mail";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface MailboxItemsProps {
     onMailItemSelect: (mail: Mail) => void;
@@ -47,11 +47,7 @@ function MailboxItems({
 
     if (showSpinner) {
         return (
-            <FadeDelay isLoading={showSpinner}>
-                <Box flex="1 0 auto" display="flex" justifyContent={'center'} alignItems={'center'}>
-                    <CircularProgress color="primary" />
-                </Box>
-            </FadeDelay>
+            <LoadingSpinner/>
         )
     }
     else {
@@ -74,9 +70,7 @@ function MailboxItems({
 
                 <Box ref={ref} mt={1} mb={1} flex="0 0 auto" display="flex" justifyContent={'center'}>
 
-                    <FadeDelay isLoading={isFetchingNextPage}>
-                        <Box sx={{ width: '100%' }}><LinearProgress color="primary" /></Box>
-                    </FadeDelay>
+                    {isFetchingNextPage && <LoadingSpinner/>}
 
                     {!hasNextPage && !isFetching && <Divider component="div" sx={{ width: "100%" }}><Typography variant='body1' color="textDisabled">No more mail</Typography></Divider>}
                 </Box>
