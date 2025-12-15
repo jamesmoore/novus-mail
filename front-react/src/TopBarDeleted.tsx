@@ -1,7 +1,7 @@
-import { IconButton, Typography, useTheme } from "@mui/material";
 import { useDeletedMailItems, useInvalidateDeletedMailItemsCache } from "./useMailItems";
-import DeleteIcon from '@mui/icons-material/Delete';
 import { emptyDeletedMails } from "./api-client";
+import { Trash } from 'lucide-react';
+import { Button } from "./components/ui/button";
 
 function TopBarDeleted() {
 
@@ -11,7 +11,6 @@ function TopBarDeleted() {
     const text = total === 0 ? 'Empty' :
         total + (hasNextPage ? '+' : '') + ' item' + (total === 1 ? '' : 's');
     const { invalidate: invalidateDeleted } = useInvalidateDeletedMailItemsCache();
-    const theme = useTheme();
 
     const onDeleteAllMails = () => {
         emptyDeletedMails().then(() => {
@@ -21,10 +20,10 @@ function TopBarDeleted() {
 
     return (
         <>
-            <IconButton sx={{ "&:hover": { color: theme.palette.error.main }, marginLeft: 'auto' }} disabled={total === 0} onClick={onDeleteAllMails}>
-                <DeleteIcon />
-            </IconButton>
-            <Typography>{text}</Typography>
+            <Button className='ml-auto hover:bg-red-700' /*sx={{ "&:hover": { color: theme.palette.error.main } }}*/ disabled={total === 0} onClick={onDeleteAllMails}>
+                <Trash /> {text}
+            </Button>
+            
         </>
     )
 
