@@ -159,8 +159,8 @@ function Manage() {
                                 placeholder="New address"
                                 aria-invalid={newAddressText !== '' && (isValidAddress === false || addressExists)}
                             />
-                            {newAddressText !== '' && isValidAddress === false && <p className='text-muted-foreground text-red-700 text-xs'>This email is invalid.</p>}
-                            {newAddressText !== '' && addressExists && <p className='text-muted-foreground text-red-700 text-xs'>Address exists.</p>}
+                            {newAddressText !== '' && isValidAddress === false && <p className='text-red-700 text-xs'>This email is invalid.</p>}
+                            {newAddressText !== '' && addressExists && <p className='text-red-700 text-xs'>Address exists.</p>}
                             @{domainName}
                         </div>
                         <div className='flex w-full md:w-2/12 justify-end' >
@@ -209,7 +209,7 @@ function Manage() {
                                             }
                                             {deleteAddress === addr &&
                                                 <>
-                                                    <span style={{ color: "red" }}>Confirm delete?</span>
+                                                    <span className='text-red-700'>Confirm delete?</span>
                                                     <Button variant="destructive" onPointerUp={() => confirmDeleteClicked(addr)}>
                                                         <X />
                                                     </Button>
