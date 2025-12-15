@@ -5,7 +5,7 @@ import useDomain from './useDomain';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import useUser from './useUser';
 import { Button } from './components/ui/button';
-import { Info, LogOut, Plus, Trash, User, X } from 'lucide-react';
+import { LogOut, Plus, Trash, User, X } from 'lucide-react';
 import { Input } from './components/ui/input';
 import { Switch } from './components/ui/switch';
 import { Avatar, AvatarImage } from './components/ui/avatar';
