@@ -1,6 +1,6 @@
-import { Chip } from "@mui/material";
 import { useWebSocketNotifier } from "./useWebSocketNotifier";
 import { ReadyState } from "react-use-websocket";
+import { Badge } from "@/components/ui/badge"
 
 const getConnectionStateLabel = (state: ReadyState) => {
     switch (state) {
@@ -23,10 +23,9 @@ export function TopBarSettings() {
     const { readyState } = useWebSocketNotifier();
 
     return (
-        <Chip
-            label={getConnectionStateLabel(readyState)}
-            sx={{ marginLeft: 'auto' }}
-        />
+        <Badge className="ml-auto">
+            {getConnectionStateLabel(readyState)}
+        </Badge>
     );
 }
 
