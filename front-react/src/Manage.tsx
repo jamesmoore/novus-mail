@@ -109,14 +109,14 @@ function Manage() {
         }
     };
 
+    const addressIsInvalid = useMemo(() => newAddressText !== '' && (isValidAddress === false || addressExists),
+        [newAddressText, isValidAddress, addressExists]);
+
     if (error) {
         return <div>{error.message}</div>;
     }
 
     const paperClassName = "rounded-sm paper-background shadow-sm";
-
-    const addressIsInvalid = useMemo(() => newAddressText !== '' && (isValidAddress === false || addressExists),
-        [newAddressText, isValidAddress, addressExists]);
 
     return (
         <>
