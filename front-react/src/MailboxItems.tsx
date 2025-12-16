@@ -1,4 +1,4 @@
-import { Box, Divider, Typography } from "@mui/material";
+import { Divider } from "@mui/material";
 import MailboxItem from "./MailboxItem";
 import { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult } from "@tanstack/react-query";
 import { MailResponse } from "./models/mail-response";
@@ -68,12 +68,12 @@ function MailboxItems({
                     )
                 }
 
-                <Box ref={ref} mt={1} mb={1} flex="0 0 auto" display="flex" justifyContent={'center'}>
+                <div ref={ref} className="flex mt-1 mb-1 flex-0 justify-center">
 
                     {isFetchingNextPage && <LoadingSpinner/>}
 
-                    {!hasNextPage && !isFetching && <Divider component="div" sx={{ width: "100%" }}><Typography variant='body1' color="textDisabled">No more mail</Typography></Divider>}
-                </Box>
+                    {!hasNextPage && !isFetching && <Divider component="div" sx={{ width: "100%" }}><p className="text-neutral-600">No more mail</p></Divider>}
+                </div>
             </>
         );
     }
