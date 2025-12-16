@@ -1,4 +1,3 @@
-import { Divider } from "@mui/material";
 import MailboxItem from "./MailboxItem";
 import { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult } from "@tanstack/react-query";
 import { MailResponse } from "./models/mail-response";
@@ -47,7 +46,7 @@ function MailboxItems({
 
     if (showSpinner) {
         return (
-            <LoadingSpinner/>
+            <LoadingSpinner />
         )
     }
     else {
@@ -58,11 +57,11 @@ function MailboxItems({
                         return mailPage.data.map((mail) =>
                         (
                             <MailboxItem
-                                key={mail.id} 
-                                mail={mail} 
-                                onDelete={() => onMailItemDelete(mail)} 
-                                onSelect={() => onMailItemSelect(mail)} 
-                                opened={false}/>
+                                key={mail.id}
+                                mail={mail}
+                                onDelete={() => onMailItemDelete(mail)}
+                                onSelect={() => onMailItemSelect(mail)}
+                                opened={false} />
                         ))
                     }
                     )
@@ -70,9 +69,15 @@ function MailboxItems({
 
                 <div ref={ref} className="flex mt-1 mb-1 flex-0 justify-center">
 
-                    {isFetchingNextPage && <LoadingSpinner/>}
-
-                    {!hasNextPage && !isFetching && <Divider component="div" sx={{ width: "100%" }}><p className="text-neutral-600">No more mail</p></Divider>}
+                    {isFetchingNextPage && <LoadingSpinner />}
+                    {!hasNextPage && !isFetching &&
+                        <div className="divider" >
+                            <span className="divider-wrapper">
+                                <p className="text-neutral-600">
+                                    No more mail
+                                </p>
+                            </span>
+                        </div>}
                 </div>
             </>
         );
