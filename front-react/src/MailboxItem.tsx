@@ -86,7 +86,7 @@ function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
     return (
         <>
             <div
-                className = {paperClassName + ' w-full hover:bg-neutral-800:shadow-lg:cursor-pointer'}
+                className = {paperClassName + ' w-full hover:bg-neutral-800 hover:shadow-lg hover:cursor-pointer'}
                 //elevation={hover ? 3 : 1}
                 tabIndex={1}
                 role="button"
