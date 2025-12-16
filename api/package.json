@@ -12,7 +12,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@t3-oss/env-core": "^0.13.8",
+    "@t3-oss/env-core": "^0.13.10",
     "better-sqlite3": "^12.5.0",
     "connect-ensure-login": "^0.1.1",
     "connect-loki": "^1.2.0",
@@ -26,7 +26,7 @@
     "passport-anonymous": "^1.0.1",
     "smtp-server": "^3.17.1",
     "ws": "^8.18.3",
-    "zod": "^4.1.13"
+    "zod": "^4.2.0"
   },
   "type": "module",
   "devDependencies": {
@@ -37,7 +37,7 @@
     "@types/express": "^5.0.6",
     "@types/express-session": "^1.18.2",
     "@types/mailparser": "^3.4.6",
-    "@types/node": "^25.0.1",
+    "@types/node": "^25.0.2",
     "@types/passport": "^1.0.17",
     "@types/passport-anonymous": "^1.0.5",
     "@types/smtp-server": "^3.5.12",
@@ -47,6 +47,6 @@
     "nodemon": "^3.1.11",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.49.0"
+    "typescript-eslint": "^8.50.0"
   }
 }
