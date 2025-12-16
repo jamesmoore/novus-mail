@@ -83,6 +83,8 @@ function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
         textOverflow: "ellipsis",
     };
 
+    const paperClassName = "rounded-sm paper-background shadow-md";
+
     return (
         <>
             <Paper
@@ -138,15 +140,15 @@ function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
             </Paper>
             {
                 showMail && message && !loading &&
-                <Paper sx={{ mb: 1, width: '100%', minWidth: 0 }} >
+                <div className={'mb-1 w-full min-w-0 ' + paperClassName}>
                     <ShadowEmail html={message.content} />
-                </Paper>
+                </div>
             }
             {
                 error &&
-                <Paper sx={{ mb: 1 }} >
+                <div className={'mb-1 ' + paperClassName} >
                     {error.message}
-                </Paper>
+                </div>
             }
         </>
     )
