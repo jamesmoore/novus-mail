@@ -26,7 +26,7 @@
     "passport-anonymous": "^1.0.1",
     "smtp-server": "^3.17.1",
     "ws": "^8.18.3",
-    "zod": "^4.2.0"
+    "zod": "^4.2.1"
   },
   "type": "module",
   "devDependencies": {
