@@ -1,4 +1,4 @@
-import { IconButton, Paper, SxProps, Theme, Tooltip, Typography } from "@mui/material";
+import { IconButton, SxProps, Theme, Tooltip, Typography } from "@mui/material";
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Grid from '@mui/material/Grid';
@@ -73,8 +73,6 @@ function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
         }
     );
 
-
-    const cursor = onSelect ? "pointer" : "default";
     const fontWeight = mail.read ? 400 : 700;
     const style: SxProps<Theme> = {
         fontWeight: fontWeight,
@@ -83,16 +81,13 @@ function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
         textOverflow: "ellipsis",
     };
 
-    const paperClassName = "rounded-sm paper-background shadow-md";
+    const paperClassName = "rounded-sm bg-neutral-900 shadow-md";
 
     return (
         <>
-            <Paper
-                sx={{
-                    "&:hover": { cursor: cursor },
-                    maxWidth: "100%"
-                }}
-                elevation={hover ? 3 : 1}
+            <div
+                className = {paperClassName + ' w-full hover:bg-neutral-800:shadow-lg:cursor-pointer'}
+                //elevation={hover ? 3 : 1}
                 tabIndex={1}
                 role="button"
                 onKeyUp={(e) => mailKeyUp(e, mail.id)}
@@ -137,7 +132,7 @@ function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
                         </IconButton>
                     </Grid>
                 </Grid>
-            </Paper>
+            </div>
             {
                 showMail && message && !loading &&
                 <div className={'mb-1 w-full min-w-0 ' + paperClassName}>

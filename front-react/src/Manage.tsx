@@ -116,7 +116,7 @@ function Manage() {
         return <div>{error.message}</div>;
     }
 
-    const paperClassName = "rounded-sm paper-background shadow-sm";
+    const paperClassName = "rounded-sm bg-neutral-900 shadow-sm";
 
     return (
         <>

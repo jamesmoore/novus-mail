@@ -135,10 +135,6 @@ input::-moz-selection {
   color: inherit;
 }
 
-.paper-background {
-  background-color: oklch(1 0 0 / 5%);
-}
-
 .delayed-fade-in {
   animation: delayedFadeIn 5s;
 }
