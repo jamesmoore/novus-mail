@@ -1,7 +1,6 @@
 import { useState, ReactNode, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { AppBar, Badge, Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
-import Grid from '@mui/material/Grid';
 import useAddressResponse from './useAddressResponse';
 import SettingsIcon from '@mui/icons-material/Settings';
 import MailIcon from '@mui/icons-material/Mail';
@@ -235,10 +234,11 @@ function Layout({ bodyChildren, topBarChildren }: LayoutProps) {
         }}
       >
 
-        <Toolbar />
-        <Grid container flexDirection='column' flex="1 0 auto" spacing={1} padding={1}>
+        {/* This is just to shift the main body down so it is not covered by the navbar */}
+        <Toolbar /> 
+        <div className='flex flex-col flex-1 p-2 gap-2'>
           {bodyChildren}
-        </Grid>
+        </div>
       </Box>
     </div>
   );
