@@ -100,10 +100,10 @@ function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
                     <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-4 flex-1 min-w-0">
 
                         {/* Sender */}
-                        <div className="font-medium truncate md:w-40">
+                        <div className="md:w-40 truncate">
                             {mail.sendername ? (
                                 <Tooltip title={mail.sender}>
-                                    <span>{mail.sendername}</span>
+                                    <span className={` ${mail.read ? "" : "font-bold"}`}>{mail.sendername}</span>
                                 </Tooltip>
                             ) : (
                                 <span>{mail.sender}</span>
@@ -113,7 +113,7 @@ function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
                         {/* Subject */}
                         <div className="flex-1 min-w-0 overflow-hidden">
                             <div
-                                className={`truncate ${mail.read ? "text-muted-foreground" :   "  font-bold text-neutral-50 should-be-text-primary"
+                                className={`truncate ${mail.read ? "text-muted-foreground" : "font-bold highlight-color should-be-text-primary"
                                     }`}
                             >
                                 {mail.subject}
@@ -122,7 +122,7 @@ function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
 
                         {/* Date */}
                         {mail.received !== 0 && (
-                            <div className="text-sm text-muted-foreground md:whitespace-nowrap">
+                            <div className="text-muted-foreground md:whitespace-nowrap">
                                 <Tooltip title={new Date(mail.received).toLocaleString()}>
                                     <span>{timeSince(mail.received)}</span>
                                 </Tooltip>

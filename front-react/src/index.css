@@ -163,3 +163,7 @@ input::-moz-selection {
     padding-right: calc(8px * 1.2);
     white-space: nowrap;
 }
+
+.highlight-color {
+    color: oklch(0.8163 0.0896 243.62);
+} 
