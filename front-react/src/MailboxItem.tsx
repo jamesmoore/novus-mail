@@ -1,4 +1,4 @@
-import { SxProps, Theme, Tooltip } from "@mui/material";
+import { Tooltip } from "@mui/material";
 import { Mail } from "./models/mail";
 import { isEnterKeyUp, isLeftMouseClick } from "./Events";
 import humanizeDuration from "humanize-duration";
