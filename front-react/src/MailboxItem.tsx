@@ -1,4 +1,4 @@
-import { Tooltip } from "@mui/material";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip";
 import { Mail } from "./models/mail";
 import { isEnterKeyUp, isLeftMouseClick } from "./Events";
 import humanizeDuration from "humanize-duration";
@@ -94,8 +94,11 @@ function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
                         {/* Sender */}
                         <div className="md:w-40 truncate">
                             {mail.sendername ? (
-                                <Tooltip title={mail.sender}>
-                                    <span className={` ${mail.read ? "" : "font-bold"}`}>{mail.sendername}</span>
+                                <Tooltip delayDuration={700}>
+                                    <TooltipTrigger asChild>
+                                        <span className={` ${mail.read ? "" : "font-bold"}`}>{mail.sendername}</span>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom">{mail.sender}</TooltipContent>
                                 </Tooltip>
                             ) : (
                                 <span>{mail.sender}</span>
@@ -115,8 +118,11 @@ function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
                         {/* Date */}
                         {mail.received !== 0 && (
                             <div className="text-muted-foreground md:whitespace-nowrap">
-                                <Tooltip title={new Date(mail.received).toLocaleString()}>
-                                    <span>{timeSince(mail.received)}</span>
+                                <Tooltip delayDuration={700}>
+                                    <TooltipTrigger asChild>
+                                        <span>{timeSince(mail.received)}</span>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom">{new Date(mail.received).toLocaleString()}</TooltipContent>
                                 </Tooltip>
                             </div>
                         )}
