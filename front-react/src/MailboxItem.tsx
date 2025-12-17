@@ -72,14 +72,6 @@ function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
         }
     );
 
-    const fontWeight = mail.read ? 400 : 700;
-    const style: SxProps<Theme> = {
-        fontWeight: fontWeight,
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-    };
-
     const paperClassName = "rounded-sm bg-neutral-900 shadow-md";
 
     return (
