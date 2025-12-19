@@ -21,6 +21,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import useAddressResponse from "@/useAddressResponse";
 import { JSX, useMemo } from "react";
@@ -45,6 +46,9 @@ export function AppSidebar() {
   const { address: urlAddressSegment } = useParams();
   const { data: addressesResponse, isLoading: addressIsLoading } = useAddressResponse();
   const { data: unreadCounts } = useUnreadCounts();
+
+  const { setOpenMobile } = useSidebar();
+
 
   // generate sidebar menu items
   const items = useMemo(() => {
@@ -93,9 +97,9 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.key}>
                   <SidebarMenuButton asChild >
-                    <a href='#' onClick={() => navigate(item.url)} className={item.selected ? "font-bold bg-neutral-200 dark:bg-neutral-700" : ""}>
+                    <a href='#' onClick={() => sidebarClicked(item)} className={item.selected ? "font-bold bg-neutral-200 dark:bg-neutral-700" : ""}>
                       {item.icon}
-                      <span>{item.title} </span>
+                      <span>{item.title}</span>
                       {item.unreadCount && <Badge className="h-5 min-w-5 rounded-full px-1">
                         {item.unreadCount}
                       </Badge>}
@@ -109,4 +113,9 @@ export function AppSidebar() {
       </SidebarContent>
     </Sidebar>
   )
+
+  function sidebarClicked(item: SidebarItem): void {
+    setOpenMobile(false);
+    navigate(item.url);
+  }
 }
