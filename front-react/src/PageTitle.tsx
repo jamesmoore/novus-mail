@@ -1,11 +1,9 @@
 import { useEffect } from "react";
 import useUnreadCounts from "./useUnreadCounts";
-import useUser from "./useUser";
 
 export default function PageTitle() {
 
-    const { data: user } = useUser();
-    const { data: unreadCounts } = useUnreadCounts(user && (!user.requiresAuth || user.isAuthenticated));
+    const { data: unreadCounts } = useUnreadCounts();
 
     // update page titles
     useEffect(() => {

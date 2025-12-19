@@ -1,7 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchUnreadCounts } from "./api-client";
+import useUser from "./useUser";
 
-const useUnreadCounts = (enabled: boolean = true) =>  useQuery(
+const useUnreadCounts = () => {
+  const { data: user } = useUser();
+  const enabled = !!user && (!user.requiresAuth || user.isAuthenticated);
+
+  return useQuery(
     {
       queryKey: ["unread-counts"],
       queryFn: fetchUnreadCounts,
@@ -9,5 +14,6 @@ const useUnreadCounts = (enabled: boolean = true) =>  useQuery(
       enabled: enabled,
     }
   )
+};
 
 export default useUnreadCounts;

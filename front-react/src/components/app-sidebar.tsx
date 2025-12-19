@@ -13,7 +13,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import useAddressResponse from "@/useAddressResponse";
-import { JSX, useMemo } from "react";
+import { Fragment, JSX, useMemo } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import useUnreadCounts from "@/useUnreadCounts";
 import { Badge } from "./ui/badge";
@@ -89,9 +89,9 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarSeparator />
               {items.map((item) => (
-                <>
-                  {item.hasSeparator && <SidebarSeparator />}
-                  <SidebarMenuItem key={item.key} >
+                <Fragment key={item.key}>
+                  {item.hasSeparator && <SidebarSeparator/>}
+                  <SidebarMenuItem  >
                     <SidebarMenuButton asChild className="text-base my-0.5" isActive={item.selected}>
                       <a href='#' onClick={() => sidebarClicked(item)} >
                         {item.icon}
@@ -102,7 +102,7 @@ export function AppSidebar() {
                       </a>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                </>
+                </Fragment>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
