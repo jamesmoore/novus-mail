@@ -5,7 +5,7 @@ import useDomain from './useDomain';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import useUser from './useUser';
 import { Button } from './components/ui/button';
-import { CircleAlert, LogOut, Moon, Plus, Sun, Trash, User, X } from 'lucide-react';
+import { CircleAlert, LogOut, Moon, Plus, Sun, SunMoon, Trash, User, X } from 'lucide-react';
 import { Input } from './components/ui/input';
 import { Switch } from './components/ui/switch';
 import { Avatar, AvatarImage } from './components/ui/avatar';
@@ -245,15 +245,15 @@ function Manage() {
                                     <span className="sr-only">Toggle theme</span>
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                            <DropdownMenuContent align="start">
                                 <DropdownMenuItem onClick={() => setTheme("light")}>
-                                    Light
+                                    <Sun/>Light
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => setTheme("dark")}>
-                                    Dark
+                                    <Moon/>Dark
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => setTheme("system")}>
-                                    System
+                                    <SunMoon/>System
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
