@@ -35,10 +35,10 @@ createRoot(document.getElementById('app')!).render(
             <Router>
               <Routes>
                 <Route path="/" element={<MailboxRedirect />} />
-                <Route path="/manage" element={<Layout><TopBarSettings /><Manage /></Layout>} />
-                <Route path="/deleted" element={<Layout><TopBarDeleted /><DeletedMailbox /></Layout>} />
+                <Route path="/manage" element={<Layout topBarChildren={<TopBarSettings />} ><Manage /></Layout>} />
+                <Route path="/deleted" element={<Layout topBarChildren={<TopBarDeleted />}><DeletedMailbox /></Layout>} />
                 <Route path="/mail/:address/:messageId" element={<Layout children={<Mail />} />} />
-                <Route path="/inbox/:address" element={<Layout><TopBarAddress/><Mailbox /></Layout>} />
+                <Route path="/inbox/:address" element={<Layout topBarChildren={<TopBarAddress />} ><Mailbox /></Layout>} />
                 <Route path="*" element={<Navigate to="/" />} />
               </Routes>
             </Router>

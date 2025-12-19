@@ -24,7 +24,7 @@ export function TopBarSettings() {
     const { readyState } = useWebSocketNotifier();
 
     return (
-        <div className="flex py-1 pr-1">
+        <div className="flex py-1 pr-1 items-center">
             <SidebarTrigger />
             <Badge className="ml-auto">
                 {getConnectionStateLabel(readyState)}

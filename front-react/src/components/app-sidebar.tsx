@@ -1,9 +1,3 @@
-/***
- * TODO
- * navbar(s)
- * auto switch theme
- */
-
 import { Mail, MailOpen, Settings, Trash2 } from "lucide-react"
 
 import {
