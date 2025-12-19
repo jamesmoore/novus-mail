@@ -14,7 +14,6 @@ import MailboxRedirect from './MailboxRedirect.tsx';
 import './index.css'
 import { ThemeProvider } from './components/theme-provider.tsx';
 import PageTitle from './PageTitle.tsx';
-import WebSocketNotificationHandler from './WebSocketNotificationHandler.tsx';
 import Layout from './Layout.tsx';
 import TopBarSettings from './TopBarSettings.tsx';
 import TopBarDeleted from './TopBarDeleted.tsx';
@@ -30,9 +29,9 @@ createRoot(document.getElementById('app')!).render(
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools initialIsOpen={false} />
           <PageTitle />
-          <WebSocketNotificationHandler />
           <Root>
             <Router>
+              
               <Routes>
                 <Route path="/" element={<MailboxRedirect />} />
                 <Route path="/manage" element={<Layout topBarChildren={<TopBarSettings />} ><Manage /></Layout>} />

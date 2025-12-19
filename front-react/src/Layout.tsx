@@ -1,6 +1,7 @@
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { ReactNode } from "react";
+import WebSocketNotificationHandler from "./WebSocketNotificationHandler";
 
 export interface LayoutProps {
   children?: ReactNode;
@@ -8,7 +9,8 @@ export interface LayoutProps {
 }
 
 export default function Layout({ children, topBarChildren }: LayoutProps) {
-  return (
+  return <>
+    <WebSocketNotificationHandler />
     <SidebarProvider>
       <AppSidebar />
       <div className="flex min-h-svh flex-col w-full min-w-0">
@@ -25,5 +27,5 @@ export default function Layout({ children, topBarChildren }: LayoutProps) {
         </div>
       </div>
     </SidebarProvider>
-  )
+  </>
 }
