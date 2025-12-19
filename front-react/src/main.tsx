@@ -31,7 +31,6 @@ createRoot(document.getElementById('app')!).render(
           <PageTitle />
           <Root>
             <Router>
-              
               <Routes>
                 <Route path="/" element={<MailboxRedirect />} />
                 <Route path="/manage" element={<Layout topBarChildren={<TopBarSettings />} ><Manage /></Layout>} />

@@ -5,10 +5,12 @@ import useDomain from './useDomain';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import useUser from './useUser';
 import { Button } from './components/ui/button';
-import { CircleAlert, LogOut, Plus, Trash, User, X } from 'lucide-react';
+import { CircleAlert, LogOut, Moon, Plus, Sun, Trash, User, X } from 'lucide-react';
 import { Input } from './components/ui/input';
 import { Switch } from './components/ui/switch';
 import { Avatar, AvatarImage } from './components/ui/avatar';
+import { useTheme } from './components/theme-provider';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './components/ui/dropdown-menu';
 
 function Manage() {
     const [newAddressText, setNewAddressText] = useState('');
@@ -27,6 +29,8 @@ function Manage() {
     const [addressExists, setAddressExists] = useState(false);
 
     const { data: user } = useUser();
+
+    const { setTheme } = useTheme();
 
     useEffect(() => {
         let cancelled = false;
@@ -227,6 +231,36 @@ function Manage() {
                     </div>
                 </div>
             }
+            <div className={paperClassName}>
+                <div className="flex flex-wrap m-1 ml-2 p-1">
+                    <div className='flex items-center w-full md:w-3/12'>
+                        Theme
+                    </div>
+                    <div className='flex' >
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="icon">
+                                    <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+                                    <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+                                    <span className="sr-only">Toggle theme</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setTheme("light")}>
+                                    Light
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setTheme("dark")}>
+                                    Dark
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setTheme("system")}>
+                                    System
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </div>
+            </div>
+
         </ >
     );
 }
