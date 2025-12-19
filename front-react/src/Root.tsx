@@ -21,7 +21,9 @@ function Root({ children }: RootProps) {
 
     // Only block on first-ever load
     if (isLoading && !user) {
-        return <LoadingSpinner />;
+        return <div className='flex h-screen items-center'>
+            <LoadingSpinner />
+        </div>;
     }
 
     if (user && !user.isAuthenticated && user.requiresAuth) {
