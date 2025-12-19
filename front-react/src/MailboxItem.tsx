@@ -72,12 +72,12 @@ function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
         }
     );
 
-    const paperClassName = "rounded-sm bg-neutral-900 shadow-md";
+    const paperClassName = "rounded-sm bg-neutral-100 dark:bg-neutral-900 shadow-md";
 
     return (
         <>
             <div
-                className={paperClassName + ' w-full hover:bg-neutral-800 hover:shadow-lg hover:cursor-pointer'}
+                className={paperClassName + ' w-full hover:bg-neutral-200 dark:hover:bg-neutral-800 hover:shadow-lg hover:cursor-pointer'}
                 //elevation={hover ? 3 : 1}
                 tabIndex={1}
                 role="button"
