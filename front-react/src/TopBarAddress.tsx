@@ -63,13 +63,13 @@ function TopBarAddress() {
                     <p>Copy</p>
                 </TooltipContent>
                 <TooltipTrigger asChild>
-                    <Button className='ml-1' onClick={copyClicked} variant="ghost">
+                    <Button onClick={copyClicked} variant="ghost">
                         <Copy />
                     </Button>
                 </TooltipTrigger>
             </Tooltip>
 
-            <Button className='ml-auto hover:bg-red-700' variant="ghost" disabled={total === 0} onClick={onDeleteAllMails} >
+            <Button className='ml-auto hover:text-destructive' variant="ghost" disabled={total === 0} onClick={onDeleteAllMails} >
                 <Trash />
             </Button>
             <Tooltip >
@@ -77,7 +77,7 @@ function TopBarAddress() {
                     <p>Mark all as read</p>
                 </TooltipContent>
                 <TooltipTrigger asChild>
-                    <Button className='ml-1' variant="ghost" onClick={onMarkAllAsRead} disabled={total === 0}>
+                    <Button variant="ghost" onClick={onMarkAllAsRead} disabled={total === 0}>
                         <CheckCheck />
                     </Button>
                 </TooltipTrigger>

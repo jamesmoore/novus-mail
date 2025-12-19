@@ -2,19 +2,20 @@ import { useWebSocketNotifier } from "./useWebSocketNotifier";
 import { ReadyState } from "react-use-websocket";
 import { Badge } from "@/components/ui/badge"
 import { SidebarTrigger } from "./components/ui/sidebar";
+import { CircleCheck, CirclePause, CircleX } from "lucide-react";
 
 const getConnectionStateLabel = (state: ReadyState) => {
     switch (state) {
         case ReadyState.UNINSTANTIATED:
-            return '🔴 Uninstantiated';
+            return <><CircleX className="text-red-400" /> Uninstantiated</>;
         case ReadyState.CONNECTING:
-            return '🟠 Connecting';
+            return <><CirclePause className="text-orange-500" /> Connecting</>;
         case ReadyState.OPEN:
-            return '🟢 Connected';
+            return <><CircleCheck className="text-green-400" /> Connected</>;
         case ReadyState.CLOSING:
-            return '🟠 Closing';
+            return <><CirclePause className="text-orange-500" /> Closing</>;
         case ReadyState.CLOSED:
-            return '🔴 Closed';
+            return <><CircleX className="text-red-400 " /> Closed</>;
         default:
             return '';
     }
@@ -26,7 +27,7 @@ export function TopBarSettings() {
     return (
         <div className="flex py-1 pr-1 items-center">
             <SidebarTrigger />
-            <Badge className="ml-auto">
+            <Badge variant="secondary" className="ml-auto h-6">
                 {getConnectionStateLabel(readyState)}
             </Badge>
         </div>

@@ -22,7 +22,7 @@ function TopBarDeleted() {
     return (
         <div className="flex items-center">
             <SidebarTrigger />
-            <Button className='ml-auto hover:bg-red-700' /*sx={{ "&:hover": { color: theme.palette.error.main } }}*/ disabled={total === 0} onClick={onDeleteAllMails}>
+            <Button className='ml-auto hover:bg-destructive' disabled={total === 0} onClick={onDeleteAllMails}>
                 <Trash /> {text}
             </Button>
         </div>
