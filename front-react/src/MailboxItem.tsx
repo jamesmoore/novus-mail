@@ -72,7 +72,7 @@ function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
         }
     );
 
-    const paperClassName = "rounded-sm bg-neutral-100 dark:bg-neutral-900 shadow-md";
+    const paperClassName = "rounded-sm bg-sidebar shadow-md";
 
     return (
         <>
