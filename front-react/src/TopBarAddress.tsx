@@ -6,6 +6,7 @@ import { useInvalidateDeletedMailItemsCache, useMailItems } from "./useMailItems
 import { CheckCheck, Copy, Trash } from 'lucide-react';
 import { Button } from "./components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip";
+import { SidebarTrigger } from "./components/ui/sidebar";
 
 const handleCopy = async (text: string) => {
     try {
@@ -52,8 +53,9 @@ function TopBarAddress() {
 
     return (
         selectedAddress &&
-        <>
-            <div>
+        <div className="flex items-center">
+            <SidebarTrigger />
+            <div className="ml-1">
                 {getFullAddress()}
             </div>
             <Tooltip>
@@ -61,13 +63,13 @@ function TopBarAddress() {
                     <p>Copy</p>
                 </TooltipContent>
                 <TooltipTrigger asChild>
-                    <Button className='ml-1' onClick={copyClicked}>
+                    <Button className='ml-1' onClick={copyClicked} variant="ghost">
                         <Copy />
                     </Button>
                 </TooltipTrigger>
             </Tooltip>
 
-            <Button className='ml-auto hover:bg-red-700' disabled={total === 0} onClick={onDeleteAllMails} >
+            <Button className='ml-auto hover:bg-red-700' variant="ghost" disabled={total === 0} onClick={onDeleteAllMails} >
                 <Trash />
             </Button>
             <Tooltip >
@@ -75,13 +77,13 @@ function TopBarAddress() {
                     <p>Mark all as read</p>
                 </TooltipContent>
                 <TooltipTrigger asChild>
-                    <Button className='ml-1' onClick={onMarkAllAsRead} disabled={total === 0}>
+                    <Button className='ml-1' variant="ghost" onClick={onMarkAllAsRead} disabled={total === 0}>
                         <CheckCheck />
                     </Button>
                 </TooltipTrigger>
             </Tooltip>
             <div className='ml-1' >{text}</div>
-        </>
+        </div>
     )
 }
 

@@ -16,6 +16,9 @@ import { ThemeProvider } from './components/theme-provider.tsx';
 import PageTitle from './PageTitle.tsx';
 import WebSocketNotificationHandler from './WebSocketNotificationHandler.tsx';
 import Layout from './Layout.tsx';
+import TopBarSettings from './TopBarSettings.tsx';
+import TopBarDeleted from './TopBarDeleted.tsx';
+import TopBarAddress from './TopBarAddress.tsx';
 
 const queryClient = new QueryClient();
 
@@ -32,10 +35,10 @@ createRoot(document.getElementById('app')!).render(
             <Router>
               <Routes>
                 <Route path="/" element={<MailboxRedirect />} />
-                <Route path="/manage" element={<Layout children={<Manage />} />} />
-                <Route path="/deleted" element={<Layout children={<DeletedMailbox />} />} />
+                <Route path="/manage" element={<Layout><TopBarSettings /><Manage /></Layout>} />
+                <Route path="/deleted" element={<Layout><TopBarDeleted /><DeletedMailbox /></Layout>} />
                 <Route path="/mail/:address/:messageId" element={<Layout children={<Mail />} />} />
-                <Route path="/inbox/:address" element={<Layout children={<Mailbox />} />} />
+                <Route path="/inbox/:address" element={<Layout><TopBarAddress/><Mailbox /></Layout>} />
                 <Route path="*" element={<Navigate to="/" />} />
               </Routes>
             </Router>

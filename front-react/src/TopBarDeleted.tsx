@@ -2,6 +2,7 @@ import { useDeletedMailItems, useInvalidateDeletedMailItemsCache } from "./useMa
 import { emptyDeletedMails } from "./api-client";
 import { Trash } from 'lucide-react';
 import { Button } from "./components/ui/button";
+import { SidebarTrigger } from "./components/ui/sidebar";
 
 function TopBarDeleted() {
 
@@ -19,12 +20,12 @@ function TopBarDeleted() {
     }
 
     return (
-        <>
+        <div className="flex items-center">
+            <SidebarTrigger />
             <Button className='ml-auto hover:bg-red-700' /*sx={{ "&:hover": { color: theme.palette.error.main } }}*/ disabled={total === 0} onClick={onDeleteAllMails}>
                 <Trash /> {text}
             </Button>
-            
-        </>
+        </div>
     )
 
 }

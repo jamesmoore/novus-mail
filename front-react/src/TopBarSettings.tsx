@@ -1,6 +1,7 @@
 import { useWebSocketNotifier } from "./useWebSocketNotifier";
 import { ReadyState } from "react-use-websocket";
 import { Badge } from "@/components/ui/badge"
+import { SidebarTrigger } from "./components/ui/sidebar";
 
 const getConnectionStateLabel = (state: ReadyState) => {
     switch (state) {
@@ -23,9 +24,12 @@ export function TopBarSettings() {
     const { readyState } = useWebSocketNotifier();
 
     return (
-        <Badge className="ml-auto">
-            {getConnectionStateLabel(readyState)}
-        </Badge>
+        <div className="flex py-1 pr-1">
+            <SidebarTrigger />
+            <Badge className="ml-auto">
+                {getConnectionStateLabel(readyState)}
+            </Badge>
+        </div>
     );
 }
 
