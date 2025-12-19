@@ -1,6 +1,7 @@
 import useUser from "./useUser";
 import Login from "./Login";
 import { ReactNode, useEffect } from "react";
+import LoadingSpinner from "./LoadingSpinner";
 
 export interface RootProps {
     children: ReactNode;
@@ -20,7 +21,7 @@ function Root({ children }: RootProps) {
 
     // Only block on first-ever load
     if (isLoading && !user) {
-        return <Login loading={true} strategy="..." />;
+        return <LoadingSpinner />;
     }
 
     if (user && !user.isAuthenticated && user.requiresAuth) {
