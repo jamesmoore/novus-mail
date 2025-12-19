@@ -1,13 +1,7 @@
 /***
  * TODO
- * sidebar close on click on mobile
- * sidebar separator
  * navbar(s)
  * auto switch theme
- * DONE
- * page title
- * websocket notification
- * MUI removal
  */
 
 import { Mail, MailOpen, Settings, Trash2 } from "lucide-react"
@@ -21,6 +15,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarSeparator,
   useSidebar,
 } from "@/components/ui/sidebar"
 import useAddressResponse from "@/useAddressResponse";
@@ -36,6 +31,7 @@ interface SidebarItem {
   icon: JSX.Element
   selected: boolean,
   unreadCount?: number,
+  hasSeparator: boolean,
 }
 
 const keyPrefix = "SIDEBAR_KEY_";
@@ -63,6 +59,7 @@ export function AppSidebar() {
         icon: addr.addr === urlAddressSegment ? <MailOpen strokeWidth={3} /> : <Mail />,
         selected: addr.addr === urlAddressSegment,
         unreadCount: unreadCounts?.filter(p => p.recipient === addr.addr)[0]?.unread,
+        hasSeparator: false,
       }));
       items.push(...mapped);
     }
@@ -73,6 +70,7 @@ export function AppSidebar() {
       url: "/deleted",
       icon: <Trash2 strokeWidth={location.pathname === '/deleted' ? 3 : 2} />,
       selected: location.pathname === '/deleted',
+      hasSeparator: true,
     });
 
     items.push({
@@ -81,6 +79,7 @@ export function AppSidebar() {
       url: "/manage",
       icon: <Settings strokeWidth={location.pathname === '/manage' ? 3 : 2} />,
       selected: location.pathname === '/manage',
+      hasSeparator: true,
     });
 
     return items;
@@ -91,21 +90,25 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Mailbox</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-base my-0.5">Mailbox</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              <SidebarSeparator />
               {items.map((item) => (
-                <SidebarMenuItem key={item.key}>
-                  <SidebarMenuButton asChild >
-                    <a href='#' onClick={() => sidebarClicked(item)} className={item.selected ? "font-bold bg-neutral-200 dark:bg-neutral-700" : ""}>
-                      {item.icon}
-                      <span>{item.title}</span>
-                      {item.unreadCount && <Badge className="h-5 min-w-5 rounded-full px-1">
-                        {item.unreadCount}
-                      </Badge>}
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                <>
+                  {item.hasSeparator && <SidebarSeparator />}
+                  <SidebarMenuItem key={item.key} >
+                    <SidebarMenuButton asChild className="text-base my-0.5" isActive={item.selected}>
+                      <a href='#' onClick={() => sidebarClicked(item)} >
+                        {item.icon}
+                        <span>{item.title}</span>
+                        {item.unreadCount && <Badge className="h-5 min-w-5 rounded-full px-1">
+                          {item.unreadCount}
+                        </Badge>}
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
