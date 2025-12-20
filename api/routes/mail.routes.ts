@@ -149,6 +149,30 @@ export function createRouter(db: Database) {
         }
     })
 
+    router.post('/restoreDeletedMails', (req, res) => {
+        try {
+            const owner = req.user?.sub;
+
+            const params = {
+                owner: owner,
+            };
+
+            const whereClause = [
+                'deleted = 1',
+                getOwnerWhereClause(owner),
+            ].filter(Boolean).join(' AND ');
+
+            const sql = `UPDATE mail SET deleted = 0 WHERE ${whereClause}`;
+
+            const dbResult = db.prepare(sql).run(params);
+            res.status(200).send(`Restored ${dbResult.changes} mails`);
+        } catch (err) {
+            console.error("DB restore deleted mails fail")
+            console.error(err)
+            res.status(500).json({ error: "Failed to restore deleted mails" });
+        }
+    })    
+
     router.post('/readMail', (req, res) => {
         const json = req.body;
         try {

@@ -57,9 +57,18 @@ const useInvalidateDeletedMailItemsCache = () => {
     return { invalidate };
 }
 
+const useInvalidateAllMailItemsCache = () => {
+    const queryClient = useQueryClient();
+    const invalidate = () => {
+        return queryClient.invalidateQueries({ predicate: p => p.queryKey[0] === 'mail' });
+    }
+    return { invalidate };
+}
+
 export {
     useMailItems,
     useDeletedMailItems,
     useInvalidateMailItemsCache,
-    useInvalidateDeletedMailItemsCache
+    useInvalidateDeletedMailItemsCache,
+    useInvalidateAllMailItemsCache,
 };
