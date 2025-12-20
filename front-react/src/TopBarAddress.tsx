@@ -83,18 +83,18 @@ function TopBarAddress() {
             </Tooltip>
 
             <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <Tooltip delayDuration={700}>
-                        <TooltipContent>
-                            <p>Delete all</p>
-                        </TooltipContent>
-                        <TooltipTrigger asChild>
+                <Tooltip delayDuration={700}>
+                    <TooltipContent>
+                        <p>Delete all</p>
+                    </TooltipContent>
+                    <TooltipTrigger asChild>
+                        <AlertDialogTrigger asChild>
                             <Button className='ml-auto hover:text-destructive' variant="ghost" disabled={total === 0}>
                                 <Trash />
                             </Button>
-                        </TooltipTrigger>
-                    </Tooltip>
-                </AlertDialogTrigger>
+                        </AlertDialogTrigger>
+                    </TooltipTrigger>
+                </Tooltip>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Delete all mail?</AlertDialogTitle>
