@@ -132,11 +132,11 @@ function Manage() {
             <SnackbarProvider />
             {
                 user && <div className={paperClassName}>
-                    <div className='flex flex-wrap m-1 ml-2 p-1'>
-                        <div className='flex items-center w-full md:w-3/12'>
+                    <div className='flex flex-wrap items-center m-1 ml-2 p-1'>
+                        <div className='w-full md:w-3/12'>
                             User
                         </div>
-                        <div className='flex items-center w-7/12 gap-1 mt-2 md:mt-0' >
+                        <div className='flex items-center gap-1 mt-2 md:mt-0 md:flex-1' >
                             {user.picture ?
                                 <Avatar>
                                     <AvatarImage
@@ -147,7 +147,7 @@ function Manage() {
                                 : <User />}
                             {user.email ?? 'Anon'}&nbsp;{`(${user.strategy})`}
                         </div>
-                        <div className='flex ml-auto w-2/12 justify-end' >
+                        <div className='ml-auto' >
                             <Button disabled={!user.requiresAuth} onClick={doLogout}>
                                 <LogOut />Logout
                             </Button>
@@ -156,11 +156,11 @@ function Manage() {
                 </div>
             }
             <div className={paperClassName}>
-                <div className="flex flex-wrap m-1 ml-2 p-1">
-                    <div className='flex items-center w-full md:w-3/12'>
+                <div className="flex flex-wrap items-center m-1 ml-2 p-1">
+                    <div className='w-full md:w-3/12'>
                         New address
                     </div>
-                    <div className='flex flex-col mt-2 w-6/12 md:w-3/12 md:mt-0'>
+                    <div className='flex flex-col mt-2 w-1/2 md:w-1/4 md:mt-0'>
                         <Input
                             type="text"
                             onChange={event => setNewAddressText(event.target.value)}
@@ -169,15 +169,15 @@ function Manage() {
                             aria-invalid={addressIsInvalid}
                         />
                         {addressIsInvalid &&
-                            <div className='flex flex-row items-center text-red-700 text-sm mt-1 w-full whitespace-nowrap'>
+                            <div className='flex items-center text-red-700 text-sm mt-1 w-full whitespace-nowrap'>
                                 <CircleAlert />&nbsp;{addressExists ? 'Address exists.' : 'This email is invalid.'}
                             </div>
                         }
                     </div>
-                    <div className='flex items-center mt-2 md:mt-0'>
+                    <div className='mt-2 md:mt-0'>
                         @{domainName}
                     </div>
-                    <div className='flex ml-auto sm:w-2/12 justify-end mt-2 md:mt-0' >
+                    <div className='ml-auto mt-2 md:mt-0' >
                         <Button disabled={newAddressText === '' || addressIsInvalid} onClick={addAddress}>
                             <Plus />Add
                         </Button>
@@ -187,16 +187,16 @@ function Manage() {
             {
                 (addressesResponse?.addresses?.length ?? 0) > 0 &&
                 <div className={paperClassName}>
-                    <div className="flex flex-wrap m-1 ml-2 p-1 ">
+                    <div className="flex flex-wrap m-1 ml-2 p-1">
                         <div className='w-full md:w-3/12 mt-1'>
                             Manage addresses
                         </div>
-                        <div className='flex flex-col w-full md:w-9/12'>
+                        <div className='flex flex-col w-full md:w-3/4'>
                             {
                                 addressesResponse && addressesResponse.addresses.map(({ addr, owner }) => (
                                     <div
                                         key={addr}
-                                        className='flex flex-row pb-1'
+                                        className='flex pb-1'
                                         onPointerEnter={() => { setSelectedAddress(addr) }}
                                         onPointerLeave={() => { setSelectedAddress(''); }}
                                     >
@@ -204,7 +204,7 @@ function Manage() {
                                             <span>{addr}</span>
                                             <span style={{ opacity: 0.3 }}>@{domainName}</span>
                                         </div>
-                                        <div className='flex items-center justify-end ml-auto gap-2' >
+                                        <div className='ml-auto flex items-center gap-2' >
                                             {owner ? 'Private' : 'Public'}
                                             <Switch
                                                 checked={!!owner}
@@ -242,11 +242,11 @@ function Manage() {
                 </div>
             }
             <div className={paperClassName}>
-                <div className="flex flex-wrap m-1 ml-2 p-1">
-                    <div className='flex items-center w-full md:w-3/12'>
+                <div className="flex flex-wrap items-center m-1 ml-2 p-1">
+                    <div className='w-full md:w-3/12'>
                         Theme
                     </div>
-                    <div className='flex mt-2 md:mt-0' >
+                    <div className='mt-2 md:mt-0' >
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="outline" >
@@ -275,3 +275,4 @@ function Manage() {
 }
 
 export default Manage;
+
