@@ -1,11 +1,7 @@
-import { LoaderCircle } from "lucide-react";
+import { Spinner } from "./components/ui/spinner";
 
-function LoadingSpinner() {
-    return <div className="flex flex-1 justify-center items-center">
-        <div className="delayed-fade-in">
-            <LoaderCircle className="animate-spin"/>
-        </div>
+export default function LoadingSpinner() {
+    return <div className="flex flex-1 justify-center items-center delayed-fade-in">
+        <Spinner />
     </div>;
 }
-
-export default LoadingSpinner;
