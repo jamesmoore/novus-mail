@@ -108,8 +108,7 @@ function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
                         {/* Subject */}
                         <div className="flex-1 min-w-0 overflow-hidden">
                             <div
-                                className={`truncate ${mail.read ? "text-muted-foreground" : "font-bold highlight-color should-be-text-primary"
-                                    }`}
+                                className={`truncate ${mail.read ? "text-muted-foreground" : "font-bold highlight-color"}`}
                             >
                                 {mail.subject}
                             </div>
