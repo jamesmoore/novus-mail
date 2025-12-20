@@ -18,12 +18,14 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "./components/ui/alert-dialog";
+import { toast } from "sonner";
 
 const handleCopy = async (text: string) => {
     try {
         await navigator.clipboard.writeText(text);
+        toast.success(text + ' copied');
     } catch (err) {
-        console.error('Failed to copy:', err);
+        toast.error('Could not copy');
     }
 };
 
@@ -82,9 +84,16 @@ function TopBarAddress() {
 
             <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <Button className='ml-auto hover:text-destructive' variant="ghost" disabled={total === 0}>
-                        <Trash />
-                    </Button>
+                    <Tooltip>
+                        <TooltipContent>
+                            <p>Delete all</p>
+                        </TooltipContent>
+                        <TooltipTrigger asChild>
+                            <Button className='ml-auto hover:text-destructive' variant="ghost" disabled={total === 0}>
+                                <Trash />
+                            </Button>
+                        </TooltipTrigger>
+                    </Tooltip>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                     <AlertDialogHeader>

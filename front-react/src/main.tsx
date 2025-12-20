@@ -18,6 +18,7 @@ import Layout from './Layout.tsx';
 import TopBarSettings from './TopBarSettings.tsx';
 import TopBarDeleted from './TopBarDeleted.tsx';
 import TopBarAddress from './TopBarAddress.tsx';
+import { Toaster } from 'sonner';
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ createRoot(document.getElementById('app')!).render(
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools initialIsOpen={false} />
           <PageTitle />
+          <Toaster />
           <Root>
             <Router>
               <Routes>

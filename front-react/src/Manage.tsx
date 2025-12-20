@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { addAddress as apiAddAddress, deleteAddress as apiDeleteAddress, getAddress, logout, updateAddress } from './api-client';
 import useAddressResponse from './useAddressResponse';
 import useDomain from './useDomain';
-import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import useUser from './useUser';
 import { Button } from './components/ui/button';
 import { CircleAlert, LogOut, Moon, Plus, Sun, SunMoon, Trash, User } from 'lucide-react';
@@ -23,6 +22,7 @@ import {
     AlertDialogTrigger,
 } from './components/ui/alert-dialog';
 import { Label } from './components/ui/label';
+import { toast } from 'sonner';
 
 function Manage() {
     const [newAddressText, setNewAddressText] = useState('');
@@ -64,18 +64,18 @@ function Manage() {
 
     function addAddress() {
         if (addressExists) {
-            enqueueSnackbar('Address already exists', { variant: 'error' });
+            toast.error('Address already exists');
         }
         else if (newAddressText !== '') {
             apiAddAddress(newAddressText)
                 .then((success: boolean) => {
                     if (success) {
-                        enqueueSnackbar('Added ' + newAddressText, { variant: 'success' });
+                        toast.success('Added ' + newAddressText);
                         setNewAddressText("");
                         refreshAddresses();
                     }
                     else {
-                        enqueueSnackbar('Failed to add address', { variant: 'error' });
+                        toast.error('Failed to add address');
                     }
                 }
                 );
@@ -86,11 +86,11 @@ function Manage() {
         apiDeleteAddress(addr)
             .then((success: boolean) => {
                 if (success) {
-                    enqueueSnackbar('Deleted ' + addr, { variant: 'success' });
+                    toast.success('Deleted ' + addr);
                     refreshAddresses();
                 }
                 else {
-                    enqueueSnackbar('Failed to delete ' + addr, { variant: 'error' });
+                    toast.error('Failed to delete ' + addr);
                 }
             });
     }
@@ -100,10 +100,10 @@ function Manage() {
             (success: boolean) => {
                 if (success) {
                     refreshAddresses();
-                    enqueueSnackbar(addr + (makePrivate ? ' made private 🔒' : ' made public 🔓'), { variant: 'success' });
+                    toast.success(addr + (makePrivate ? ' made private 🔒' : ' made public 🔓'));
                 }
                 else {
-                    enqueueSnackbar('Failed to update ' + addr, { variant: 'error' });
+                    toast.error('Failed to update ' + addr);
                 }
             }
         )
@@ -130,7 +130,6 @@ function Manage() {
 
     return (
         <>
-            <SnackbarProvider />
             {
                 user && <div className={paperClassName}>
                     <div className='flex flex-wrap items-center m-1 ml-2 p-1'>
