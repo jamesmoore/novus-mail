@@ -5,17 +5,27 @@ import useDomain from './useDomain';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import useUser from './useUser';
 import { Button } from './components/ui/button';
-import { CircleAlert, LogOut, Moon, Plus, Sun, SunMoon, Trash, User, X } from 'lucide-react';
+import { CircleAlert, LogOut, Moon, Plus, Sun, SunMoon, Trash, User } from 'lucide-react';
 import { Input } from './components/ui/input';
 import { Switch } from './components/ui/switch';
 import { Avatar, AvatarImage } from './components/ui/avatar';
 import { useTheme } from './components/theme-provider';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './components/ui/dropdown-menu';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from './components/ui/alert-dialog';
 
 function Manage() {
     const [newAddressText, setNewAddressText] = useState('');
     const [selectedAddress, setSelectedAddress] = useState('');
-    const [deleteAddress, setDeleteAddress] = useState('');
 
     const { data: domainName } = useDomain();
 
@@ -71,16 +81,11 @@ function Manage() {
         }
     }
 
-    function deleteClicked(addr: string) {
-        setDeleteAddress(addr);
-    }
-
     function confirmDeleteClicked(addr: string) {
         apiDeleteAddress(addr)
             .then((success: boolean) => {
                 if (success) {
                     enqueueSnackbar('Deleted ' + addr, { variant: 'success' });
-                    setDeleteAddress('');
                     refreshAddresses();
                 }
                 else {
@@ -193,36 +198,41 @@ function Manage() {
                                         key={addr}
                                         className='flex flex-row pb-1'
                                         onPointerEnter={() => { setSelectedAddress(addr) }}
-                                        onPointerLeave={() => { setSelectedAddress(''); setDeleteAddress(''); }}
+                                        onPointerLeave={() => { setSelectedAddress(''); }}
                                     >
                                         <div className='flex items-center' >
                                             <span>{addr}</span>
                                             <span style={{ opacity: 0.3 }}>@{domainName}</span>
                                         </div>
                                         <div className='flex items-center justify-end ml-auto gap-2' >
-                                            {deleteAddress !== addr &&
-                                                <>
-                                                    {owner ? 'Private' : 'Public'}
-                                                    <Switch
-                                                        checked={!!owner}
-                                                        onCheckedChange={(checked: boolean) => setVisibility(addr, checked)}
-                                                    />
+                                            {owner ? 'Private' : 'Public'}
+                                            <Switch
+                                                checked={!!owner}
+                                                onCheckedChange={(checked: boolean) => setVisibility(addr, checked)}
+                                            />
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
                                                     <Button
                                                         aria-label="delete"
-                                                        onClick={() => deleteClicked(addr)}
                                                         variant={selectedAddress === addr ? "destructive" : "secondary"}>
                                                         <Trash />
                                                     </Button>
-                                                </>
-                                            }
-                                            {deleteAddress === addr &&
-                                                <>
-                                                    <span className='text-red-700'>Confirm delete?</span>
-                                                    <Button variant="destructive" onPointerUp={() => confirmDeleteClicked(addr)}>
-                                                        <X />
-                                                    </Button>
-                                                </>
-                                            }
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Delete address?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            This will permanently delete {addr}@{domainName}.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => confirmDeleteClicked(addr)}>
+                                                            Delete
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                         </div>
                                     </div>
                                 ))
@@ -260,8 +270,7 @@ function Manage() {
                     </div>
                 </div>
             </div>
-
-        </ >
+        </>
     );
 }
 
