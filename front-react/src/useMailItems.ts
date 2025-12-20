@@ -2,12 +2,12 @@ import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchDeletedMails, fetchMails } from "./api-client";
 import { MailResponse } from "./models/mail-response";
 
+const mailItemsKey0 = 'mail';
 const getUseMailItemsQueryKey = (selectedAddress: string) => {
-    return ['mail', selectedAddress];
+    return [mailItemsKey0, selectedAddress];
 }
 
 const useMailItems = (selectedAddress?: string) => {
-
     return useInfiniteQuery({
         queryKey: getUseMailItemsQueryKey(selectedAddress!),
         queryFn: async ({
@@ -51,16 +51,15 @@ const useInvalidateDeletedMailItemsCache = () => {
     const queryClient = useQueryClient();
     const invalidate = () => {
         const queryKey = getUseDeletedMailItemsQueryKey;
-        return queryClient.resetQueries({ queryKey: queryKey }); // prteviously invalidateQueries, but not working for unknown reasons https://stackoverflow.com/questions/78679768/react-query-not-updating-data-even-after-refetch-shows-new-data-from-api
+        return queryClient.resetQueries({ queryKey: queryKey });
     }
-
     return { invalidate };
 }
 
 const useInvalidateAllMailItemsCache = () => {
     const queryClient = useQueryClient();
     const invalidate = () => {
-        return queryClient.resetQueries({ predicate: p => p.queryKey[0] === 'mail' });
+        return queryClient.resetQueries({ predicate: p => p.queryKey[0] === mailItemsKey0 });
     }
     return { invalidate };
 }
