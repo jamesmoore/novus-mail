@@ -30,7 +30,7 @@ function Manage() {
 
     const { data: user } = useUser();
 
-    const { setTheme } = useTheme();
+    const { theme, setTheme } = useTheme();
 
     useEffect(() => {
         let cancelled = false;
@@ -236,24 +236,24 @@ function Manage() {
                     <div className='flex items-center w-full md:w-3/12'>
                         Theme
                     </div>
-                    <div className='flex' >
+                    <div className='flex mt-2 md:mt-0' >
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="icon">
-                                    <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-                                    <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-                                    <span className="sr-only">Toggle theme</span>
+                                <Button variant="outline" >
+                                    {theme === 'light' && <><Sun />Light</>}
+                                    {theme === 'dark' && <><Moon />Dark</>}
+                                    {theme === 'system' && <><SunMoon />System</>}
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="start">
                                 <DropdownMenuItem onClick={() => setTheme("light")}>
-                                    <Sun/>Light
+                                    <Sun />Light
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => setTheme("dark")}>
-                                    <Moon/>Dark
+                                    <Moon />Dark
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => setTheme("system")}>
-                                    <SunMoon/>System
+                                    <SunMoon />System
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
