@@ -7,6 +7,17 @@ import { CheckCheck, Copy, Trash } from 'lucide-react';
 import { Button } from "./components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip";
 import { SidebarTrigger } from "./components/ui/sidebar";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "./components/ui/alert-dialog";
 
 const handleCopy = async (text: string) => {
     try {
@@ -69,9 +80,27 @@ function TopBarAddress() {
                 </TooltipTrigger>
             </Tooltip>
 
-            <Button className='ml-auto hover:text-destructive' variant="ghost" disabled={total === 0} onClick={onDeleteAllMails} >
-                <Trash />
-            </Button>
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button className='ml-auto hover:text-destructive' variant="ghost" disabled={total === 0}>
+                        <Trash />
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete all mail?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will delete all mail for {getFullAddress()}.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={onDeleteAllMails}>
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
             <Tooltip >
                 <TooltipContent>
                     <p>Mark all as read</p>
