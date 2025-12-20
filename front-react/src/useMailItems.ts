@@ -60,7 +60,7 @@ const useInvalidateDeletedMailItemsCache = () => {
 const useInvalidateAllMailItemsCache = () => {
     const queryClient = useQueryClient();
     const invalidate = () => {
-        return queryClient.invalidateQueries({ predicate: p => p.queryKey[0] === 'mail' });
+        return queryClient.resetQueries({ predicate: p => p.queryKey[0] === 'mail' });
     }
     return { invalidate };
 }
