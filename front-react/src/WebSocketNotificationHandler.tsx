@@ -45,6 +45,5 @@ export default function WebSocketNotificationHandler() {
         setLastReceivedMessage(null);
     }, [lastReceivedMessage, invalidate, unreadRefetch, refetch, urlAddressSegment, setLastReceivedMessage]);
 
-
-    return <></>
+    return null;
 }

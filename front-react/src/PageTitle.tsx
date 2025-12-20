@@ -12,5 +12,6 @@ export default function PageTitle() {
         //document.title = ''; // https://stackoverflow.com/questions/72982365/setting-document-title-doesnt-change-the-tabs-text-after-pressing-back-in-the
         document.title = title;
     }, [unreadCounts]);
-    return <></>
+
+    return null;
 }
