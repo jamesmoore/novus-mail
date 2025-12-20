@@ -71,7 +71,7 @@ function TopBarAddress() {
             <div className="ml-1">
                 {getFullAddress()}
             </div>
-            <Tooltip>
+            <Tooltip delayDuration={700}>
                 <TooltipContent>
                     <p>Copy</p>
                 </TooltipContent>
@@ -84,7 +84,7 @@ function TopBarAddress() {
 
             <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <Tooltip>
+                    <Tooltip delayDuration={700}>
                         <TooltipContent>
                             <p>Delete all</p>
                         </TooltipContent>
@@ -110,7 +110,7 @@ function TopBarAddress() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-            <Tooltip >
+            <Tooltip delayDuration={700}>
                 <TooltipContent>
                     <p>Mark all as read</p>
                 </TooltipContent>
