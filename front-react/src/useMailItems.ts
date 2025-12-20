@@ -25,7 +25,7 @@ const useInvalidateMailItemsCache = () => {
     const queryClient = useQueryClient();
     const invalidate = (address: string) => {
         const queryKey = getUseMailItemsQueryKey(address);
-        return queryClient.invalidateQueries({ queryKey: queryKey });
+        return queryClient.resetQueries({ queryKey: queryKey });
     }
 
     return { invalidate };
