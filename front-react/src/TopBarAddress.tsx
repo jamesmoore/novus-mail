@@ -24,7 +24,7 @@ const handleCopy = async (text: string) => {
     try {
         await navigator.clipboard.writeText(text);
         toast.success(text + ' copied');
-    } catch (err) {
+    } catch {
         toast.error('Could not copy');
     }
 };
