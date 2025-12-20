@@ -12,7 +12,7 @@ export default function WebSocketNotificationHandler() {
     const { address: urlAddressSegment } = useParams();
     const { refetch: mailItemsRefetch } = useMailItems(urlAddressSegment);
     const { refetch: unreadRefetch } = useUnreadCounts();
-    const { invalidate } = useInvalidateMailItemsCache();
+    const { invalidate: invalidateMailItems } = useInvalidateMailItemsCache();
     const [lastReceivedMessage, setLastReceivedMessage] = useState<WebSocketMessage | null>(null);
     const { data: addressesResponse } = useAddressResponse();
 
@@ -27,14 +27,16 @@ export default function WebSocketNotificationHandler() {
 
         switch (lastReceivedMessage.type) {
             case 'received':
-                unreadRefetch();
-                const address = lastReceivedMessage.value;
-                if (urlAddressSegment === address) {
-                    mailItemsRefetch();
-                } else if (address) {
-                    invalidate(address);
-                    if(addressesResponse && addressesResponse.addresses && addressesResponse.addresses.filter(p => p.addr === address).length > 0) {
-                        toast.info("New mail for " + address);
+                {
+                    unreadRefetch();
+                    const address = lastReceivedMessage.value;
+                    if (urlAddressSegment === address) {
+                        mailItemsRefetch();
+                    } else if (address) {
+                        invalidateMailItems(address);
+                        if (addressesResponse && addressesResponse.addresses && addressesResponse.addresses.filter(p => p.addr === address).length > 0) {
+                            toast.info("New mail for " + address);
+                        }
                     }
                 }
                 break;
@@ -48,7 +50,7 @@ export default function WebSocketNotificationHandler() {
         }
 
         setLastReceivedMessage(null);
-    }, [lastReceivedMessage, invalidate, unreadRefetch, mailItemsRefetch, urlAddressSegment, setLastReceivedMessage, addressesResponse]);
+    }, [lastReceivedMessage, invalidateMailItems, unreadRefetch, mailItemsRefetch, urlAddressSegment, setLastReceivedMessage, addressesResponse]);
 
     return null;
 }
