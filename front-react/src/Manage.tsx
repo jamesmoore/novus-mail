@@ -22,6 +22,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from './components/ui/alert-dialog';
+import { Label } from './components/ui/label';
 
 function Manage() {
     const [newAddressText, setNewAddressText] = useState('');
@@ -205,8 +206,9 @@ function Manage() {
                                             <span style={{ opacity: 0.3 }}>@{domainName}</span>
                                         </div>
                                         <div className='ml-auto flex items-center gap-2' >
-                                            {owner ? 'Private' : 'Public'}
+                                            <Label htmlFor={"switch-" + addr}>{owner ? 'Private' : 'Public'}</Label>
                                             <Switch
+                                                id={"switch-" + addr}
                                                 checked={!!owner}
                                                 onCheckedChange={(checked: boolean) => setVisibility(addr, checked)}
                                             />
