@@ -3,6 +3,7 @@ import { useWebSocketNotifier, WebSocketMessage } from "./useWebSocketNotifier";
 import { useInvalidateMailItemsCache, useMailItems } from "./useMailItems";
 import { useParams } from "react-router-dom";
 import useUnreadCounts from "./useUnreadCounts";
+import { toast } from "sonner";
 
 export default function WebSocketNotificationHandler() {
 
@@ -29,6 +30,7 @@ export default function WebSocketNotificationHandler() {
                     refetch();
                 } else if (lastReceivedMessage.value) {
                     invalidate(lastReceivedMessage.value);
+                    toast.info("New mail for " + lastReceivedMessage.value);
                 }
                 break;
 
