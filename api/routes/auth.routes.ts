@@ -89,6 +89,7 @@ export function createRouter() {
     router.get('/auth/user', (req, res) => {
         res.status(200).json({
             strategy: passportConfig.strategy.name,
+            name: req.user?.name,
             email: req.user?.email,
             sub: req.user?.sub,
             picture: req.user?.picture,
