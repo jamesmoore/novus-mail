@@ -12,6 +12,7 @@ import './dompurify-hooks'; // imported to initialize but not referenced
 import Root from './Root.tsx';
 import MailboxRedirect from './MailboxRedirect.tsx';
 import './index.css'
+import './custom.css'
 import { ThemeProvider } from './components/theme-provider.tsx';
 import PageTitle from './PageTitle.tsx';
 import Layout from './Layout.tsx';
