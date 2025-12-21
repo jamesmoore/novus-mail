@@ -44,13 +44,13 @@ export class HttpServer {
 			app.use(cors());
 		}
 
+		// app.use(function(req,res,next){setTimeout(next,5000)});
+		
 		app.use('/', createAuthRouter());
 
 		// app.get('/', (_req, res) => {
 		// 	res.redirect('/index.html');
 		// })
-
-		// app.use(function(req,res,next){setTimeout(next,1000)});
 
 		app.get(/\/favicon.ico|\/mail.svg/, (_req, res) => {
 			res.sendFile(join(__dirname, staticContentPath, 'mail.svg'), (err) => {

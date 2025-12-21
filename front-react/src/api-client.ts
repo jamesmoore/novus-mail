@@ -138,6 +138,13 @@ const emptyDeletedMails = async () => {
     })
 };
 
+const restoreDeletedMails = async () => {
+    await apiFetch(`${ApiUrl}/restoreDeletedMails`, {
+        method: 'POST',
+        headers: defaultHeaders,
+    })
+};
+
 const readMail = async (id: string) => {
     await apiFetch(`${ApiUrl}/readMail`, {
         method: 'POST',
@@ -199,6 +206,7 @@ export {
     deleteMail,
     deleteMails,
     emptyDeletedMails,
+    restoreDeletedMails,
     readMail,
     fetchUnreadCounts,
     readAllMail,

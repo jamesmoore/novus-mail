@@ -1,21 +1,32 @@
 import { useEffect, useMemo, useState } from 'react';
 import { addAddress as apiAddAddress, deleteAddress as apiDeleteAddress, getAddress, logout, updateAddress } from './api-client';
-import { Avatar, Button, FormControl, FormControlLabel, IconButton, Paper, Switch, TextField, Typography } from '@mui/material';
-import Grid from '@mui/material/Grid';
 import useAddressResponse from './useAddressResponse';
 import useDomain from './useDomain';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import DeleteIcon from '@mui/icons-material/Delete';
-import DeleteForever from '@mui/icons-material/DeleteForever';
-import AddIcon from '@mui/icons-material/Add';
-import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import useUser from './useUser';
-import LogoutIcon from '@mui/icons-material/Logout';
+import { Button } from './components/ui/button';
+import { CircleAlert, LogOut, Moon, Plus, Sun, SunMoon, Trash, User } from 'lucide-react';
+import { Input } from './components/ui/input';
+import { Switch } from './components/ui/switch';
+import { Avatar, AvatarImage } from './components/ui/avatar';
+import { useTheme } from './components/theme-provider';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './components/ui/dropdown-menu';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from './components/ui/alert-dialog';
+import { Label } from './components/ui/label';
+import { toast } from 'sonner';
 
 function Manage() {
     const [newAddressText, setNewAddressText] = useState('');
     const [selectedAddress, setSelectedAddress] = useState('');
-    const [deleteAddress, setDeleteAddress] = useState('');
 
     const { data: domainName } = useDomain();
 
@@ -29,6 +40,8 @@ function Manage() {
     const [addressExists, setAddressExists] = useState(false);
 
     const { data: user } = useUser();
+
+    const { theme, setTheme } = useTheme();
 
     useEffect(() => {
         let cancelled = false;
@@ -51,38 +64,33 @@ function Manage() {
 
     function addAddress() {
         if (addressExists) {
-            enqueueSnackbar('Address already exists', { variant: 'error' });
+            toast.error('Address already exists');
         }
         else if (newAddressText !== '') {
             apiAddAddress(newAddressText)
                 .then((success: boolean) => {
                     if (success) {
-                        enqueueSnackbar('Added ' + newAddressText, { variant: 'success' });
+                        toast.success('Added ' + newAddressText);
                         setNewAddressText("");
                         refreshAddresses();
                     }
                     else {
-                        enqueueSnackbar('Failed to add address', { variant: 'error' });
+                        toast.error('Failed to add address');
                     }
                 }
                 );
         }
     }
 
-    function deleteClicked(addr: string) {
-        setDeleteAddress(addr);
-    }
-
     function confirmDeleteClicked(addr: string) {
         apiDeleteAddress(addr)
             .then((success: boolean) => {
                 if (success) {
-                    enqueueSnackbar('Deleted ' + addr, { variant: 'success' });
-                    setDeleteAddress('');
+                    toast.success('Deleted ' + addr);
                     refreshAddresses();
                 }
                 else {
-                    enqueueSnackbar('Failed to delete ' + addr, { variant: 'error' });
+                    toast.error('Failed to delete ' + addr);
                 }
             });
     }
@@ -92,10 +100,10 @@ function Manage() {
             (success: boolean) => {
                 if (success) {
                     refreshAddresses();
-                    enqueueSnackbar(addr + (makePrivate ? ' made private 🔒' : ' made public 🔓'), { variant: 'success' });
+                    toast.success(addr + (makePrivate ? ' made private 🔒' : ' made public 🔓'));
                 }
                 else {
-                    enqueueSnackbar('Failed to update ' + addr, { variant: 'error' });
+                    toast.error('Failed to update ' + addr);
                 }
             }
         )
@@ -111,128 +119,161 @@ function Manage() {
         }
     };
 
+    const addressIsInvalid = useMemo(() => newAddressText !== '' && (isValidAddress === false || addressExists),
+        [newAddressText, isValidAddress, addressExists]);
+
     if (error) {
         return <div>{error.message}</div>;
     }
 
+    const paperClassName = "rounded-sm bg-sidebar shadow-sm";
+
     return (
-        <Grid>
-            <SnackbarProvider />
+        <>
             {
-                user && <Paper>
-                    <Grid container mb={1} ml={1} mr={1} p={1}>
-                        <Grid size={{ xs: 12, md: 3 }} display={'flex'} alignItems={'center'} sx={{
-                            mb: { xs: 1, md: 0 }
-                        }} >
-                            <Typography>User</Typography>
-                        </Grid>
-                        <Grid container size={{ xs: 12, md: 9 }} flexDirection={'row'} >
-                            <Grid container direction="row" alignItems={'center'} flex="0 0 auto" size={{ xs: 12, md: 10 }} columnGap={1}>
-                                <Avatar src={user.picture} />
-                                <Typography>{user.email ?? 'Anon'} ({user.strategy})</Typography>
-                            </Grid>
-                            <Grid display={'flex'} size={{ xs: 12, md: 2 }} justifyContent={'right'} sx={{
-                                mt: { xs: 2, md: 0 }
-                            }}>
-                                <Button  disabled={!user.requiresAuth} fullWidth={true} onClick={doLogout} startIcon={<LogoutIcon />}>Logout</Button>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Paper>
+                user && <div className={paperClassName}>
+                    <div className='flex flex-wrap items-center m-1 ml-2 p-1'>
+                        <div className='w-full md:w-3/12'>
+                            User
+                        </div>
+                        <div className='flex items-center gap-1 mt-2 md:mt-0 md:flex-1' >
+                            {user.picture ?
+                                <Avatar>
+                                    <AvatarImage
+                                        src={user.picture}
+                                        alt={user.email}
+                                    />
+                                </Avatar>
+                                : <User />}
+                            {user.email ?? 'Anon'}&nbsp;{`(${user.strategy})`}
+                        </div>
+                        <div className='ml-auto' >
+                            <Button disabled={!user.requiresAuth} onClick={doLogout}>
+                                <LogOut />Logout
+                            </Button>
+                        </div>
+                    </div>
+                </div>
             }
-            <Paper>
-                <Grid container m={1} p={1}>
-                    <Grid mt={2} mb={2} size={{ xs: 12, md: 3 }}>
-                        <Typography>New address</Typography>
-                    </Grid>
-                    <Grid container size={{ xs: 12, md: 9 }} flexDirection={'row'}>
-                        <Grid container direction="row" alignItems={'center'} flex="0 0 auto" size={{ xs: 12, md: 10 }}>
-                            <FormControl>
-                                <TextField
-                                    type="text"
-                                    onChange={event => setNewAddressText(event.target.value)}
-                                    value={newAddressText}
-                                    placeholder="New address"
-                                    style={{ flex: 1 }}
-                                    error={newAddressText !== '' && (isValidAddress === false || addressExists)}
-                                    helperText={newAddressText !== '' && isValidAddress === false ? 'Invalid email address' :
-                                        addressExists ? 'Address exists' : ''
-                                    }
-
-                                />
-                            </FormControl>
-                            <FormControl sx={{ m: 1 }}>
-                                @{domainName}
-                            </FormControl>
-                        </Grid>
-                        <Grid display={'flex'} size={{ xs: 12, md: 2 }} justifyContent={'right'} sx={{
-                            mt: { xs: 2, md: 0 }
-                        }}>
-
-                            <Button fullWidth={true} disabled={newAddressText === '' || isValidAddress === false || addressExists} onClick={addAddress} startIcon={<AddIcon />} >Add</Button>
-                        </Grid>
-                    </Grid>
-                </Grid>
-            </Paper>
+            <div className={paperClassName}>
+                <div className="flex flex-wrap items-center m-1 ml-2 p-1">
+                    <div className='w-full md:w-3/12'>
+                        New address
+                    </div>
+                    <div className='flex flex-col mt-2 w-1/2 md:w-1/4 md:mt-0'>
+                        <Input
+                            type="text"
+                            onChange={event => setNewAddressText(event.target.value)}
+                            value={newAddressText}
+                            placeholder="New address"
+                            aria-invalid={addressIsInvalid}
+                        />
+                        {addressIsInvalid &&
+                            <div className='flex items-center text-red-700 text-sm mt-1 w-full whitespace-nowrap'>
+                                <CircleAlert />&nbsp;{addressExists ? 'Address exists.' : 'This email is invalid.'}
+                            </div>
+                        }
+                    </div>
+                    <div className='mt-2 md:mt-0'>
+                        @{domainName}
+                    </div>
+                    <div className='ml-auto mt-2 md:mt-0' >
+                        <Button disabled={newAddressText === '' || addressIsInvalid} onClick={addAddress}>
+                            <Plus />Add
+                        </Button>
+                    </div>
+                </div>
+            </div>
             {
                 (addressesResponse?.addresses?.length ?? 0) > 0 &&
-                <Paper>
-                    <Grid container m={1} p={1} >
-                        <Grid container mt={2} mb={2} size={{ xs: 12, md: 3 }} >
-                            <Typography>Manage addresses</Typography>
-                        </Grid>
-                        <Grid container size={{ xs: 12, md: 9 }} flexDirection={'column'}>
+                <div className={paperClassName}>
+                    <div className="flex flex-wrap m-1 ml-2 p-1">
+                        <div className='w-full md:w-3/12 mt-1'>
+                            Manage addresses
+                        </div>
+                        <div className='flex flex-col w-full md:w-3/4'>
                             {
                                 addressesResponse && addressesResponse.addresses.map(({ addr, owner }) => (
-                                    <Grid
+                                    <div
                                         key={addr}
-                                        container
-                                        pt={1}
-                                        pb={1}
-                                        flexDirection={'row'}
+                                        className='flex pb-1'
                                         onPointerEnter={() => { setSelectedAddress(addr) }}
-                                        onPointerLeave={() => { setSelectedAddress(''); setDeleteAddress(''); }}
+                                        onPointerLeave={() => { setSelectedAddress(''); }}
                                     >
-                                        <Grid display={'flex'} alignItems={'center'}>
-                                            <Typography component={'span'}>{addr}</Typography>
-                                            <Typography component={'span'} sx={{ opacity: 0.3 }}>@{domainName}</Typography>
-                                        </Grid>
-                                        <Grid display={'flex'} sx={{ marginLeft: 'auto' }} justifyContent={'right'} alignItems={'center'}>
-                                            {deleteAddress !== addr &&
-                                                <>
-                                                    <FormControlLabel
-                                                        control={<Switch
-                                                            checked={!!owner}
-                                                            onChange={(_event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => setVisibility(addr, checked)}
-                                                        />}
-                                                        label={owner ? 'Private' : 'Public'}
-                                                        labelPlacement='start'
-                                                    />
-                                                    <IconButton aria-label="delete" onClick={() => deleteClicked(addr)}>
-                                                        {!(selectedAddress === addr) && <DeleteOutlineIcon color="action" opacity={0.3} />}
-                                                        {selectedAddress === addr && <DeleteIcon color="error" />}
-                                                    </IconButton>
-                                                </>
-                                            }
-                                            {deleteAddress === addr &&
-                                                <>
-                                                    <Typography color='error'>Confirm delete?</Typography>
-                                                    <IconButton onPointerUp={() => confirmDeleteClicked(addr)}>
-                                                        <DeleteForever color="error" />
-                                                    </IconButton>
-                                                </>
-                                            }
-                                        </Grid>
-                                    </Grid>
+                                        <div className='flex items-center' >
+                                            <span>{addr}</span>
+                                            <span style={{ opacity: 0.3 }}>@{domainName}</span>
+                                        </div>
+                                        <div className='ml-auto flex items-center gap-2' >
+                                            <Label htmlFor={"switch-" + addr}>{owner ? 'Private' : 'Public'}</Label>
+                                            <Switch
+                                                id={"switch-" + addr}
+                                                checked={!!owner}
+                                                onCheckedChange={(checked: boolean) => setVisibility(addr, checked)}
+                                            />
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button
+                                                        aria-label="delete"
+                                                        variant={selectedAddress === addr ? "destructive" : "secondary"}>
+                                                        <Trash />
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Delete address?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            This will permanently delete {addr}@{domainName}.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => confirmDeleteClicked(addr)}>
+                                                            Delete
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </div>
+                                    </div>
                                 ))
                             }
-                        </Grid>
-                    </Grid>
-                </Paper>
+                        </div>
+                    </div>
+                </div>
             }
-
-        </Grid >
+            <div className={paperClassName}>
+                <div className="flex flex-wrap items-center m-1 ml-2 p-1">
+                    <div className='w-full md:w-3/12'>
+                        Theme
+                    </div>
+                    <div className='mt-2 md:mt-0' >
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" >
+                                    {theme === 'light' && <><Sun />Light</>}
+                                    {theme === 'dark' && <><Moon />Dark</>}
+                                    {theme === 'system' && <><SunMoon />System</>}
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start">
+                                <DropdownMenuItem onClick={() => setTheme("light")}>
+                                    <Sun />Light
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setTheme("dark")}>
+                                    <Moon />Dark
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setTheme("system")}>
+                                    <SunMoon />System
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </div>
+            </div>
+        </>
     );
 }
 
 export default Manage;
+

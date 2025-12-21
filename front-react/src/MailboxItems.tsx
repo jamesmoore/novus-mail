@@ -1,11 +1,10 @@
-import { Box, CircularProgress, Divider, LinearProgress, Typography } from "@mui/material";
-import FadeDelay from "./FadeDelay";
 import MailboxItem from "./MailboxItem";
 import { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult } from "@tanstack/react-query";
 import { MailResponse } from "./models/mail-response";
 import { useInView } from "react-intersection-observer";
 import { useEffect } from "react";
 import { Mail } from "./models/mail";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface MailboxItemsProps {
     onMailItemSelect: (mail: Mail) => void;
@@ -47,11 +46,7 @@ function MailboxItems({
 
     if (showSpinner) {
         return (
-            <FadeDelay isLoading={showSpinner}>
-                <Box flex="1 0 auto" display="flex" justifyContent={'center'} alignItems={'center'}>
-                    <CircularProgress color="primary" />
-                </Box>
-            </FadeDelay>
+            <LoadingSpinner />
         )
     }
     else {
@@ -62,24 +57,28 @@ function MailboxItems({
                         return mailPage.data.map((mail) =>
                         (
                             <MailboxItem
-                                key={mail.id} 
-                                mail={mail} 
-                                onDelete={() => onMailItemDelete(mail)} 
-                                onSelect={() => onMailItemSelect(mail)} 
-                                opened={false}/>
+                                key={mail.id}
+                                mail={mail}
+                                onDelete={() => onMailItemDelete(mail)}
+                                onSelect={() => onMailItemSelect(mail)}
+                                opened={false} />
                         ))
                     }
                     )
                 }
 
-                <Box ref={ref} mt={1} mb={1} flex="0 0 auto" display="flex" justifyContent={'center'}>
+                <div ref={ref} className="flex mt-1 mb-1 flex-0 justify-center">
 
-                    <FadeDelay isLoading={isFetchingNextPage}>
-                        <Box sx={{ width: '100%' }}><LinearProgress color="primary" /></Box>
-                    </FadeDelay>
-
-                    {!hasNextPage && !isFetching && <Divider component="div" sx={{ width: "100%" }}><Typography variant='body1' color="textDisabled">No more mail</Typography></Divider>}
-                </Box>
+                    {isFetchingNextPage && <LoadingSpinner />}
+                    {!hasNextPage && !isFetching &&
+                        <div className="divider" >
+                            <span className="divider-wrapper">
+                                <p className="text-neutral-600">
+                                    No more mail
+                                </p>
+                            </span>
+                        </div>}
+                </div>
             </>
         );
     }

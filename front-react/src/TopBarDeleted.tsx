@@ -1,17 +1,30 @@
-import { IconButton, Typography, useTheme } from "@mui/material";
-import { useDeletedMailItems, useInvalidateDeletedMailItemsCache } from "./useMailItems";
-import DeleteIcon from '@mui/icons-material/Delete';
-import { emptyDeletedMails } from "./api-client";
+import { useDeletedMailItems, useInvalidateAllMailItemsCache, useInvalidateDeletedMailItemsCache } from "./useMailItems";
+import { emptyDeletedMails, restoreDeletedMails } from "./api-client";
+import { Trash, Undo } from 'lucide-react';
+import { Button } from "./components/ui/button";
+import { SidebarTrigger } from "./components/ui/sidebar";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "./components/ui/alert-dialog";
+import useUnreadCounts from "./useUnreadCounts";
 
 function TopBarDeleted() {
 
     const { data, hasNextPage } = useDeletedMailItems();
 
     const total = data?.pages.reduce((p, q) => p + q.data.length, 0) ?? 0;
-    const text = total === 0 ? 'Empty' :
-        total + (hasNextPage ? '+' : '') + ' item' + (total === 1 ? '' : 's');
+    const text = total === 0 ? 'Empty' : `${total + (hasNextPage ? '+' : '')} item${total === 1 ? '' : 's'}`;
     const { invalidate: invalidateDeleted } = useInvalidateDeletedMailItemsCache();
-    const theme = useTheme();
+    const { invalidate: invalidateAllMails } = useInvalidateAllMailItemsCache();
+    const { refetch: refetchUread } = useUnreadCounts();
 
     const onDeleteAllMails = () => {
         emptyDeletedMails().then(() => {
@@ -19,13 +32,42 @@ function TopBarDeleted() {
         });
     }
 
+    const onRestoreDeletedMails = () => {
+        restoreDeletedMails().then(() => {
+            invalidateDeleted();
+            invalidateAllMails();
+            refetchUread();
+        });
+    }
+
     return (
-        <>
-            <IconButton sx={{ "&:hover": { color: theme.palette.error.main }, marginLeft: 'auto' }} disabled={total === 0} onClick={onDeleteAllMails}>
-                <DeleteIcon />
-            </IconButton>
-            <Typography>{text}</Typography>
-        </>
+        <div className="flex items-center gap-2">
+            <SidebarTrigger />
+            <Button className='ml-auto' disabled={total === 0} onClick={onRestoreDeletedMails}>
+                <Undo /> {total > 0 ? 'Restore ' + text : ''}
+            </Button>
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button className='hover:bg-destructive' disabled={total === 0}>
+                        <Trash /> {total > 0 ? 'Empty ' + text : ''}
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Empty deleted mail?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will permanently delete all items in the deleted folder.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={onDeleteAllMails}>
+                            Empty
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </div>
     )
 
 }

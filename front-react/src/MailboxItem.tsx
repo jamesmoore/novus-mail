@@ -1,7 +1,4 @@
-import { IconButton, Paper, SxProps, Theme, Tooltip, Typography } from "@mui/material";
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import DeleteIcon from '@mui/icons-material/Delete';
-import Grid from '@mui/material/Grid';
+import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip";
 import { Mail } from "./models/mail";
 import { isEnterKeyUp, isLeftMouseClick } from "./Events";
 import humanizeDuration from "humanize-duration";
@@ -10,6 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchMail } from "./api-client";
 import ShadowEmail from "./ShadowEmail";
 import { useNavigate, useParams } from "react-router-dom";
+import { Button } from "./components/ui/button";
+import { Trash } from "lucide-react";
 
 interface MailboxItemProps {
     mail: Mail;
@@ -73,24 +72,13 @@ function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
         }
     );
 
-
-    const cursor = onSelect ? "pointer" : "default";
-    const fontWeight = mail.read ? 400 : 700;
-    const style: SxProps<Theme> = {
-        fontWeight: fontWeight,
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-    };
+    const paperClassName = "rounded-sm bg-sidebar shadow-md";
 
     return (
         <>
-            <Paper
-                sx={{
-                    "&:hover": { cursor: cursor },
-                    maxWidth: "100%"
-                }}
-                elevation={hover ? 3 : 1}
+            <div
+                className={paperClassName + ' w-full hover:bg-sidebar-accent hover:shadow-lg hover:cursor-pointer dark:hover:ring ring-neutral-700'}
+                //elevation={hover ? 3 : 1}
                 tabIndex={1}
                 role="button"
                 onKeyUp={(e) => mailKeyUp(e, mail.id)}
@@ -99,54 +87,71 @@ function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
                 onPointerLeave={() => { setHover(false); }}
                 key={mail.id}
             >
-                <Grid container columns={24} sx={{ ml: 1 }} flex="1 1 auto">
-                    <Grid container size={{ xs: 22, md: 23 }} alignItems='center'>
-                        <Grid size={{ xs: 24, md: 6 }} >
-                            {
-                                mail.sendername ?
-                                    <Tooltip title={mail.sender}>
-                                        <Typography sx={style}>{mail.sendername}</Typography>
-                                    </Tooltip>
-                                    :
-                                    <Typography sx={style}>{mail.sender}</Typography>
-                            }
+                <div className="flex gap-2 px-2 py-1 ">
+                    {/* Main content */}
+                    <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-4 flex-1 min-w-0">
 
-                        </Grid>
-                        <Grid
-                            size={{ xs: 24, md: 15 }}>
-                            <Typography sx={style} color={mail.read ? "textPrimary" : "primary"}>{mail.subject}</Typography>
-                        </Grid>
-                        <Grid container
-                            size={{ md: 3 }}
-                            justifyContent='right'
-                            sx={style}
-                        >
-                            {mail.received !== 0 &&
-                                <Tooltip title={new Date(mail.received).toLocaleString()}>
-                                    <Typography>{timeSince(mail.received)}</Typography>
+                        {/* Sender */}
+                        <div className="md:w-40 truncate">
+                            {mail.sendername ? (
+                                <Tooltip delayDuration={700}>
+                                    <TooltipTrigger asChild>
+                                        <span className={` ${mail.read ? "" : "font-bold"}`}>{mail.sendername}</span>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom">{mail.sender}</TooltipContent>
                                 </Tooltip>
-                            }
-                        </Grid>
-                    </Grid>
-                    <Grid container size={{ xs: 2, md: 1 }} justifyContent='right' alignItems='center'>
-                        <IconButton aria-label="delete" onKeyUp={(e) => deleteKeyUp(e, mail.id)} onClick={(e) => deleteClicked(e, mail.id)} >
-                            {!hover && <DeleteOutlineIcon color="action" opacity={0.3} />}
-                            {hover && <DeleteIcon color="error" />}
-                        </IconButton>
-                    </Grid>
-                </Grid>
-            </Paper>
+                            ) : (
+                                <span>{mail.sender}</span>
+                            )}
+                        </div>
+
+                        {/* Subject */}
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                            <div
+                                className={`truncate ${mail.read ? "text-muted-foreground" : "font-bold highlight-color"}`}
+                            >
+                                {mail.subject}
+                            </div>
+                        </div>
+
+                        {/* Date */}
+                        {mail.received !== 0 && (
+                            <div className="text-muted-foreground md:whitespace-nowrap">
+                                <Tooltip delayDuration={700}>
+                                    <TooltipTrigger asChild>
+                                        <span>{timeSince(mail.received)}</span>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom">{new Date(mail.received).toLocaleString()}</TooltipContent>
+                                </Tooltip>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Trash (always right aligned) */}
+                    <div className="flex items-center ml-auto">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label="delete"
+                            onClick={(e) => deleteClicked(e, mail.id)}
+                            onKeyUp={(e) => deleteKeyUp(e, mail.id)}
+                        >
+                            {!hover ? <Trash /> : <Trash className="text-destructive" />}
+                        </Button>
+                    </div>
+                </div>
+            </div>
             {
                 showMail && message && !loading &&
-                <Paper sx={{ mb: 1, width: '100%', minWidth: 0 }} >
+                <div className={'mb-1 w-full min-w-0 ' + paperClassName}>
                     <ShadowEmail html={message.content} />
-                </Paper>
+                </div>
             }
             {
                 error &&
-                <Paper sx={{ mb: 1 }} >
+                <div className={'mb-1 ' + paperClassName} >
                     {error.message}
-                </Paper>
+                </div>
             }
         </>
     )
