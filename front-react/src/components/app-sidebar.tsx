@@ -20,6 +20,8 @@ import useUnreadCounts from "@/useUnreadCounts";
 import { Badge } from "./ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import useUser from "@/useUser";
+import { logout } from "@/api-client";
+import { Avatar, AvatarImage } from "./ui/avatar";
 
 interface SidebarItem {
   key: string,
@@ -90,6 +92,16 @@ export function AppSidebar() {
 
   }, [addressesResponse, addressIsLoading, urlAddressSegment, location.pathname, unreadCounts]);
 
+  const doLogout = async () => {
+    const logoutResponse = await logout();
+    if (logoutResponse.logoutUrl) {
+      window.location.href = logoutResponse.logoutUrl;
+    }
+    else {
+      window.location.href = "/";
+    }
+  };
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -129,12 +141,18 @@ export function AppSidebar() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton className="text-base">
-                <User2 /> {user.name ?? user.email}
+                {user.picture ?
+                  <Avatar>
+                    <AvatarImage src={user.picture} />
+                  </Avatar>
+                  : <User2 />
+                }
+                {user.name ?? user.email}
                 <ChevronRight className="ml-auto" />
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent side="right">
-              <DropdownMenuItem className="text-base">
+              <DropdownMenuItem className="text-base" onClick={doLogout}>
                 <LogOut /><span>Sign out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
