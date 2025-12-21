@@ -14,6 +14,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "./components/ui/alert-dialog";
+import useUnreadCounts from "./useUnreadCounts";
 
 function TopBarDeleted() {
 
@@ -23,6 +24,8 @@ function TopBarDeleted() {
     const text = total === 0 ? 'Empty' : `${total + (hasNextPage ? '+' : '')} item${total === 1 ? '' : 's'}`;
     const { invalidate: invalidateDeleted } = useInvalidateDeletedMailItemsCache();
     const { invalidate: invalidateAllMails } = useInvalidateAllMailItemsCache();
+    const { refetch: refetchUread } = useUnreadCounts();
+
     const onDeleteAllMails = () => {
         emptyDeletedMails().then(() => {
             invalidateDeleted();
@@ -33,6 +36,7 @@ function TopBarDeleted() {
         restoreDeletedMails().then(() => {
             invalidateDeleted();
             invalidateAllMails();
+            refetchUread();
         });
     }
 
