@@ -16,7 +16,7 @@ export default function Layout({ children, topBarChildren }: LayoutProps) {
     <WebSocketNotificationHandler />
     <SidebarProvider >
       <AppSidebar />
-      <div className="flex min-h-svh flex-col w-full min-w-0">
+      <div className="flex flex-col w-full min-w-0">
         {topBarChildren &&
           <div className="sticky top-0">
             <div className="bg-sidebar p-1 pr-3">
