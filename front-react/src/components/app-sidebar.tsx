@@ -103,7 +103,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar>
+    <Sidebar className="h-dvh">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="text-base my-0.5">Mailbox</SidebarGroupLabel>
