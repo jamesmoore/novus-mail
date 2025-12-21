@@ -1,8 +1,9 @@
-import { Mail, MailOpen, Settings, Trash2 } from "lucide-react"
+import { ChevronRight, LogOut, Mail, MailOpen, Settings, Trash2, User2 } from "lucide-react"
 
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -17,6 +18,8 @@ import { Fragment, JSX, useEffect, useMemo } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import useUnreadCounts from "@/useUnreadCounts";
 import { Badge } from "./ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import useUser from "@/useUser";
 
 interface SidebarItem {
   key: string,
@@ -34,7 +37,7 @@ export function AppSidebar() {
   const { address: urlAddressSegment } = useParams();
   const { data: addressesResponse, isLoading: addressIsLoading } = useAddressResponse();
   const { data: unreadCounts } = useUnreadCounts();
-
+  const { data: user } = useUser();
   const { setOpenMobile } = useSidebar();
 
   useEffect(() => {
@@ -121,6 +124,23 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        {user && user.requiresAuth &&
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <SidebarMenuButton className="text-base">
+                <User2 /> {user.name ?? user.email}
+                <ChevronRight className="ml-auto" />
+              </SidebarMenuButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="right">
+              <DropdownMenuItem className="text-base">
+                <LogOut /><span>Sign out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        }
+      </SidebarFooter >
     </Sidebar>
   )
 }
