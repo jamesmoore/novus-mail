@@ -21,7 +21,7 @@ function Root({ children }: RootProps) {
 
     // Only block on first-ever load
     if (isLoading && !user) {
-        return <div className='flex h-screen items-center'>
+        return <div className='flex h-dvh items-center'>
             <LoadingSpinner />
         </div>;
     }
