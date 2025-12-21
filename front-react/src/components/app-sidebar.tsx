@@ -100,7 +100,13 @@ export function AppSidebar() {
                   {item.hasSeparator && <SidebarSeparator />}
                   <SidebarMenuItem  >
                     <SidebarMenuButton asChild className="text-base my-0.5" isActive={item.selected}>
-                      <Link to={item.url} >
+                      <Link to={item.url}
+                        onClick={() => {
+                          if (item.selected) {
+                            setOpenMobile(false);
+                          }
+                        }}
+                      >
                         {item.icon}
                         <span>{item.title}</span>
                         {item.unreadCount && <Badge className="h-5 min-w-5 rounded-full px-1 bg-highlight-color">
