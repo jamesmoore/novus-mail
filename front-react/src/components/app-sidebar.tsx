@@ -13,8 +13,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import useAddressResponse from "@/useAddressResponse";
-import { Fragment, JSX, useMemo } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { Fragment, JSX, useEffect, useMemo } from "react";
+import { Link, useLocation, useParams } from "react-router-dom";
 import useUnreadCounts from "@/useUnreadCounts";
 import { Badge } from "./ui/badge";
 
@@ -31,7 +31,6 @@ interface SidebarItem {
 const keyPrefix = "SIDEBAR_KEY_";
 export function AppSidebar() {
 
-  const navigate = useNavigate();
   const location = useLocation();
   const { address: urlAddressSegment } = useParams();
   const { data: addressesResponse, isLoading: addressIsLoading } = useAddressResponse();
@@ -39,6 +38,9 @@ export function AppSidebar() {
 
   const { setOpenMobile } = useSidebar();
 
+  useEffect(() => {
+    setOpenMobile(false);
+  }, [location.pathname]);
 
   // generate sidebar menu items
   const items = useMemo(() => {
@@ -93,13 +95,13 @@ export function AppSidebar() {
                   {item.hasSeparator && <SidebarSeparator/>}
                   <SidebarMenuItem  >
                     <SidebarMenuButton asChild className="text-base my-0.5" isActive={item.selected}>
-                      <a href='#' onClick={() => sidebarClicked(item)} >
+                      <Link to={item.url} >
                         {item.icon}
                         <span>{item.title}</span>
                         {item.unreadCount && <Badge className="h-5 min-w-5 rounded-full px-1 bg-highlight-color">
                           {item.unreadCount}
                         </Badge>}
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </Fragment>
@@ -111,8 +113,4 @@ export function AppSidebar() {
     </Sidebar>
   )
 
-  function sidebarClicked(item: SidebarItem): void {
-    setOpenMobile(false);
-    navigate(item.url);
-  }
 }
