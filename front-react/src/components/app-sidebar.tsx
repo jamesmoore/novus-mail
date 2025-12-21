@@ -96,7 +96,7 @@ export function AppSidebar() {
                       <a href='#' onClick={() => sidebarClicked(item)} >
                         {item.icon}
                         <span>{item.title}</span>
-                        {item.unreadCount && <Badge className="h-5 min-w-5 rounded-full px-1">
+                        {item.unreadCount && <Badge className="h-5 min-w-5 rounded-full px-1 bg-highlight-color">
                           {item.unreadCount}
                         </Badge>}
                       </a>

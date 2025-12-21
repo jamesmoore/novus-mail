@@ -175,3 +175,6 @@
   color: var(--highlight-color);
 }
 
+.bg-highlight-color {
+  background-color: var(--highlight-color);
+}
