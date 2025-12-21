@@ -27,10 +27,12 @@ function Root({ children }: RootProps) {
     }
 
     if (user && !user.isAuthenticated && user.requiresAuth) {
-        return <Login strategy={user.strategy} loading={false} />;
+        return <div className="flex h-dvh justify-center items-center">
+            <Login strategy={user.strategy} loading={false} />
+        </div>;
     }
 
-    return <>{children}</>;
+    return <div className="h-dvh">{children}</div>;
 }
 
 export default Root;

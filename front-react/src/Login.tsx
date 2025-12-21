@@ -12,11 +12,9 @@ export default function Login({ strategy, loading }: LoginProps) {
     };
 
     return (
-        <div className="flex justify-center items-center h-dvh">
-            <Button onClick={doLogin} disabled={loading}>
-                <LogIn />
-                Login with {strategy}
-            </Button>
-        </div>
+        <Button onClick={doLogin} disabled={loading}>
+            <LogIn />
+            Login with {strategy}
+        </Button>
     );
 }

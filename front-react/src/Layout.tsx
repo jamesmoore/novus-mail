@@ -14,7 +14,6 @@ export default function Layout({ children, topBarChildren }: LayoutProps) {
 
   return <>
     <WebSocketNotificationHandler />
-    <div className="h-dvh">
       <SidebarProvider >
         <AppSidebar />
         <div className="flex flex-col w-full min-w-0">
@@ -31,6 +30,5 @@ export default function Layout({ children, topBarChildren }: LayoutProps) {
           </div>
         </div>
       </SidebarProvider>
-    </div>
   </>
 }
