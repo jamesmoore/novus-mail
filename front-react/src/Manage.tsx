@@ -128,26 +128,31 @@ function Manage() {
 
     const paperClassName = "rounded-sm bg-sidebar shadow-sm";
 
-    const avatar = user && user.picture ?
-        <Avatar>
-            <AvatarImage src={user.picture} />
-        </Avatar>
-        : <User />;
 
+    const userInfo = user && <>
+        {user.picture ?
+            <Avatar>
+                <AvatarImage src={user.picture} />
+            </Avatar>
+            : <User />}
+        {user.name ?? user.email ?? 'Anon'}&nbsp;{`(${user.strategy})`}
+    </>;
+
+    const canLogout = user && user.requiresAuth;
+    
     return (
         <>
             {
-                user && <div className={paperClassName}>
+                <div className={paperClassName}>
                     <div className='flex flex-wrap items-center m-1 ml-2 p-1'>
                         <div className='w-full md:w-3/12'>
                             User
                         </div>
                         <div className='flex items-center gap-1 mt-2 md:mt-0 md:flex-1' >
-                            {avatar}
-                            {user.name ?? user.email ?? 'Anon'}   &nbsp;{`(${user.strategy})`}
+                            {userInfo}
                         </div>
                         <div className='ml-auto' >
-                            <Button disabled={!user.requiresAuth} onClick={doLogout}>
+                            <Button disabled={!canLogout} onClick={doLogout}>
                                 <LogOut />Logout
                             </Button>
                         </div>
