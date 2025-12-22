@@ -68,8 +68,7 @@ class WebSocketNotifier {
             this.connectedSockets.forEach(ws => {
 
                 if (authMode !== 'anonymous') {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any                
-                    const sub = (ws as any).user?.sub as string;
+                    const sub = (ws as WebSocketWithPassportUser).user?.sub as string;
                     console.log("Received message for sub: ", sub);
 
                     if (!sub) return;
