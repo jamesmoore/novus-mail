@@ -44,6 +44,8 @@ class WebSocketNotifier {
 
         this.notificationEmitter.on('received', (address: string) => {
             this.connectedSockets.forEach(ws => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any                
+                console.log("Received message for sub: ", (ws as any).user?.sub);
                 this.sendWebSocketMessage(ws, { type: 'received', value: address });
             });
 
