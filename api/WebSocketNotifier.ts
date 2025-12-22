@@ -5,16 +5,19 @@ import { WebSocketMessage } from "./WebSocketMessage.js";
 import { sessionParser } from "./routes/auth.routes.js";
 import { authMode } from "./auth/passport-config.js";
 import { Request, Response } from "express";
+import { DatabaseFacade } from "./databaseFacade.js";
 
 class WebSocketNotifier {
     private wss: WebSocketServer;
     private connectedSockets: Array<WebSocket>;
     private notificationEmitter: EventEmitter;
+    private databaseFacade: DatabaseFacade;
 
-    constructor(server: Server, notificationEmitter: EventEmitter) {
+    constructor(server: Server, databaseFacade: DatabaseFacade, notificationEmitter: EventEmitter) {
         this.wss = new WebSocketServer({ noServer: true });
         this.notificationEmitter = notificationEmitter;
         this.connectedSockets = [];
+        this.databaseFacade = databaseFacade;
 
         server.on('upgrade', (req, socket, head) => {
             sessionParser(req as Request, {} as Response, () => {
@@ -44,8 +47,20 @@ class WebSocketNotifier {
 
         this.notificationEmitter.on('received', (address: string) => {
             this.connectedSockets.forEach(ws => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any                
-                console.log("Received message for sub: ", (ws as any).user?.sub);
+
+                if (authMode !== 'anonymous') {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any                
+                    const sub = (ws as any).user?.sub as string;
+                    console.log("Received message for sub: ", sub);
+
+                    if (!sub) return;
+
+                    const owner = databaseFacade.getAddressOwner(address);
+
+                    if (owner && owner.owner !== sub) {
+                        return;
+                    }
+                }
                 this.sendWebSocketMessage(ws, { type: 'received', value: address });
             });
 
