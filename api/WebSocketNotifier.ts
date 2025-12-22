@@ -11,20 +11,24 @@ import { IncomingMessage } from "http";
 import { Session } from "express-session";
 
 interface PassportUser {
-  sub: string;
-  [key: string]: unknown;
+    sub: string;
+    [key: string]: unknown;
 }
 
 interface PassportSession {
-  user?: PassportUser;
+    user?: PassportUser;
 }
 
 interface SessionWithPassport extends Session {
-  passport?: PassportSession;
+    passport?: PassportSession;
 }
 
 interface SessionIncomingMessage extends IncomingMessage {
-  session: SessionWithPassport;
+    session: SessionWithPassport;
+}
+
+interface WebSocketWithPassportUser extends WebSocket {
+    user?: PassportUser;
 }
 
 class WebSocketNotifier {
@@ -51,8 +55,7 @@ class WebSocketNotifier {
 
                 this.wss.handleUpgrade(req, socket, head, ws => {
                     // Attach session/user to the socket 
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    (ws as any).user = user;
+                    (ws as WebSocketWithPassportUser).user = user;
                     this.wss.emit('connection', ws, req);
                 });
 
