@@ -23,7 +23,8 @@ class WebSocketNotifier {
                 console.log(session);
 
                 // 🔐 AUTH CHECK 
-                if (authMode !== 'anonymous' && (!session || !session.user)) {
+                const user = session?.passport?.user;
+                if (authMode !== 'anonymous' && (!user || typeof user.sub !== 'string')) {
                     socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
                     socket.destroy();
                     return;
@@ -32,9 +33,7 @@ class WebSocketNotifier {
                 this.wss.handleUpgrade(req, socket, head, ws => {
                     // Attach session/user to the socket 
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    (ws as any).user = session.user;
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    (ws as any).sessionId = (req as any).sessionID;
+                    (ws as any).user = user;
                     this.wss.emit('connection', ws, req);
                 });
 
