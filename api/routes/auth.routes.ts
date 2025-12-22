@@ -12,7 +12,7 @@ import LokiStore from 'connect-loki';
 
 const lokiStore = LokiStore(session);
 
-const sessionParser = session({
+export const sessionParser = session({
     saveUninitialized: false,
     resave: true,
     secret: env.SESSION_SECRET,

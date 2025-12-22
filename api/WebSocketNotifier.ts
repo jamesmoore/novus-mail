@@ -2,6 +2,9 @@ import { Server } from "http";
 import { EventEmitter } from "events";
 import WebSocket, { WebSocketServer } from 'ws';
 import { WebSocketMessage } from "./WebSocketMessage.js";
+import { sessionParser } from "./routes/auth.routes.js";
+import { authMode } from "./auth/passport-config.js";
+import { Request, Response } from "express";
 
 class WebSocketNotifier {
     private wss: WebSocketServer;
@@ -9,9 +12,34 @@ class WebSocketNotifier {
     private notificationEmitter: EventEmitter;
 
     constructor(server: Server, notificationEmitter: EventEmitter) {
-        this.wss = new WebSocketServer({ server });
+        this.wss = new WebSocketServer({ noServer: true });
         this.notificationEmitter = notificationEmitter;
         this.connectedSockets = [];
+
+        server.on('upgrade', (req, socket, head) => {
+            sessionParser(req as Request, {} as Response, () => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const session = (req as any).session;
+                console.log(session);
+
+                // 🔐 AUTH CHECK 
+                if (authMode !== 'anonymous' && (!session || !session.user)) {
+                    socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+                    socket.destroy();
+                    return;
+                }
+
+                this.wss.handleUpgrade(req, socket, head, ws => {
+                    // Attach session/user to the socket 
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    (ws as any).user = session.user;
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    (ws as any).sessionId = (req as any).sessionID;
+                    this.wss.emit('connection', ws, req);
+                });
+
+            });
+        });
 
         this.initialize();
 
