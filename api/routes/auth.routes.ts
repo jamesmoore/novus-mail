@@ -10,32 +10,32 @@ import session from 'express-session';
 // @ts-expect-error missing types - no @types/connect-loki package
 import LokiStore from 'connect-loki';
 
-export function createRouter() {
+const lokiStore = LokiStore(session);
 
-    const lokiStore = LokiStore(session);
+const sessionParser = session({
+    saveUninitialized: false,
+    resave: true,
+    secret: env.SESSION_SECRET,
+    store: new lokiStore({
+        ttl: 3600 * 24 * 7,
+        path: './data/session-store.db',
+    }) as session.Store,
+    rolling: true,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 3600 * 1000 * 24 * 7,
+        httpOnly: true,
+    },
+});
+
+export function createRouter() {
 
     const router = Router();
 
     router.use(noCacheMiddleware);
 
-    router.use(cookieParser())
-    router.use(
-        session({
-            saveUninitialized: false,
-            resave: true,
-            secret: env.SESSION_SECRET,
-            store: new lokiStore({
-                ttl: 3600 * 24 * 7,
-                path: './data/session-store.db',
-            }) as session.Store,
-            rolling: true,
-            cookie: {
-                secure: process.env.NODE_ENV === 'production',
-                maxAge: 3600 * 1000 * 24 * 7,
-                httpOnly: true,
-            },
-        }),
-    )
+    router.use(cookieParser());
+    router.use(sessionParser);
     router.use(passport.initialize());
     router.use(passport.session());
     router.use(passport.authenticate('session'))
