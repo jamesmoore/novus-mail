@@ -7,6 +7,26 @@ import { authMode } from "./auth/passport-config.js";
 import { Request, Response } from "express";
 import { DatabaseFacade } from "./databaseFacade.js";
 
+import { IncomingMessage } from "http";
+import { Session } from "express-session";
+
+interface PassportUser {
+  sub: string;
+  [key: string]: unknown;
+}
+
+interface PassportSession {
+  user?: PassportUser;
+}
+
+interface SessionWithPassport extends Session {
+  passport?: PassportSession;
+}
+
+interface SessionIncomingMessage extends IncomingMessage {
+  session: SessionWithPassport;
+}
+
 class WebSocketNotifier {
     private wss: WebSocketServer;
     private connectedSockets: Array<WebSocket>;
@@ -19,8 +39,7 @@ class WebSocketNotifier {
 
         server.on('upgrade', (req, socket, head) => {
             sessionParser(req as Request, {} as Response, () => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const session = (req as any).session;
+                const session = (req as SessionIncomingMessage).session;
 
                 // 🔐 AUTH CHECK 
                 const user = session?.passport?.user;
