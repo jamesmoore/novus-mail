@@ -5,6 +5,7 @@
 declare namespace Express {
     interface User {
         sub: string
+        name?: string
         email?: string
         picture?: string
     }

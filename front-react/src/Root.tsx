@@ -21,16 +21,18 @@ function Root({ children }: RootProps) {
 
     // Only block on first-ever load
     if (isLoading && !user) {
-        return <div className='flex h-screen items-center'>
+        return <div className='flex h-dvh items-center'>
             <LoadingSpinner />
         </div>;
     }
 
     if (user && !user.isAuthenticated && user.requiresAuth) {
-        return <Login strategy={user.strategy} loading={false} />;
+        return <div className="flex h-dvh justify-center items-center">
+            <Login strategy={user.strategy} loading={false} />
+        </div>;
     }
 
-    return <>{children}</>;
+    return <div className="h-dvh">{children}</div>;
 }
 
 export default Root;

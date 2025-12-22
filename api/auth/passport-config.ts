@@ -46,6 +46,7 @@ const verify: VerifyFunctionWithRequest = (req, tokens, verified) => {
   if (sub) {
     fetchUserInfo(configuration, tokens.access_token, sub).then((userInfo) => {
       if (req.user) {
+        req.user.name = userInfo.name;
         req.user.email = userInfo.email;
         req.user.picture = userInfo.picture;
       }

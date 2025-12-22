@@ -1,13 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { addAddress as apiAddAddress, deleteAddress as apiDeleteAddress, getAddress, logout, updateAddress } from './api-client';
+import { addAddress as apiAddAddress, deleteAddress as apiDeleteAddress, getAddress, updateAddress } from './api-client';
 import useAddressResponse from './useAddressResponse';
 import useDomain from './useDomain';
-import useUser from './useUser';
 import { Button } from './components/ui/button';
-import { CircleAlert, LogOut, Moon, Plus, Sun, SunMoon, Trash, User } from 'lucide-react';
+import { CircleAlert, Moon, Plus, Sun, SunMoon, Trash } from 'lucide-react';
 import { Input } from './components/ui/input';
 import { Switch } from './components/ui/switch';
-import { Avatar, AvatarImage } from './components/ui/avatar';
 import { useTheme } from './components/theme-provider';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './components/ui/dropdown-menu';
 import {
@@ -38,8 +36,6 @@ function Manage() {
     }, [newAddressText]);
 
     const [addressExists, setAddressExists] = useState(false);
-
-    const { data: user } = useUser();
 
     const { theme, setTheme } = useTheme();
 
@@ -109,16 +105,6 @@ function Manage() {
         )
     }
 
-    const doLogout = async () => {
-        const logoutResponse = await logout();
-        if (logoutResponse.logoutUrl) {
-            window.location.href = logoutResponse.logoutUrl;
-        }
-        else {
-            window.location.href = "/";
-        }
-    };
-
     const addressIsInvalid = useMemo(() => newAddressText !== '' && (isValidAddress === false || addressExists),
         [newAddressText, isValidAddress, addressExists]);
 
@@ -130,31 +116,6 @@ function Manage() {
 
     return (
         <>
-            {
-                user && <div className={paperClassName}>
-                    <div className='flex flex-wrap items-center m-1 ml-2 p-1'>
-                        <div className='w-full md:w-3/12'>
-                            User
-                        </div>
-                        <div className='flex items-center gap-1 mt-2 md:mt-0 md:flex-1' >
-                            {user.picture ?
-                                <Avatar>
-                                    <AvatarImage
-                                        src={user.picture}
-                                        alt={user.email}
-                                    />
-                                </Avatar>
-                                : <User />}
-                            {user.email ?? 'Anon'}&nbsp;{`(${user.strategy})`}
-                        </div>
-                        <div className='ml-auto' >
-                            <Button disabled={!user.requiresAuth} onClick={doLogout}>
-                                <LogOut />Logout
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            }
             <div className={paperClassName}>
                 <div className="flex flex-wrap items-center m-1 ml-2 p-1">
                     <div className='w-full md:w-3/12'>
