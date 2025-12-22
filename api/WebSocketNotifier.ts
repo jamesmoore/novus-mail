@@ -58,6 +58,7 @@ class WebSocketNotifier {
                     const owner = databaseFacade.getAddressOwner(address);
 
                     if (owner && owner.owner !== sub) {
+                        console.log("\tSkipping");
                         return;
                     }
                 }
