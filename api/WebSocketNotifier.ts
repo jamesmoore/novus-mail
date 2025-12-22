@@ -11,19 +11,16 @@ class WebSocketNotifier {
     private wss: WebSocketServer;
     private connectedSockets: Array<WebSocket>;
     private notificationEmitter: EventEmitter;
-    private databaseFacade: DatabaseFacade;
 
     constructor(server: Server, databaseFacade: DatabaseFacade, notificationEmitter: EventEmitter) {
         this.wss = new WebSocketServer({ noServer: true });
         this.notificationEmitter = notificationEmitter;
         this.connectedSockets = [];
-        this.databaseFacade = databaseFacade;
 
         server.on('upgrade', (req, socket, head) => {
             sessionParser(req as Request, {} as Response, () => {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const session = (req as any).session;
-                console.log(session);
 
                 // 🔐 AUTH CHECK 
                 const user = session?.passport?.user;
