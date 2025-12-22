@@ -47,7 +47,7 @@ class WebSocketNotifier {
 
                 // 🔐 AUTH CHECK 
                 const user = session?.passport?.user;
-                if (authMode !== 'anonymous' && (!user || typeof user.sub !== 'string')) {
+                if (authMode !== 'anonymous' && !user) {
                     socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
                     socket.destroy();
                     return;
@@ -68,14 +68,14 @@ class WebSocketNotifier {
             this.connectedSockets.forEach(ws => {
 
                 if (authMode !== 'anonymous') {
-                    const sub = (ws as WebSocketWithPassportUser).user?.sub as string;
+                    const sub = (ws as WebSocketWithPassportUser).user?.sub;
                     console.log("Received message for sub: ", sub);
 
                     if (!sub) return;
 
                     const owner = databaseFacade.getAddressOwner(address);
 
-                    if (owner && owner.owner !== sub) {
+                    if (owner && owner.owner && owner.owner !== sub) {
                         console.log("\tSkipping");
                         return;
                     }
