@@ -7,7 +7,7 @@ export interface RootProps {
     children: ReactNode;
 }
 
-function Root({ children }: RootProps) {
+export default function AuthRouter({ children }: RootProps) {
     const { data: user, isLoading, refetch } = useUser();
 
     useEffect(() => {
@@ -34,5 +34,3 @@ function Root({ children }: RootProps) {
 
     return <div className="h-dvh">{children}</div>;
 }
-
-export default Root;
