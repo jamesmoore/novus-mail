@@ -1,9 +1,9 @@
-import { Database } from 'better-sqlite3';
 import { Router } from 'express';
 import { noCacheMiddleware } from './noCacheMiddleware.js';
 import { env } from '../env/env.js';
+import { DatabaseFacade } from '../databaseFacade.js';
 
-export function createRouter(db: Database, domainName: string) {
+export function createRouter(databaseFacade: DatabaseFacade, domainName: string) {
 
     const router = Router();
 
@@ -12,7 +12,8 @@ export function createRouter(db: Database, domainName: string) {
     const refreshInterval = env.MAIL_REFRESH_INTERVAL;
     router.get('/addresses', (req, res) => {
         try {
-            const rows = db.prepare("SELECT addr, owner FROM address WHERE owner is NULL or owner = ?").all(req.user?.sub);
+            const sub = req.user?.sub;
+            const rows = databaseFacade.getAddresses(sub);
             res.json({ addresses: rows, refreshInterval: refreshInterval });
         } catch (err) {
             console.error("DB get addresses fail", err);
@@ -31,7 +32,7 @@ export function createRouter(db: Database, domainName: string) {
     router.get('/address/:addr', (req, res) => {
         const address = req.params.addr.toLowerCase();
         try {
-            const addressRow = db.prepare("SELECT addr FROM address WHERE addr = ?").get(address);
+            const addressRow = databaseFacade.getAddress(address);
             if (addressRow) {
                 res.status(200).send((addressRow as { addr: string }).addr);
             } else {
@@ -46,11 +47,11 @@ export function createRouter(db: Database, domainName: string) {
     router.put('/address/:addr', (req, res) => {
         const address = req.params.addr.toLowerCase();
         try {
-            const rows = db.prepare("SELECT addr FROM address WHERE addr = ?").all(address);
-            if (rows.length > 0) {
+            const existing = databaseFacade.getAddress(address);
+            if (existing) {
                 res.status(200).send();
             } else {
-                db.prepare("INSERT INTO address (addr) VALUES (?)").run(address);
+                databaseFacade.addAddress(address);
                 res.status(200).send();
             }
         } catch (err) {
@@ -63,9 +64,9 @@ export function createRouter(db: Database, domainName: string) {
         const address = req.params.addr.toLowerCase();
 
         try {
-            const addressRow = getAddressOwner(db, address);
+            const addressRow = databaseFacade.getAddress(address);
             if (addressRow) {
-                const owner = (addressRow as { owner: string | null }).owner;
+                const owner = addressRow.owner;
                 if (owner !== req.user?.sub && owner !== null) {
                     res.status(401).send('Address not yours');
                     return;
@@ -85,7 +86,7 @@ export function createRouter(db: Database, domainName: string) {
 
         const owner = json.private ? req.user?.sub : null;
         try {
-            db.prepare("UPDATE address SET owner = ? WHERE addr = ?").run(owner, address);
+            databaseFacade.updateAddressOwner(owner, address);
             res.status(200).send();
         } catch (err) {
             console.error("DB update addresses fail", err)
@@ -96,20 +97,19 @@ export function createRouter(db: Database, domainName: string) {
     router.delete('/address/:addr', (req, res) => {
         const address = req.params.addr.toLowerCase();
         try {
-            const addressRow = getAddressOwner(db, address);
+            const addressRow = databaseFacade.getAddress(address);
             if (!addressRow) {
                 res.status(404).send('Address not found');
                 return;
             }
 
-            const owner = (addressRow as { owner: string | null }).owner;
+            const owner = addressRow.owner;
             if (owner && owner !== req.user?.sub) {
                 res.status(401).send('Address not yours');
                 return;
             }
 
-            db.prepare("DELETE FROM address WHERE addr = ?").run(address);
-            db.prepare("DELETE FROM mail WHERE recipient = ?").run(address);
+            databaseFacade.deleteAddress(address);
             res.status(200).send();
         } catch (err) {
             console.error("DB delete address fail");
@@ -117,10 +117,6 @@ export function createRouter(db: Database, domainName: string) {
             res.status(500).send('Failed to delete address');
         }
     })
-
-    function getAddressOwner(db: Database, address: string) {
-        return db.prepare("SELECT owner FROM address WHERE addr = ?").get(address);
-    }
 
     return router;
 }

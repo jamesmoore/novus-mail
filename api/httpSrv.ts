@@ -1,5 +1,4 @@
 import express from 'express'
-import { Database } from 'better-sqlite3';
 import cors from 'cors';
 import { Server } from 'http';
 import { createRouter as createAddressRouter } from './routes/address.routes.js';
@@ -10,17 +9,18 @@ import { env } from './env/env.js';
 import { passportConfig } from './auth/passport-config.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { DatabaseFacade } from './databaseFacade.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const staticContentPath = './front-react/dist';
 
 export class HttpServer {
-	private db: Database;
+	private db: DatabaseFacade;
 	private port: number;
 	private domainName: string;
 
-	constructor(db: Database, domainName: string, port: number) {
+	constructor(db: DatabaseFacade, domainName: string, port: number) {
 		this.db = db;
 		this.port = port;
 		this.domainName = domainName;

@@ -1,24 +1,12 @@
-import { Database } from 'better-sqlite3';
 import { Router, Response } from 'express';
 import { noCacheMiddleware } from './noCacheMiddleware.js';
 import { env } from '../env/env.js';
 import { DatabaseFacade } from '../databaseFacade.js';
+import { Mail } from '../models/mail.js';
 
-interface Mail {
-    id: string;
-    sender: string;
-    sendername: string;
-    recipient: string;
-    subject: string;
-    read: number;
-    received: number;
-    deleted: number;
-}
-
-export function createRouter(db: Database) {
+export function createRouter(databaseFacade: DatabaseFacade) {
 
     const router = Router();
-    const databaseFacade = new DatabaseFacade(db);
 
     router.use(noCacheMiddleware);
 
@@ -34,38 +22,13 @@ export function createRouter(db: Database) {
         try {
             const perPage = env.MAIL_COUNT_PER_PAGE;
 
-            const directionDursorId = (json.cursorId as string) || 'lt';
-            const direction = directionDursorId.substring(0, 2);
-            const cursorId = directionDursorId.substring(2);
+            const directionCursorId = (json.cursorId as string) || 'lt';
+            const direction = directionCursorId.substring(0, 2);
+            const cursorId = directionCursorId.substring(2);
 
             const owner = req.user?.sub;
 
-            const params = {
-                recipient: json.addr,
-                cursorId: cursorId,
-                mailCount: perPage,
-                owner: owner,
-            };
-
-            const comparisonOperator = direction === 'lt' ? '<' : '>';
-            const whereClause = [
-                json.deleted ? 'deleted = 1' : 'deleted <> 1',
-                cursorId && `Id ${comparisonOperator} @cursorId`,
-                json.addr && 'recipient = @recipient',
-                getOwnerWhereClause(owner),
-            ].filter(Boolean).join(' AND ');
-
-            const sortOrder = direction === 'lt' ? 'DESC' : 'ASC';
-
-            const sql = `
-              SELECT id, sender, sendername, subject, read, received 
-              FROM mail 
-              WHERE ${whereClause}
-              ORDER BY id ${sortOrder} 
-              LIMIT @mailCount
-            `;
-
-            let rows = db.prepare(sql).all(params) as Mail[];
+            let rows = databaseFacade.getMails(json.addr, json.deleted, cursorId, perPage, owner, direction);
 
             if (direction === 'gt') {
                 rows = rows.sort((a, b) => b.id > a.id ? 1 : -1);
@@ -88,7 +51,7 @@ export function createRouter(db: Database) {
     router.get('/mail/:id', (req, res) => {
         const id = req.params.id;
         try {
-            const mail = getMail(id);
+            const mail = databaseFacade.getMail(id);
             checkMailOwnership(req.user?.sub, mail, res, () => {
                 res.json(mail);
             });
@@ -101,12 +64,12 @@ export function createRouter(db: Database) {
     router.delete('/mail/:id', (req, res) => {
         const id = req.params.id;
         try {
-            const mail = getMail(id);
+            const mail = databaseFacade.getMail(id);
             checkMailOwnership(req.user?.sub, mail, res, () => {
-                const dbResult = mail.deleted ?
-                    db.prepare("DELETE FROM mail WHERE id = ?").run(id) :
-                    db.prepare("UPDATE mail SET deleted = 1 WHERE id = ?").run(id);
-                res.status(200).send(`Deleted ${dbResult.changes} mails`);
+                const changes = mail.deleted ?
+                    databaseFacade.deleteMail(id) :
+                    databaseFacade.softDeleteMail(id);
+                res.status(200).send(`Deleted ${changes} mails`);
             });
         } catch (err) {
             console.error("DB delete mail fail", err)
@@ -118,8 +81,8 @@ export function createRouter(db: Database) {
         const addr = req.params.addr;
         try {
             checkAddressOwnership(req.user?.sub, addr, res, () => {
-                const dbResult = db.prepare("UPDATE mail SET deleted = 1 WHERE recipient = ? and deleted = 0").run(addr);
-                res.status(200).send(`Deleted ${dbResult.changes} mails`);
+                const changes = databaseFacade.deleteMailsForAddress(addr);
+                res.status(200).send(`Deleted ${changes} mails`);
             });
         } catch (err) {
             console.error("DB delete mails fail", err)
@@ -130,20 +93,8 @@ export function createRouter(db: Database) {
     router.post('/emptyDeletedMails', (req, res) => {
         try {
             const owner = req.user?.sub;
-
-            const params = {
-                owner: owner,
-            };
-
-            const whereClause = [
-                'deleted = 1',
-                getOwnerWhereClause(owner),
-            ].filter(Boolean).join(' AND ');
-
-            const sql = `DELETE FROM mail WHERE ${whereClause}`;
-
-            const dbResult = db.prepare(sql).run(params);
-            res.status(200).send(`Deleted ${dbResult.changes} mails`);
+            const changes = databaseFacade.emptyDeletedMails(owner);
+            res.status(200).send(`Deleted ${changes} mails`);
         } catch (err) {
             console.error("DB empty deleted mails fail")
             console.error(err)
@@ -154,20 +105,8 @@ export function createRouter(db: Database) {
     router.post('/restoreDeletedMails', (req, res) => {
         try {
             const owner = req.user?.sub;
-
-            const params = {
-                owner: owner,
-            };
-
-            const whereClause = [
-                'deleted = 1',
-                getOwnerWhereClause(owner),
-            ].filter(Boolean).join(' AND ');
-
-            const sql = `UPDATE mail SET deleted = 0 WHERE ${whereClause}`;
-
-            const dbResult = db.prepare(sql).run(params);
-            res.status(200).send(`Restored ${dbResult.changes} mails`);
+            const changes = databaseFacade.restoreDeletedMails(owner);
+            res.status(200).send(`Restored ${changes} mails`);
         } catch (err) {
             console.error("DB restore deleted mails fail")
             console.error(err)
@@ -178,11 +117,12 @@ export function createRouter(db: Database) {
     router.post('/readMail', (req, res) => {
         const json = req.body;
         try {
-            const mail = getMail(json.id);
+            const mail = databaseFacade.getMail(json.id);
             checkMailOwnership(req.user?.sub, mail, res, () => {
                 if (mail.read === 0) {
-                    const dbResult = db.prepare("UPDATE mail SET read = 1 where id = ?").run(json.id);
-                    res.status(200).send(`Updated ${dbResult.changes} mails as read`);
+                    const mailId = json.id;
+                    const changes = databaseFacade.markMailAsRead(mailId);
+                    res.status(200).send(`Updated ${changes} mails as read`);
                 }
                 else {
                     res.status(200).send("Mail already read");
@@ -199,8 +139,8 @@ export function createRouter(db: Database) {
         const addr = req.body.address;
         try {
             checkAddressOwnership(req.user?.sub, addr, res, () => {
-                const dbResult = db.prepare("UPDATE mail SET read = 1 where recipient = ? and read = 0").run(addr);
-                res.status(200).send(`Marked ${dbResult.changes} mails read`);
+                const changes = databaseFacade.markAllAsRead(addr);
+                res.status(200).send(`Marked ${changes} mails read`);
             }
             );
         } catch (err) {
@@ -214,23 +154,7 @@ export function createRouter(db: Database) {
 
         try {
             const owner = req.user?.sub;
-
-            const params = {
-                owner: owner,
-            };
-
-            const whereClause = [
-                'read = 0',
-                'deleted = 0',
-                getOwnerWhereClause(owner),
-            ].filter(Boolean).join(' AND ');
-
-            const unread = db.prepare(`
-                SELECT recipient, count(*) as unread
-                FROM mail
-                WHERE ${whereClause}
-                GROUP BY recipient
-                `).all(params);
+            const unread = databaseFacade.getUnread(owner);
             res.json(unread);
         } catch (err) {
             console.error("unread counts select fail", err);
@@ -244,7 +168,7 @@ export function createRouter(db: Database) {
             return;
         }
 
-        const addressRow = databaseFacade.getAddressOwner(address);
+        const addressRow = databaseFacade.getAddress(address);
 
         if (!addressRow) {
             res.status(404).send();
@@ -272,7 +196,7 @@ export function createRouter(db: Database) {
             return;
         }
 
-        const addressRow = databaseFacade.getAddressOwner(mail.recipient);
+        const addressRow = databaseFacade.getAddress(mail.recipient);
 
         if (!addressRow) {
             res.status(404).send();
@@ -289,17 +213,8 @@ export function createRouter(db: Database) {
         }
     };
 
-    function getMail(id: string) {
-        const rows = db.prepare("SELECT recipient, sender, sendername, subject, content, read, received, deleted FROM mail WHERE id = ?").all(id);
-        const mail = rows[0] as Mail;
-        return mail;
-    }
-
     return router;
 }
 
 export default createRouter;
 
-function getOwnerWhereClause(owner: string | undefined) {
-    return owner && 'mail.recipient in (SELECT addr FROM address WHERE address.owner IS NULL OR address.owner = @owner)';
-}
