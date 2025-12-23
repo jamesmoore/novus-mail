@@ -170,7 +170,7 @@ export function createRouter(db: Database) {
             return;
         }
 
-        const addressRow = databaseFacade.getAddressOwner(address);
+        const addressRow = databaseFacade.getAddress(address);
 
         if (!addressRow) {
             res.status(404).send();
@@ -198,7 +198,7 @@ export function createRouter(db: Database) {
             return;
         }
 
-        const addressRow = databaseFacade.getAddressOwner(mail.recipient);
+        const addressRow = databaseFacade.getAddress(mail.recipient);
 
         if (!addressRow) {
             res.status(404).send();

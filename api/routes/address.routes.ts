@@ -66,7 +66,7 @@ export function createRouter(db: Database, domainName: string) {
         const address = req.params.addr.toLowerCase();
 
         try {
-            const addressRow = databaseFacade.getAddressOwner(address);
+            const addressRow = databaseFacade.getAddress(address);
             if (addressRow) {
                 const owner = addressRow.owner;
                 if (owner !== req.user?.sub && owner !== null) {
@@ -99,7 +99,7 @@ export function createRouter(db: Database, domainName: string) {
     router.delete('/address/:addr', (req, res) => {
         const address = req.params.addr.toLowerCase();
         try {
-            const addressRow = databaseFacade.getAddressOwner(address);
+            const addressRow = databaseFacade.getAddress(address);
             if (!addressRow) {
                 res.status(404).send('Address not found');
                 return;

@@ -1,5 +1,6 @@
 import { Database } from "better-sqlite3";
 import { Mail } from "./models/mail.js";
+import { Address } from "./models/address.js";
 
 export class DatabaseFacade {
     private db: Database;
@@ -9,12 +10,6 @@ export class DatabaseFacade {
     }
 
     // Address
-    public getAddressOwner(address: string) {
-        return this.db
-            .prepare("SELECT owner FROM address WHERE addr = ?")
-            .get(address) as { owner: string | null; } | undefined;
-    }
-
     public addAddress(address: string) {
         this.db.prepare("INSERT INTO address (addr) VALUES (?)").run(address);
     }
@@ -24,7 +19,7 @@ export class DatabaseFacade {
     }
 
     public getAddress(address: string) {
-        return this.db.prepare("SELECT addr FROM address WHERE addr = ?").get(address);
+        return this.db.prepare("SELECT addr, owner FROM address WHERE addr = ?").get(address) as Address;
     }
 
     public updateAddressOwner(owner: string | null | undefined, address: string) {
@@ -34,6 +29,10 @@ export class DatabaseFacade {
     public deleteAddress(address: string) {
         this.db.prepare("DELETE FROM address WHERE addr = ?").run(address);
         this.db.prepare("DELETE FROM mail WHERE recipient = ?").run(address);
+    }
+
+    public getAddressCount() {
+        return this.db.prepare('SELECT count(*) as addresses from address').get();
     }
 
     // Mails
@@ -102,6 +101,10 @@ export class DatabaseFacade {
     public markAllAsRead(addr: string) {
         const result = this.db.prepare("UPDATE mail SET read = 1 where recipient = ? and read = 0").run(addr);
         return result.changes;
+    }
+
+    public getUnreadMailsCount() {
+        return this.db.prepare('SELECT count(*) as unread from mail where read = 0 and deleted = 0').get();
     }
 
     // Deletions
