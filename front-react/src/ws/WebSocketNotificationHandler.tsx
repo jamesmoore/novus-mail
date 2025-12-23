@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { useWebSocketNotifier, WebSocketMessage } from "./useWebSocketNotifier";
-import { useInvalidateMailItemsCache, useMailItems } from "./useMailItems";
+import { useInvalidateMailItemsCache, useMailItems } from "../useMailItems";
 import { useParams } from "react-router-dom";
-import useUnreadCounts from "./useUnreadCounts";
+import useUnreadCounts from "../useUnreadCounts";
 import { toast } from "sonner";
-import useAddressResponse from "./useAddressResponse";
 
 export default function WebSocketNotificationHandler() {
 
@@ -14,7 +13,6 @@ export default function WebSocketNotificationHandler() {
     const { refetch: unreadRefetch } = useUnreadCounts();
     const { invalidate: invalidateMailItems } = useInvalidateMailItemsCache();
     const [lastReceivedMessage, setLastReceivedMessage] = useState<WebSocketMessage | null>(null);
-    const { data: addressesResponse } = useAddressResponse();
 
     useEffect(() => {
         setLastReceivedMessage(lastJsonMessage);
@@ -34,9 +32,7 @@ export default function WebSocketNotificationHandler() {
                         mailItemsRefetch();
                     } else if (address) {
                         invalidateMailItems(address);
-                        if (addressesResponse && addressesResponse.addresses && addressesResponse.addresses.filter(p => p.addr === address).length > 0) {
-                            toast.info("New mail for " + address);
-                        }
+                        toast.info("New mail for " + address);
                     }
                 }
                 break;
@@ -50,7 +46,7 @@ export default function WebSocketNotificationHandler() {
         }
 
         setLastReceivedMessage(null);
-    }, [lastReceivedMessage, invalidateMailItems, unreadRefetch, mailItemsRefetch, urlAddressSegment, setLastReceivedMessage, addressesResponse]);
+    }, [lastReceivedMessage, invalidateMailItems, unreadRefetch, mailItemsRefetch, urlAddressSegment, setLastReceivedMessage]);
 
     return null;
 }

@@ -15,15 +15,15 @@ const authConfig = {
   redirectUri: env.REDIRECT_URI
 };
 
-const oidcEnabled =
+export const authMode =
   authConfig.clientID &&
   authConfig.clientSecret &&
   authConfig.issuer &&
-  authConfig.redirectUri;
+  authConfig.redirectUri ? 'oidc' : 'anonymous';
 
-console.log(oidcEnabled ? 'OIDC enabled' : 'OIDC disabled');
+console.log(`Auth mode: ${authMode}`);
 
-export const configuration: Configuration = oidcEnabled ? await discovery(
+export const configuration: Configuration = (authMode === 'oidc') ? await discovery(
   new URL(authConfig.issuer!), // visit authConfig.issuer + '/.well-known/openid-configuration'
   authConfig.clientID!,
   authConfig.clientSecret,
@@ -60,7 +60,7 @@ const verify: VerifyFunctionWithRequest = (req, tokens, verified) => {
   verified(null, tokens.claims());
 }
 
-export const passportConfig = oidcEnabled ? {
+export const passportConfig = authMode === 'oidc' ? {
   strategy: new CustomStrategy(oidcStrategyOptions, verify),
   middleware: (_req: Request, res: Response, next: NextFunction) => {
     if (

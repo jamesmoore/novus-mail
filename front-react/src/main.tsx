@@ -5,11 +5,11 @@ import Manage from './Manage.tsx';
 import Mail from './Mail.tsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Mailbox from './Mailbox.tsx';
-import { WebSocketNotificationProvider } from './WebSocketNotificationProvider.tsx';
+import { WebSocketNotificationProvider } from './ws/WebSocketNotificationProvider.tsx';
 import DeletedMailbox from './DeletedMailbox.tsx';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import './dompurify-hooks'; // imported to initialize but not referenced
-import Root from './Root.tsx';
+import AuthRouter from './AuthRouter.tsx';
 import MailboxRedirect from './MailboxRedirect.tsx';
 import './index.css'
 import './custom.css'
@@ -26,13 +26,13 @@ const queryClient = new QueryClient();
 // Renamed from root to app for css compatability
 createRoot(document.getElementById('app')!).render(
   <StrictMode>
-    <WebSocketNotificationProvider>
-      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-        <QueryClientProvider client={queryClient}>
-          <ReactQueryDevtools initialIsOpen={false} />
-          <PageTitle />
-          <Toaster />
-          <Root>
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+      <QueryClientProvider client={queryClient}>
+        <ReactQueryDevtools initialIsOpen={false} />
+        <PageTitle />
+        <Toaster />
+        <AuthRouter>
+          <WebSocketNotificationProvider>
             <Router>
               <Routes>
                 <Route path="/" element={<MailboxRedirect />} />
@@ -43,9 +43,9 @@ createRoot(document.getElementById('app')!).render(
                 <Route path="*" element={<Navigate to="/" />} />
               </Routes>
             </Router>
-          </Root>
-        </QueryClientProvider>
-      </ThemeProvider>
-    </WebSocketNotificationProvider>
+          </WebSocketNotificationProvider>
+        </AuthRouter>
+      </QueryClientProvider>
+    </ThemeProvider>
   </StrictMode>
 )

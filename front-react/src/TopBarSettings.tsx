@@ -1,4 +1,4 @@
-import { useWebSocketNotifier } from "./useWebSocketNotifier";
+import { useWebSocketNotifier } from "./ws/useWebSocketNotifier";
 import { ReadyState } from "react-use-websocket";
 import { Badge } from "@/components/ui/badge"
 import { SidebarTrigger } from "./components/ui/sidebar";

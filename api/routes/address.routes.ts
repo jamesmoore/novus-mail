@@ -63,7 +63,7 @@ export function createRouter(db: Database, domainName: string) {
         const address = req.params.addr.toLowerCase();
 
         try {
-            const addressRow = db.prepare("SELECT owner FROM address WHERE addr = ?").get(address);
+            const addressRow = getAddressOwner(db, address);
             if (addressRow) {
                 const owner = (addressRow as { owner: string | null }).owner;
                 if (owner !== req.user?.sub && owner !== null) {
@@ -96,7 +96,7 @@ export function createRouter(db: Database, domainName: string) {
     router.delete('/address/:addr', (req, res) => {
         const address = req.params.addr.toLowerCase();
         try {
-            const addressRow = db.prepare("SELECT owner FROM address WHERE addr = ?").get(address);
+            const addressRow = getAddressOwner(db, address);
             if (!addressRow) {
                 res.status(404).send('Address not found');
                 return;
@@ -117,6 +117,10 @@ export function createRouter(db: Database, domainName: string) {
             res.status(500).send('Failed to delete address');
         }
     })
+
+    function getAddressOwner(db: Database, address: string) {
+        return db.prepare("SELECT owner FROM address WHERE addr = ?").get(address);
+    }
 
     return router;
 }

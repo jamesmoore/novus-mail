@@ -2,6 +2,7 @@ import { Database } from 'better-sqlite3';
 import { Router, Response } from 'express';
 import { noCacheMiddleware } from './noCacheMiddleware.js';
 import { env } from '../env/env.js';
+import { DatabaseFacade } from '../databaseFacade.js';
 
 interface Mail {
     id: string;
@@ -17,6 +18,7 @@ interface Mail {
 export function createRouter(db: Database) {
 
     const router = Router();
+    const databaseFacade = new DatabaseFacade(db);
 
     router.use(noCacheMiddleware);
 
@@ -242,7 +244,7 @@ export function createRouter(db: Database) {
             return;
         }
 
-        const addressRow = getAddress(address);
+        const addressRow = databaseFacade.getAddressOwner(address);
 
         if (!addressRow) {
             res.status(404).send();
@@ -270,7 +272,7 @@ export function createRouter(db: Database) {
             return;
         }
 
-        const addressRow = getAddress(mail.recipient);
+        const addressRow = databaseFacade.getAddressOwner(mail.recipient);
 
         if (!addressRow) {
             res.status(404).send();
@@ -286,12 +288,6 @@ export function createRouter(db: Database) {
             handle();
         }
     };
-
-    function getAddress(address: string) {
-        return db
-            .prepare("SELECT owner FROM address WHERE addr = ?")
-            .get(address) as { owner: string | null; } | undefined;
-    }
 
     function getMail(id: string) {
         const rows = db.prepare("SELECT recipient, sender, sendername, subject, content, read, received, deleted FROM mail WHERE id = ?").all(id);
