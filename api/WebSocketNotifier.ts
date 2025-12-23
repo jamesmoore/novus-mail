@@ -33,7 +33,7 @@ interface WebSocketWithPassportUser extends WebSocket {
 
 class WebSocketNotifier {
     private wss: WebSocketServer;
-    private connectedSockets: Array<WebSocket>;
+    private connectedSockets: Array<WebSocketWithPassportUser>;
     private notificationEmitter: EventEmitter;
 
     constructor(server: Server, databaseFacade: DatabaseFacade, notificationEmitter: EventEmitter) {
@@ -45,7 +45,6 @@ class WebSocketNotifier {
             sessionParser(req as Request, {} as Response, () => {
                 const session = (req as SessionIncomingMessage).session;
 
-                // 🔐 AUTH CHECK 
                 const user = session?.passport?.user;
                 if (authMode !== 'anonymous' && !user) {
                     socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
@@ -68,15 +67,15 @@ class WebSocketNotifier {
             this.connectedSockets.forEach(ws => {
 
                 if (authMode !== 'anonymous') {
-                    const sub = (ws as WebSocketWithPassportUser).user?.sub;
-                    console.log("Received message for sub: ", sub);
+                    const sub = ws.user?.sub;
+                    console.debug("Received message for sub: ", sub);
 
                     if (!sub) return;
 
                     const owner = databaseFacade.getAddressOwner(address);
 
                     if (owner && owner.owner && owner.owner !== sub) {
-                        console.log("\tSkipping");
+                        console.debug("\tSkipping");
                         return;
                     }
                 }
@@ -91,13 +90,13 @@ class WebSocketNotifier {
             try {
                 this.sendWebSocketMessage(ws, { type: 'connected' });
                 this.connectedSockets.push(ws);
-                console.log(`New connection established. Total sockets: ${this.connectedSockets.length}`);
+                console.debug(`New connection established. Total sockets: ${this.connectedSockets.length}`);
 
                 ws.on('close', () => {
                     const index = this.connectedSockets.indexOf(ws);
                     if (index !== -1) {
                         this.connectedSockets.splice(index, 1);
-                        console.log(`Connection closed. Remaining sockets: ${this.connectedSockets.length}`);
+                        console.debug(`Connection closed. Remaining sockets: ${this.connectedSockets.length}`);
                     } else {
                         console.error("Socket not found in list when closing");
                     }
