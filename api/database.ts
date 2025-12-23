@@ -9,7 +9,6 @@ const database = {
 
 			const db = Database('./data/data.db');
 			db.exec("CREATE TABLE IF NOT EXISTS address (addr TEXT NOT NULL)");
-			const res = db.prepare("SELECT COUNT(*) as count FROM address").get();
 
 			db.exec("CREATE TABLE IF NOT EXISTS mail (id TEXT NOT NULL, recipient TEXT NOT NULL, sender TEXT NOT NULL, subject TEXT NOT NULL, content TEXT NOT NULL)");
 
