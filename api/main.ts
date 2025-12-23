@@ -12,8 +12,10 @@ const domainName = domain.getDomainName();
 
 const notificationEventEmitter = new EventEmitter();
 
+
+const databaseFacade = new DatabaseFacade(db);
 const smtpSrv = new SMTPServer(db, 25, notificationEventEmitter);
 smtpSrv.start();
-const httpServer = new HttpServer(db, domainName, 80);
+const httpServer = new HttpServer(databaseFacade, domainName, 80);
 const server = httpServer.start();
-new WebSocketNotifier(server, new DatabaseFacade(db), notificationEventEmitter);
+new WebSocketNotifier(server, databaseFacade, notificationEventEmitter);

@@ -1,13 +1,11 @@
-import { Database } from 'better-sqlite3';
 import { Router } from 'express';
 import { noCacheMiddleware } from './noCacheMiddleware.js';
 import { env } from '../env/env.js';
 import { DatabaseFacade } from '../databaseFacade.js';
 
-export function createRouter(db: Database, domainName: string) {
+export function createRouter(databaseFacade: DatabaseFacade, domainName: string) {
 
     const router = Router();
-    const databaseFacade = new DatabaseFacade(db);
 
     router.use(noCacheMiddleware);
 
