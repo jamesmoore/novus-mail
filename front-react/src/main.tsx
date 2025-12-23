@@ -5,7 +5,7 @@ import Manage from './Manage.tsx';
 import Mail from './Mail.tsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Mailbox from './Mailbox.tsx';
-import { WebSocketNotificationProvider } from './WebSocketNotificationProvider.tsx';
+import { WebSocketNotificationProvider } from './ws/WebSocketNotificationProvider.tsx';
 import DeletedMailbox from './DeletedMailbox.tsx';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import './dompurify-hooks'; // imported to initialize but not referenced

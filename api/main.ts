@@ -3,7 +3,7 @@ import { SMTPServer } from './smtpSrv.js'
 import { HttpServer } from './httpSrv.js'
 import domain from './domain.js'
 import database from './database.js'
-import WebSocketNotifier from './WebSocketNotifier.js';
+import WebSocketNotifier from './ws/WebSocketNotifier.js';
 import EventEmitter from 'events';
 import { DatabaseFacade } from './databaseFacade.js';
 

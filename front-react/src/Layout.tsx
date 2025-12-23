@@ -1,7 +1,7 @@
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { ReactNode } from "react";
-import WebSocketNotificationHandler from "./WebSocketNotificationHandler";
+import WebSocketNotificationHandler from "./ws/WebSocketNotificationHandler";
 import { useSystemThemeListener } from "./useSystemThemeListener";
 
 export interface LayoutProps {

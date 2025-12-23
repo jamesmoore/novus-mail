@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useWebSocketNotifier, WebSocketMessage } from "./useWebSocketNotifier";
-import { useInvalidateMailItemsCache, useMailItems } from "./useMailItems";
+import { useInvalidateMailItemsCache, useMailItems } from "../useMailItems";
 import { useParams } from "react-router-dom";
-import useUnreadCounts from "./useUnreadCounts";
+import useUnreadCounts from "../useUnreadCounts";
 import { toast } from "sonner";
 
 export default function WebSocketNotificationHandler() {
