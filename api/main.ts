@@ -14,7 +14,7 @@ const notificationEventEmitter = new EventEmitter();
 
 
 const databaseFacade = new DatabaseFacade(db);
-const smtpSrv = new SMTPServer(db, 25, notificationEventEmitter);
+const smtpSrv = new SMTPServer(databaseFacade, 25, notificationEventEmitter);
 smtpSrv.start();
 const httpServer = new HttpServer(databaseFacade, domainName, 80);
 const server = httpServer.start();

@@ -36,6 +36,11 @@ export class DatabaseFacade {
     }
 
     // Mails
+    public addMail(mail: Mail) {
+        this.db.prepare("INSERT INTO mail (id, recipient, sender, sendername, subject, content, read, received) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").
+            run(mail.id, mail.recipient, mail.sender, mail.sendername, mail.subject, mail.content, 0, mail.received);
+    }
+
     public getMail(id: string) {
         const rows = this.db.prepare("SELECT recipient, sender, sendername, subject, content, read, received, deleted FROM mail WHERE id = ?").all(id);
         const mail = rows[0] as Mail;

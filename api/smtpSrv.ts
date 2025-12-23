@@ -3,31 +3,32 @@ import { AddressObject, simpleParser } from 'mailparser'
 import { readFileSync, readdirSync } from 'fs';
 import { extname } from 'path';
 import h from './helper.js';
-import { Database } from 'better-sqlite3';
 import EventEmitter from 'events';
+import { DatabaseFacade } from './databaseFacade.js';
+import { Mail } from './models/mail.js';
 
 export class SMTPServer {
-    private db: Database;
-    private port: number;
-    private notifier: EventEmitter;
+	private port: number;
+	private notifier: EventEmitter;
+	private databaseFacade: DatabaseFacade;
 
-    constructor(db: Database, port: number, notifier: EventEmitter) {
-        this.db = db;
-        this.port = port;
-        this.notifier = notifier;
-    }
+	constructor(databaseFacade: DatabaseFacade, port: number, notifier: EventEmitter) {
+		this.port = port;
+		this.notifier = notifier;
+		this.databaseFacade = databaseFacade;
+	}
 
-    public start(): void {
-		const db = this.db;
+	public start(): void {
+		const databaseFacade = this.databaseFacade;
 		const notifier = this.notifier;
 		const opt: SMTPServerOptions = {
 
 			async onData(stream, _session, callback) {
 
 				try {
-	
+
 					const mail = await simpleParser(stream);
-			
+
 					const senderAddress = mail.from?.value?.at(0);
 
 					const senderName = senderAddress?.name;
@@ -35,45 +36,58 @@ export class SMTPServer {
 					const sender = senderAddress?.address ?? senderAddress?.name ?? 'unknown sender';
 					const subject = mail.subject ?? 'No Subject';
 					const content = mail.html ? mail.html : mail.textAsHtml;
-			
+
 					try {
-			
+
 						const mailToAddresses = (mail.to as AddressObject)?.value?.filter(p => p.address).map(p => p.address!) ?? [];
 						const smtpRcptAddresses = _session.envelope.rcptTo.map(p => p.address);
-			
+
 						for (const recipient of mailToAddresses.concat(smtpRcptAddresses).map(p => p.toLowerCase())) {
-			
+
 							const recipientName = recipient.substring(0, recipient.lastIndexOf("@"));
-							const res = db.prepare("SELECT COUNT(*) as count FROM address WHERE addr = ?").all(recipientName);
-			
-							if ((res[0] as { count: number }).count > 0) {
-			
+							const res = databaseFacade.getAddress(recipientName);
+
+							if (res) {
 								const id = h.randomID();
-								db.prepare("INSERT INTO mail (id, recipient, sender, sendername, subject, content, read, received) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").run(id, recipientName, sender, senderName, subject, content, 0, mail.date?.getTime() ?? 0);
+								const dateTime = mail.date?.getTime() ?? 0;
+
+								const newMail: Mail = {
+									deleted: 0,
+									id: id,
+									read: 0,
+									received: dateTime,
+									recipient: recipientName,
+									sender: sender,
+									subject: subject,
+									sendername: senderName,
+									content: content
+								}
+
+								databaseFacade.addMail(newMail);
 								notifier.emit('received', recipientName);
 								break;
-			
 							}
 							else {
 								console.log("No address matched for: " + recipient);
 							}
 						}
-			
+
 					} catch (err) {
-			
+
 						console.log("Inbound email error");
 						console.log(err);
-			
+
 					}
-			
+
 				} catch (err) {
-			
+
 					console.log("Processing email error");
 					console.log(err);
-			
+
 				}
 
 				callback(null);
+
 
 			},
 
