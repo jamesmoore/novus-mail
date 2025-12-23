@@ -15,6 +15,27 @@ export class DatabaseFacade {
             .get(address) as { owner: string | null; } | undefined;
     }
 
+    public addAddress(address: string) {
+        this.db.prepare("INSERT INTO address (addr) VALUES (?)").run(address);
+    }
+
+    public getAddresses(sub: string | undefined) {
+        return this.db.prepare("SELECT addr, owner FROM address WHERE owner is NULL or owner = ?").all(sub);
+    }
+
+    public getAddress(address: string) {
+        return this.db.prepare("SELECT addr FROM address WHERE addr = ?").get(address);
+    }
+
+    public updateAddressOwner(owner: string | null | undefined, address: string) {
+        this.db.prepare("UPDATE address SET owner = ? WHERE addr = ?").run(owner, address);
+    }
+
+    public deleteAddress(address: string) {
+        this.db.prepare("DELETE FROM address WHERE addr = ?").run(address);
+        this.db.prepare("DELETE FROM mail WHERE recipient = ?").run(address);
+    }
+
     // Mails
     public getMail(id: string) {
         const rows = this.db.prepare("SELECT recipient, sender, sendername, subject, content, read, received, deleted FROM mail WHERE id = ?").all(id);
