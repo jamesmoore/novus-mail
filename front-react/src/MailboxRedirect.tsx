@@ -28,6 +28,9 @@ function MailboxRedirect() {
     if (firstUnread) {
       navigate(`/inbox/${firstUnread}`, { replace: true });
     }
+    else {
+      navigate('/manage');
+    }
   }, [unreadCounts, addressResponse, isAddressesLoading, isUnreadLoading, navigate]);
 
   return null;
