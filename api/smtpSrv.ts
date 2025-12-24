@@ -2,10 +2,10 @@ import { SMTPServerOptions, SMTPServer as ssrv } from 'smtp-server'
 import { AddressObject, simpleParser } from 'mailparser'
 import { readFileSync, readdirSync } from 'fs';
 import { extname } from 'path';
-import h from './helper.js';
 import EventEmitter from 'events';
 import { DatabaseFacade } from './databaseFacade.js';
 import { Mail } from './models/mail.js';
+import { ulid } from 'ulid';
 
 export class SMTPServer {
 	private port: number;
@@ -48,7 +48,7 @@ export class SMTPServer {
 							const res = databaseFacade.getAddress(recipientName);
 
 							if (res) {
-								const id = h.randomID();
+								const id = ulid();
 								const dateTime = mail.date?.getTime() ?? 0;
 
 								const newMail: Mail = {

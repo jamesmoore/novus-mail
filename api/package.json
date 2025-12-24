@@ -25,6 +25,7 @@
     "passport": "^0.7.0",
     "passport-anonymous": "^1.0.1",
     "smtp-server": "^3.18.0",
+    "ulid": "^3.0.2",
     "ws": "^8.18.3",
     "zod": "^4.2.1"
   },
