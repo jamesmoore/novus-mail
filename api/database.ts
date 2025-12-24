@@ -23,6 +23,7 @@ export default function dbinit() {
 
 			db1.close();
 			fs.renameSync(v1DatabaseFileName, v1DatabaseFileName + ".bak");
+			console.log("Migrating schema v1 to v2 Completed");
 		}
 
 		return db2;
