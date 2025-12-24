@@ -3,6 +3,7 @@ import type { Database as BetterSqlite3Database } from 'better-sqlite3';
 import fs from 'fs';
 import { Address } from './models/address.js';
 import { Mail } from './models/mail.js';
+import { ulid } from 'ulid';
 const v1DatabaseFileName = './data/data.db';
 const v2DatabaseFileName = './data/data2.db';
 
@@ -119,8 +120,25 @@ function migrateV1toV2(db1: BetterSqlite3Database, db2: BetterSqlite3Database) {
 
 	for (const row of db1.prepare("SELECT id, recipient, sender, subject, content, read, received, deleted, sendername FROM mail").iterate()) {
 		const mail = row as Mail;
+
+		const idPrefix = mail.id.slice(0, 13);
+		let timeSeed: number | undefined;
+		if (idPrefix.length === 13) {
+			let isNumeric = true;
+			for (let i = 0; i < 13; i++) {
+				const code = idPrefix.charCodeAt(i);
+				if (code < 48 || code > 57) {
+					isNumeric = false;
+					break;
+				}
+			}
+			if (isNumeric) {
+				timeSeed = Number(idPrefix);
+			}
+		}
+
 		insertMail.run(
-			mail.id,
+			timeSeed === undefined ? ulid() : ulid(timeSeed),
 			mail.recipient,
 			mail.sender,
 			mail.subject,

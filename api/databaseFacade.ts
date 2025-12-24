@@ -27,8 +27,8 @@ export class DatabaseFacade {
     }
 
     public deleteAddress(address: string) {
-        this.db.prepare("DELETE FROM address WHERE addr = ?").run(address);
         this.db.prepare("DELETE FROM mail WHERE recipient = ?").run(address);
+        this.db.prepare("DELETE FROM address WHERE addr = ?").run(address);
     }
 
     public getAddressCount() {
