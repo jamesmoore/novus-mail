@@ -102,6 +102,7 @@ function getV2Database() {
   		value TEXT NOT NULL
 		)`);
 
+	db.prepare("INSERT OR IGNORE INTO meta (key,value) VALUES (?,?)").run('schemaVersion', '2');
 	return db;
 }
 
@@ -150,5 +151,4 @@ function migrateV1toV2(db1: BetterSqlite3Database, db2: BetterSqlite3Database) {
 		);
 	}
 
-	db2.prepare("INSERT OR REPLACE INTO meta (key,value) VALUES (?,?)").run('schemaVersion', '2');
 }
