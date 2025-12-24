@@ -2,12 +2,12 @@
 import { SMTPServer } from './smtpSrv.js'
 import { HttpServer } from './httpSrv.js'
 import domain from './domain.js'
-import database from './database.js'
+import dbinit from './database.js'
 import WebSocketNotifier from './ws/webSocketNotifier.js';
 import EventEmitter from 'events';
 import { DatabaseFacade } from './databaseFacade.js';
 
-const db = database.init();
+const db = dbinit();
 const domainName = domain.getDomainName();
 
 const notificationEventEmitter = new EventEmitter();
