@@ -8,18 +8,43 @@ import { env } from '../env/env.js';
 import session from 'express-session';
 // @ts-expect-error missing types - no @types/connect-loki package
 import LokiStore from 'connect-loki';
+import { createClient } from 'redis';
+import { RedisStore } from 'connect-redis';
 
-const lokiStore = LokiStore(session);
+function GetLokiStore() {
+    const lokiStore = LokiStore(session);
+    return new lokiStore({
+        ttl: 3600 * 24 * 7,
+        path: './data/session-store.db',
+    }) as session.Store;
+}
+
+function GetRedisStore() {
+    const redisClient = createClient({
+        url: env.REDIS_URL,
+    });
+    redisClient.connect().catch((e) => {
+        console.error(e);
+        process.exit(1);
+    });
+    const redisStore = new RedisStore({
+        client: redisClient,
+        prefix: "novusmail:",
+    })
+    return redisStore;
+}
+
+const sessionStore =
+    env.SESSION_STORE === 'NONE' ? undefined as unknown as session.Store :
+        env.SESSION_STORE === 'LOKI' ? GetLokiStore() :
+            env.SESSION_STORE === 'REDIS' ? GetRedisStore() :
+                undefined;
 
 export const sessionParser = session({
     saveUninitialized: false,
     resave: true,
     secret: env.SESSION_SECRET,
-    store: new lokiStore({
-        ttl: 3600 * 24 * 7,
-        path: './data/session-store.db',
-        
-    }) as session.Store,
+    store: sessionStore,
     rolling: true,
     cookie: {
         secure: process.env.NODE_ENV === 'production',
