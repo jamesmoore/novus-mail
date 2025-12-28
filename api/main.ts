@@ -5,7 +5,7 @@ import domain from './domain.js'
 import dbinit from './database.js'
 import WebSocketNotifier from './ws/webSocketNotifier.js';
 import EventEmitter from 'events';
-import { DatabaseFacade } from './databaseFacade.js';
+import { SqliteDatabaseFacade } from './sqliteDatabaseFacade.js';
 
 const db = dbinit();
 const domainName = domain.getDomainName();
@@ -13,7 +13,7 @@ const domainName = domain.getDomainName();
 const notificationEventEmitter = new EventEmitter();
 
 
-const databaseFacade = new DatabaseFacade(db);
+const databaseFacade = new SqliteDatabaseFacade(db);
 const smtpSrv = new SMTPServer(databaseFacade, 25, notificationEventEmitter);
 smtpSrv.start();
 const httpServer = new HttpServer(databaseFacade, domainName, 80);
