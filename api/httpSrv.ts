@@ -48,18 +48,6 @@ export class HttpServer {
 		
 		app.use('/', createAuthRouter());
 
-		// app.get('/', (_req, res) => {
-		// 	res.redirect('/index.html');
-		// })
-
-		app.get(/\/favicon.ico|\/mail.svg/, (_req, res) => {
-			res.sendFile(join(__dirname, staticContentPath, 'mail.svg'), (err) => {
-				if (err) {
-					res.status(500).send(err)
-				}
-			});
-		})
-
 		app.use(express.static(staticContentPath));
 
 		const authMiddleware = passportConfig.middleware;
