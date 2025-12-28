@@ -4,7 +4,6 @@ import passport from 'passport';
 import { ensureLoggedOut } from 'connect-ensure-login';
 import * as client from 'openid-client'
 import { configuration, oidcStrategyOptions, passportConfig } from '../auth/passport-config.js';
-import cookieParser from 'cookie-parser';
 import { env } from '../env/env.js';
 import session from 'express-session';
 // @ts-expect-error missing types - no @types/connect-loki package
@@ -19,6 +18,7 @@ export const sessionParser = session({
     store: new lokiStore({
         ttl: 3600 * 24 * 7,
         path: './data/session-store.db',
+        
     }) as session.Store,
     rolling: true,
     cookie: {
@@ -34,7 +34,6 @@ export function createRouter() {
 
     router.use(noCacheMiddleware);
 
-    router.use(cookieParser());
     router.use(sessionParser);
     router.use(passport.initialize());
     router.use(passport.session());
