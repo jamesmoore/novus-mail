@@ -4,6 +4,12 @@ import { z } from "zod";
 
 const fallbackSessionSecret = () => randomBytes(32).toString("hex");
 
+const SessionStoreSchema = z.union([
+  z.literal('NONE'),
+  z.literal('LOKI'),
+  z.literal('REDIS'),
+]).default('LOKI');
+
 export const env = createEnv({
   server: {
     MAIL_COUNT_PER_PAGE: z.string().optional().default("50").transform((s) => parseInt(s, 10)).pipe(z.number().min(1)),
@@ -21,6 +27,7 @@ export const env = createEnv({
 
     CORS_ALLOW_ALL_ORIGINS: z.string().default('false').transform((s) => s.toLowerCase() !== "false" && s !== "0"),
     TRUST_PROXY: z.string().default('false').transform((s) => s.toLowerCase() !== "false" && s !== "0"),
+    SESSION_STORE: SessionStoreSchema,
   },
 
   /**

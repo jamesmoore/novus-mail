@@ -9,17 +9,23 @@ import session from 'express-session';
 // @ts-expect-error missing types - no @types/connect-loki package
 import LokiStore from 'connect-loki';
 
-const lokiStore = LokiStore(session);
+function GetLokiStore() {
+    const lokiStore = LokiStore(session);
+    return new lokiStore({
+        ttl: 3600 * 24 * 7,
+        path: './data/session-store.db',
+    }) as session.Store;
+}
+
+const sessionStore = 
+    env.SESSION_STORE === 'NONE' ? undefined as unknown as session.Store : 
+    env.SESSION_STORE === 'LOKI' ? GetLokiStore() : undefined;
 
 export const sessionParser = session({
     saveUninitialized: false,
     resave: true,
     secret: env.SESSION_SECRET,
-    store: new lokiStore({
-        ttl: 3600 * 24 * 7,
-        path: './data/session-store.db',
-        
-    }) as session.Store,
+    store: sessionStore,
     rolling: true,
     cookie: {
         secure: process.env.NODE_ENV === 'production',
