@@ -40,25 +40,25 @@ export const oidcStrategyOptions: StrategyOptionsWithRequest = {
   passReqToCallback: true
 }
 
-const verify: VerifyFunctionWithRequest = (req, tokens, verified) => {
+const verify: VerifyFunctionWithRequest = async (req, tokens, verified) => {
+  const claims = tokens.claims();
+  if (!claims?.sub) {
+    return verified(new Error("No sub"));
+  }
 
-  const sub = tokens.claims()?.sub;
-  if (sub) {
-    fetchUserInfo(configuration, tokens.access_token, sub).then((userInfo) => {
-      if (req.user) {
-        req.user.name = userInfo.name;
-        req.user.email = userInfo.email;
-        req.user.picture = userInfo.picture;
-      }
-    }).catch(
-      (e) => console.error('userinfo error', e)
-    );
+  try {
+    const userInfo = await fetchUserInfo(configuration, tokens.access_token, claims.sub);
+
+    verified(null, {
+      ...claims,
+      name: userInfo.name,
+      email: userInfo.email,
+      picture: userInfo.picture,
+    });
+  } catch (e) {
+    verified(e);
   }
-  else {
-    console.error('No sub in verify callback');
-  }
-  verified(null, tokens.claims());
-}
+};
 
 export const passportConfig = authMode === 'oidc' ? {
   strategy: new CustomStrategy(oidcStrategyOptions, verify),
