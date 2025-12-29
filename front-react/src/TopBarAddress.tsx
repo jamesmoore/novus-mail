@@ -45,19 +45,17 @@ function TopBarAddress() {
         return `${selectedAddress}@${domainName}`;
     }
 
-    const onDeleteAllMails = () => {
-        deleteMails(selectedAddress!).then(() => {
-            refetchUread();
-            refetch();
-            invalidateDeleted();
-        });
+    const onDeleteAllMails = async () => {
+        await deleteMails(selectedAddress!);
+        await refetchUread();
+        await refetch();
+        await invalidateDeleted();
     }
 
-    const onMarkAllAsRead = () => {
-        readAllMail(selectedAddress!).then(() => {
-            refetchUread();
-            refetch();
-        });
+    const onMarkAllAsRead = async () => {
+        await readAllMail(selectedAddress!);
+        await refetchUread();
+        await refetch();
     }
 
     const total = data?.pages.reduce((p, q) => p + q.data.length, 0) ?? 0;
