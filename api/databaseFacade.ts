@@ -1,5 +1,6 @@
 import { Address } from "./models/address.js";
 import { Mail } from "./models/mail.js";
+import { UnreadCount } from "./models/unreadCount.js";
 
 export interface DatabaseFacade {
     // Address
@@ -23,7 +24,7 @@ export interface DatabaseFacade {
     ): Mail[];
 
     // Unread
-    getUnread(owner: string | undefined): Array<{ recipient: string; unread: number; }>;
+    getUnread(owner: string | undefined): UnreadCount[];
     markMailAsRead(mailId: string): number;
     markAllAsRead(addr: string): number;
     getUnreadMailsCount(): number;

@@ -2,6 +2,7 @@ import { Database } from "better-sqlite3";
 import { Mail } from "./models/mail.js";
 import { Address } from "./models/address.js";
 import { DatabaseFacade } from "./databaseFacade.js";
+import { UnreadCount } from "./models/unreadCount.js";
 
 export class SqliteDatabaseFacade implements DatabaseFacade {
     private db: Database;
@@ -97,7 +98,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
                 WHERE ${whereClause}
                 GROUP BY recipient
                 `).all(params);
-        return unread as { recipient: string; unread: number; }[];
+        return unread as UnreadCount[];
     }
 
     public markMailAsRead(mailId: string) {
