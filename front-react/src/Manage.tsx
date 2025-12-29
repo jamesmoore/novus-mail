@@ -234,11 +234,6 @@ function Manage() {
                     </div>
                     <div className='mt-2 md:mt-0' >
                         <ExportButton/>
-                        {/* <a href={ExportApiUrl} target="_blank" download>
-                            <Button >
-                                <Download />Download
-                            </Button>
-                        </a> */}
                     </div>
                 </div>
             </div>

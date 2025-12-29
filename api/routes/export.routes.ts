@@ -32,19 +32,19 @@ export function createRouter(databaseFacade: DatabaseFacade) {
     router.post('/import', upload.single('file'), (req, res) => {
 
         if (req.file) {
-            var data = JSON.parse(req.file.buffer.toString()) as ExportFile;
+            const data = JSON.parse(req.file.buffer.toString()) as ExportFile;
             console.log("Received addresses: " + data.addresses.length);
             console.log("Received mails: " + data.mails.length);
 
             data.addresses.forEach((addr) => {
-                var existing = databaseFacade.getAddress(addr.addr);
+                const existing = databaseFacade.getAddress(addr.addr);
                 if (!existing) {
                     databaseFacade.addAddress(addr.addr);
                 }
             });
 
             data.mails.forEach((mail) => {
-                var existing = databaseFacade.getMail(mail.id); {
+                const existing = databaseFacade.getMail(mail.id); {
                     if (!existing) {
                         databaseFacade.addMail(mail);
                     }
