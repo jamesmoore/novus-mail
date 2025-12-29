@@ -33,7 +33,8 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
     }
 
     public getAddressCount() {
-        return this.db.prepare('SELECT count(*) as addresses from address').get() as { addresses: number };
+        const addressCountResult = this.db.prepare('SELECT count(*) as addresses from address').get() as { addresses: number };
+        return addressCountResult.addresses;
     }
 
     // Mails
@@ -110,7 +111,8 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
     }
 
     public getUnreadMailsCount() {
-        return this.db.prepare('SELECT count(*) as unread from mail where read = 0 and deleted = 0').get() as { unread: number };
+        const unreadMailCount = this.db.prepare('SELECT count(*) as unread from mail where read = 0 and deleted = 0').get() as { unread: number };
+        return unreadMailCount.unread;
     }
 
     // Deletions

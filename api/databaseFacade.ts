@@ -8,7 +8,7 @@ export interface DatabaseFacade {
     getAddress(address: string): Address;
     updateAddressOwner(owner: string | null | undefined, address: string): void;
     deleteAddress(address: string): void;
-    getAddressCount(): { addresses: number; };
+    getAddressCount(): number;
 
     // Mails
     addMail(mail: Mail): void;
@@ -26,7 +26,7 @@ export interface DatabaseFacade {
     getUnread(owner: string | undefined): Array<{ recipient: string; unread: number; }>;
     markMailAsRead(mailId: string): number;
     markAllAsRead(addr: string): number;
-    getUnreadMailsCount(): { unread: number; };
+    getUnreadMailsCount(): number;
 
     // Deletions
     softDeleteMail(id: string): number;
