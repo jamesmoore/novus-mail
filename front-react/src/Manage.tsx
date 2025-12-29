@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { addAddress as apiAddAddress, deleteAddress as apiDeleteAddress, getAddress, updateAddress } from './api-client';
+import { addAddress, deleteAddress, getAddress, updateAddress } from './api-client';
 import useAddressResponse from './useAddressResponse';
 import useDomain from './useDomain';
 import { Button } from './components/ui/button';
@@ -21,6 +21,8 @@ import {
 } from './components/ui/alert-dialog';
 import { Label } from './components/ui/label';
 import { toast } from 'sonner';
+import { ImportForm } from './importForm';
+import { ExportButton } from './exportButton';
 
 function Manage() {
     const [newAddressText, setNewAddressText] = useState('');
@@ -58,12 +60,12 @@ function Manage() {
         return () => { cancelled = true; };
     }, [newAddressText]);
 
-    async function addAddress() {
+    async function addAddressClicked() {
         if (addressExists) {
             toast.error('Address already exists');
         }
         else if (newAddressText !== '') {
-            const result = await apiAddAddress(newAddressText);
+            const result = await addAddress(newAddressText);
             if (result) {
                 toast.success('Added ' + newAddressText);
                 setNewAddressText("");
@@ -76,7 +78,7 @@ function Manage() {
     }
 
     async function confirmDeleteClicked(addr: string) {
-        const success = await apiDeleteAddress(addr);
+        const success = await deleteAddress(addr);
         if (success) {
             toast.success('Deleted ' + addr);
             await refreshAddresses();
@@ -131,7 +133,7 @@ function Manage() {
                         @{domainName}
                     </div>
                     <div className='ml-auto mt-2 md:mt-0' >
-                        <Button disabled={newAddressText === '' || addressIsInvalid} onClick={addAddress}>
+                        <Button disabled={newAddressText === '' || addressIsInvalid} onClick={addAddressClicked}>
                             <Plus />Add
                         </Button>
                     </div>
@@ -221,6 +223,33 @@ function Manage() {
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
+                    </div>
+                </div>
+            </div>
+
+            <div className={paperClassName}>
+                <div className="flex flex-wrap items-center m-1 ml-2 p-1">
+                    <div className='w-full md:w-3/12'>
+                        Export
+                    </div>
+                    <div className='mt-2 md:mt-0' >
+                        <ExportButton/>
+                        {/* <a href={ExportApiUrl} target="_blank" download>
+                            <Button >
+                                <Download />Download
+                            </Button>
+                        </a> */}
+                    </div>
+                </div>
+            </div>
+
+            <div className={paperClassName}>
+                <div className="flex flex-wrap items-center m-1 ml-2 p-1">
+                    <div className='w-full md:w-3/12'>
+                        Import
+                    </div>
+                    <div className='mt-2 md:mt-0'>
+                        <ImportForm/>
                     </div>
                 </div>
             </div>

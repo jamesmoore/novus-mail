@@ -12,6 +12,7 @@ const defaultHeaders = {
 /** To support local development - add this env variable to the file `.env.development.local`, which should be located alongside package.json  */
 const BaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
 const ApiUrl = `${BaseUrl}/api`;
+const ExportApiUrl = `${ApiUrl}/export`;
 
 async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
     const res = await fetch(input, init);
@@ -193,6 +194,33 @@ const logout = async () => {
     return response.json() as Promise<Logout>;
 };
 
+const exportMail = async () => {
+    const response = await apiFetch(`${ApiUrl}/export`, {
+        method: 'GET',
+        headers: defaultHeaders,
+    });
+    if (!response.ok) {
+        throw new Error("Export failed");
+    }
+    return response;
+}
+
+const importMail = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch(`${ApiUrl}/import`, {
+        method: "POST",
+        body: formData,
+        //credentials: "include", // important if you rely on session/OIDC cookies
+    });
+
+    if (!res.ok) {
+        throw new Error("Import failed");
+    }
+}
+
+
 export {
     fetchDomain,
     fetchAddress,
@@ -212,4 +240,7 @@ export {
     readAllMail,
     fetchUser,
     logout,
+    exportMail,
+    importMail,
+    ExportApiUrl,
 };
