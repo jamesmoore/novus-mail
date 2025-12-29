@@ -86,7 +86,7 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string)
 
         const owner = json.private ? req.user?.sub : null;
         try {
-            databaseFacade.updateAddressOwner(owner, address);
+            databaseFacade.updateAddressOwner(address, owner);
             res.status(200).send();
         } catch (err) {
             console.error("DB update addresses fail", err)
