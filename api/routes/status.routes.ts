@@ -11,8 +11,8 @@ export function createRouter(databaseFacade: DatabaseFacade) {
         const unread = databaseFacade.getUnreadMailsCount();
         const addresses = databaseFacade.getAddressCount();
         res.json({
-            unread: (unread as { unread: number }).unread,
-            addresses: (addresses as { addresses: number }).addresses,
+            unread: unread,
+            addresses: addresses,
         });
     });
 
