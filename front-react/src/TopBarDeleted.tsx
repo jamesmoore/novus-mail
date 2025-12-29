@@ -26,18 +26,16 @@ function TopBarDeleted() {
     const { invalidate: invalidateAllMails } = useInvalidateAllMailItemsCache();
     const { refetch: refetchUread } = useUnreadCounts();
 
-    const onDeleteAllMails = () => {
-        emptyDeletedMails().then(() => {
-            invalidateDeleted();
-        });
+    const onDeleteAllMails = async () => {
+        await emptyDeletedMails();
+        await invalidateDeleted();
     }
 
-    const onRestoreDeletedMails = () => {
-        restoreDeletedMails().then(() => {
-            invalidateDeleted();
-            invalidateAllMails();
-            refetchUread();
-        });
+    const onRestoreDeletedMails = async () => {
+        await restoreDeletedMails();
+        await invalidateDeleted();
+        await invalidateAllMails();
+        await refetchUread();
     }
 
     return (
