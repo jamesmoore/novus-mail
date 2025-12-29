@@ -58,51 +58,43 @@ function Manage() {
         return () => { cancelled = true; };
     }, [newAddressText]);
 
-    function addAddress() {
+    async function addAddress() {
         if (addressExists) {
             toast.error('Address already exists');
         }
         else if (newAddressText !== '') {
-            apiAddAddress(newAddressText)
-                .then((success: boolean) => {
-                    if (success) {
-                        toast.success('Added ' + newAddressText);
-                        setNewAddressText("");
-                        refreshAddresses();
-                    }
-                    else {
-                        toast.error('Failed to add address');
-                    }
-                }
-                );
+            const result = await apiAddAddress(newAddressText);
+            if (result) {
+                toast.success('Added ' + newAddressText);
+                setNewAddressText("");
+                await refreshAddresses();
+            }
+            else {
+                toast.error('Failed to add address');
+            }
         }
     }
 
-    function confirmDeleteClicked(addr: string) {
-        apiDeleteAddress(addr)
-            .then((success: boolean) => {
-                if (success) {
-                    toast.success('Deleted ' + addr);
-                    refreshAddresses();
-                }
-                else {
-                    toast.error('Failed to delete ' + addr);
-                }
-            });
+    async function confirmDeleteClicked(addr: string) {
+        const success = await apiDeleteAddress(addr);
+        if (success) {
+            toast.success('Deleted ' + addr);
+            await refreshAddresses();
+        }
+        else {
+            toast.error('Failed to delete ' + addr);
+        }
     }
 
-    function setVisibility(addr: string, makePrivate: boolean) {
-        updateAddress(addr, makePrivate).then(
-            (success: boolean) => {
-                if (success) {
-                    refreshAddresses();
-                    toast.success(addr + (makePrivate ? ' made private 🔒' : ' made public 🔓'));
-                }
-                else {
-                    toast.error('Failed to update ' + addr);
-                }
-            }
-        )
+    async function setVisibility(addr: string, makePrivate: boolean) {
+        const success = await updateAddress(addr, makePrivate);
+        if (success) {
+            await refreshAddresses();
+            toast.success(addr + (makePrivate ? ' made private 🔒' : ' made public 🔓'));
+        }
+        else {
+            toast.error('Failed to update ' + addr);
+        }
     }
 
     const addressIsInvalid = useMemo(() => newAddressText !== '' && (isValidAddress === false || addressExists),
