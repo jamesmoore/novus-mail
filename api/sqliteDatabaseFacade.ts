@@ -24,7 +24,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
         return this.db.prepare("SELECT addr, owner FROM address WHERE addr = ?").get(address) as Address;
     }
 
-    public updateAddressOwner(owner: string | null | undefined, address: string) {
+    public updateAddressOwner(address: string, owner: string | null | undefined) {
         this.db.prepare("UPDATE address SET owner = ? WHERE addr = ?").run(owner, address);
     }
 

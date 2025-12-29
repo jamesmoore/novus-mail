@@ -7,7 +7,7 @@ export interface DatabaseFacade {
     addAddress(address: string): void;
     getAddresses(sub: string | undefined): Address[];
     getAddress(address: string): Address;
-    updateAddressOwner(owner: string | null | undefined, address: string): void;
+    updateAddressOwner(address: string, owner: string | null | undefined): void;
     deleteAddress(address: string): void;
     getAddressCount(): number;
 
