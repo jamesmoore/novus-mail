@@ -4,6 +4,7 @@ import { DatabaseFacade } from '../databaseFacade.js';
 import multer from "multer";
 import { Address } from '../models/address.js';
 import { Mail } from '../models/mail.js';
+import AdmZip from 'adm-zip';
 
 interface ExportFile {
     addresses: Address[],
@@ -19,12 +20,18 @@ export function createRouter(databaseFacade: DatabaseFacade) {
         const addresses = databaseFacade.getAddresses(req.user?.sub);
         const mails = databaseFacade.getAllMails(req.user?.sub);
         const userName = req.user?.name;
-        const filename = (userName ? userName + '_' : '') + Date.now() + '.json';
-        res.setHeader('content-disposition', 'attachment; filename=' + filename);
-        res.json({
+        const fileNamePrefix = (userName ? userName + '_' : '') + Date.now();
+        res.setHeader('content-disposition', 'attachment; filename=' + fileNamePrefix + '.zip');
+        const mailsObj: ExportFile = {
             addresses: addresses,
             mails: mails,
-        });
+        };
+        var zip = new AdmZip();
+        zip.addFile(fileNamePrefix + '.json', Buffer.from(JSON.stringify(mailsObj, null, 4), "utf8"));
+        var zipData = zip.toBuffer();
+
+        res.setHeader('content-type', 'application/zip');
+        res.status(200).end(zipData);
     });
 
     const upload = multer();

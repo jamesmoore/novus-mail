@@ -16,7 +16,7 @@ export function ExportButton() {
       // get filename from header if present
       const contentDisposition = res.headers.get("content-disposition");
       const filenameMatch = contentDisposition?.match(/filename="?([^"]+)"?/);
-      const filename = filenameMatch?.[1] ?? "export.json";
+      const filename = filenameMatch?.[1] ?? "export.zip";
       
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
