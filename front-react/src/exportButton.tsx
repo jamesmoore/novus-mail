@@ -38,7 +38,7 @@ export function ExportButton() {
   }
 
   return (
-    <Button onClick={handleExport} disabled={isExporting}>
+    <Button onClick={handleExport} disabled={isExporting} variant='outline'>
       {isExporting ? (
         <>
           <Spinner className="mr-2" />

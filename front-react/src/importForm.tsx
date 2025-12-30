@@ -38,7 +38,7 @@ export function ImportForm() {
                 disabled={isUploading}
             />
 
-            <Button type="submit" disabled={!file || isUploading}>
+            <Button type="submit" disabled={!file || isUploading} variant='outline'>
                 {isUploading ? (
                     <>
                         <Spinner className="mr-2" />
