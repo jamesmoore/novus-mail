@@ -41,12 +41,12 @@ export function ExportButton() {
     <Button onClick={handleExport} disabled={isExporting} variant='outline'>
       {isExporting ? (
         <>
-          <Spinner className="mr-2" />
+          <Spinner />
           Exporting…
         </>
       ) : (
         <>
-          <Download className="mr-2" />
+          <Download />
           Download
         </>
       )}

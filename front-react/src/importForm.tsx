@@ -41,12 +41,12 @@ export function ImportForm() {
             <Button type="submit" disabled={!file || isUploading} variant='outline'>
                 {isUploading ? (
                     <>
-                        <Spinner className="mr-2" />
+                        <Spinner />
                         Importing…
                     </>
                 ) : (
                     <>
-                        <Upload className="mr-2" />
+                        <Upload />
                         Upload
                     </>
                 )}
