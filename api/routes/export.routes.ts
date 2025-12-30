@@ -26,9 +26,9 @@ export function createRouter(databaseFacade: DatabaseFacade) {
             addresses: addresses,
             mails: mails,
         };
-        var zip = new AdmZip();
+        const zip = new AdmZip();
         zip.addFile(fileNamePrefix + '.json', Buffer.from(JSON.stringify(mailsObj, null, 4), "utf8"));
-        var zipData = zip.toBuffer();
+        const zipData = zip.toBuffer();
 
         res.setHeader('content-type', 'application/zip');
         res.status(200).end(zipData);
