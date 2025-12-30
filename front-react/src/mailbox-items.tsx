@@ -1,10 +1,10 @@
-import MailboxItem from "./MailboxItem";
+import MailboxItem from "./mailbox-item";
 import { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult } from "@tanstack/react-query";
 import { MailResponse } from "./models/mail-response";
 import { useInView } from "react-intersection-observer";
 import { useEffect } from "react";
 import { Mail } from "./models/mail";
-import LoadingSpinner from "./LoadingSpinner";
+import LoadingSpinner from "./loading-spinner";
 
 interface MailboxItemsProps {
     onMailItemSelect: (mail: Mail) => void;

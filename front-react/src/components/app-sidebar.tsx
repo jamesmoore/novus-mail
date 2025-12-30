@@ -13,13 +13,13 @@ import {
   SidebarSeparator,
   useSidebar,
 } from "@/components/ui/sidebar"
-import useAddressResponse from "@/useAddressResponse";
+import useAddressResponse from "@/use-address-response";
 import { Fragment, JSX, useEffect, useMemo } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
-import useUnreadCounts from "@/useUnreadCounts";
+import useUnreadCounts from "@/use-unread-counts";
 import { Badge } from "./ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import useUser from "@/useUser";
+import useUser from "@/use-user";
 import { logout } from "@/api-client";
 import { Avatar, AvatarImage } from "./ui/avatar";
 

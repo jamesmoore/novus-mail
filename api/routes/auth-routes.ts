@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { noCacheMiddleware } from './noCacheMiddleware.js';
+import { noCacheMiddleware } from './no-cache-middleware.js';
 import passport from 'passport';
 import { ensureLoggedOut } from 'connect-ensure-login';
 import * as client from 'openid-client'

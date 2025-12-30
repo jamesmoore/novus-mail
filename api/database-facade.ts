@@ -1,6 +1,6 @@
 import { Address } from "./models/address.js";
 import { Mail } from "./models/mail.js";
-import { UnreadCount } from "./models/unreadCount.js";
+import { UnreadCount } from "./models/unread-count.js";
 
 export interface DatabaseFacade {
     // Address

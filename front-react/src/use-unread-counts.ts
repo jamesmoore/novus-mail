@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchUnreadCounts } from "./api-client";
-import useUser from "./useUser";
+import useUser from "./use-user";
 
 const useUnreadCounts = () => {
   const { data: user } = useUser();

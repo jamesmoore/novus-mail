@@ -1,24 +1,24 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Manage from './Manage.tsx';
-import Mail from './Mail.tsx';
+import Manage from './manage.tsx';
+import Mail from './mail.tsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import Mailbox from './Mailbox.tsx';
-import { WebSocketNotificationProvider } from './ws/WebSocketNotificationProvider.tsx';
-import DeletedMailbox from './DeletedMailbox.tsx';
+import Mailbox from './mailbox.tsx';
+import { WebSocketNotificationProvider } from './ws/websocket-notification-provider.tsx';
+import DeletedMailbox from './deleted-mailbox.tsx';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import './dompurify-hooks'; // imported to initialize but not referenced
-import AuthRouter from './AuthRouter.tsx';
-import MailboxRedirect from './MailboxRedirect.tsx';
+import AuthRouter from './auth-router.tsx';
+import MailboxRedirect from './mailbox-redirect.tsx';
 import './index.css'
 import './custom.css'
 import { ThemeProvider } from './components/theme-provider.tsx';
-import PageTitle from './PageTitle.tsx';
-import Layout from './Layout.tsx';
-import TopBarSettings from './TopBarSettings.tsx';
-import TopBarDeleted from './TopBarDeleted.tsx';
-import TopBarAddress from './TopBarAddress.tsx';
+import PageTitle from './page-title.tsx';
+import Layout from './layout.tsx';
+import TopBarSettings from './top-bar-settings.tsx';
+import TopBarDeleted from './top-bar-deleted.tsx';
+import TopBarAddress from './top-bar-address.tsx';
 import { Toaster } from 'sonner';
 
 const queryClient = new QueryClient();

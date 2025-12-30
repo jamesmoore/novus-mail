@@ -1,4 +1,4 @@
-import { useDeletedMailItems, useInvalidateAllMailItemsCache, useInvalidateDeletedMailItemsCache } from "./useMailItems";
+import { useDeletedMailItems, useInvalidateAllMailItemsCache, useInvalidateDeletedMailItemsCache } from "./use-mail-items";
 import { emptyDeletedMails, restoreDeletedMails } from "./api-client";
 import { Trash, Undo } from 'lucide-react';
 import { Button } from "./components/ui/button";
@@ -14,7 +14,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "./components/ui/alert-dialog";
-import useUnreadCounts from "./useUnreadCounts";
+import useUnreadCounts from "./use-unread-counts";
 
 function TopBarDeleted() {
 

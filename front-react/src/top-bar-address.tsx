@@ -1,8 +1,8 @@
-import useDomain from "./useDomain";
+import useDomain from "./use-domain";
 import { useParams } from "react-router-dom";
 import { deleteMails, readAllMail } from "./api-client";
-import useUnreadCounts from "./useUnreadCounts";
-import { useInvalidateDeletedMailItemsCache, useMailItems } from "./useMailItems";
+import useUnreadCounts from "./use-unread-counts";
+import { useInvalidateDeletedMailItemsCache, useMailItems } from "./use-mail-items";
 import { CheckCheck, Copy, Trash } from 'lucide-react';
 import { Button } from "./components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip";
