@@ -40,8 +40,8 @@ export function createRouter(databaseFacade: DatabaseFacade) {
 
         if (req.file) {
 
-            var zip = new AdmZip(req.file.buffer);
-            var zipEntries = zip.getEntries();
+            const zip = new AdmZip(req.file.buffer);
+            const zipEntries = zip.getEntries();
 
             zipEntries.forEach((p) => {
                 if (p.entryName.endsWith('.json')) {
