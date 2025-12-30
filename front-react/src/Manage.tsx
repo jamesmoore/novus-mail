@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { addAddress, deleteAddress, getAddress, updateAddress } from './api-client';
-import useAddressResponse from './useAddressResponse';
-import useDomain from './useDomain';
+import useAddressResponse from './use-address-response';
+import useDomain from './use-domain';
 import { Button } from './components/ui/button';
 import { CircleAlert, Moon, Plus, Sun, SunMoon, Trash } from 'lucide-react';
 import { Input } from './components/ui/input';

@@ -1,7 +1,7 @@
-import useUser from "./useUser";
-import Login from "./Login";
+import useUser from "./use-user";
+import Login from "./login";
 import { ReactNode, useEffect } from "react";
-import LoadingSpinner from "./LoadingSpinner";
+import LoadingSpinner from "./loading-spinner";
 
 export interface RootProps {
     children: ReactNode;

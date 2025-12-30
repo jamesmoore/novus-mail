@@ -2,9 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom'
 import { deleteMail, fetchMail } from './api-client';
 import { useQuery } from '@tanstack/react-query';
-import MailboxItem from './MailboxItem';
-import { useInvalidateMailItemsCache } from './useMailItems';
-import LoadingSpinner from './LoadingSpinner';
+import MailboxItem from './mailbox-item';
+import { useInvalidateMailItemsCache } from './use-mail-items';
+import LoadingSpinner from './loading-spinner';
 
 function Mail() {
     const navigate = useNavigate();

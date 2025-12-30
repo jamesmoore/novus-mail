@@ -1,11 +1,11 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip";
 import { Mail } from "./models/mail";
-import { isEnterKeyUp, isLeftMouseClick } from "./Events";
+import { isEnterKeyUp, isLeftMouseClick } from "./events";
 import humanizeDuration from "humanize-duration";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMail } from "./api-client";
-import ShadowEmail from "./ShadowEmail";
+import ShadowEmail from "./shadow-email";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "./components/ui/button";
 import { Trash } from "lucide-react";

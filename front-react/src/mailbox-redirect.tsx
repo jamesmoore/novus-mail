@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import useAddressResponse from "./useAddressResponse";
-import useUnreadCounts from "./useUnreadCounts";
+import useAddressResponse from "./use-address-response";
+import useUnreadCounts from "./use-unread-counts";
 import { AddressesResponse } from "./models/addresses-response";
 import { UnreadCount } from "./models/unread-count";
 

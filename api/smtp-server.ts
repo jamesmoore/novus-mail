@@ -3,7 +3,7 @@ import { AddressObject, simpleParser } from 'mailparser'
 import { readFileSync, readdirSync } from 'fs';
 import { extname } from 'path';
 import EventEmitter from 'events';
-import { DatabaseFacade } from './databaseFacade.js';
+import { DatabaseFacade } from './database-facade.js';
 import { Mail } from './models/mail.js';
 import { ulid } from 'ulid';
 

@@ -1,8 +1,8 @@
 import { deleteMail, readMail } from "./api-client";
 import { Mail } from "./models/mail";
-import useUnreadCounts from "./useUnreadCounts";
-import { useDeletedMailItems } from './useMailItems';
-import MailboxItems from "./MailboxItems";
+import useUnreadCounts from "./use-unread-counts";
+import { useDeletedMailItems } from './use-mail-items';
+import MailboxItems from "./mailbox-items";
 
 function DeletedMailbox() {
 

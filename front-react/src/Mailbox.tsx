@@ -1,9 +1,9 @@
 import { deleteMail, readMail } from "./api-client";
 import { Mail } from "./models/mail";
 import { useParams } from "react-router-dom";
-import useUnreadCounts from "./useUnreadCounts";
-import { useInvalidateDeletedMailItemsCache, useMailItems } from './useMailItems';
-import MailboxItems from "./MailboxItems";
+import useUnreadCounts from "./use-unread-counts";
+import { useInvalidateDeletedMailItemsCache, useMailItems } from './use-mail-items';
+import MailboxItems from "./mailbox-items";
 
 function Mailbox() {
     const { address: selectedAddress } = useParams();

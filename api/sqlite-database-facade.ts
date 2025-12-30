@@ -1,8 +1,8 @@
 import { Database } from "better-sqlite3";
 import { Mail } from "./models/mail.js";
 import { Address } from "./models/address.js";
-import { DatabaseFacade } from "./databaseFacade.js";
-import { UnreadCount } from "./models/unreadCount.js";
+import { DatabaseFacade } from "./database-facade.js";
+import { UnreadCount } from "./models/unread-count.js";
 
 export class SqliteDatabaseFacade implements DatabaseFacade {
     private db: Database;
