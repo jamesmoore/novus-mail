@@ -1,4 +1,5 @@
 import { AddressesResponse } from "./models/addresses-response";
+import { ImportStatus } from "./models/import-status";
 import { Logout } from "./models/logout";
 import { MailMessage } from "./models/mail-message";
 import { MailResponse } from "./models/mail-response";
@@ -193,6 +194,36 @@ const logout = async () => {
     return response.json() as Promise<Logout>;
 };
 
+const exportMail = async () => {
+    const response = await apiFetch(`${ApiUrl}/export`, {
+        method: 'GET',
+        headers: defaultHeaders,
+    });
+    if (!response.ok) {
+        throw new Error("Export failed");
+    }
+    return response;
+}
+
+const importMail = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(`${ApiUrl}/import`, {
+        method: "POST",
+        body: formData,
+        //credentials: "include", // important if you rely on session/OIDC cookies
+    });
+
+    if (!response.ok) {
+        throw new Error("Import failed");
+    }
+    else {
+        return response.json() as Promise<ImportStatus>;
+    }
+}
+
+
 export {
     fetchDomain,
     fetchAddress,
@@ -212,4 +243,6 @@ export {
     readAllMail,
     fetchUser,
     logout,
+    exportMail,
+    importMail,
 };

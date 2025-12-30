@@ -41,7 +41,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
     // Mails
     public addMail(mail: Mail) {
         this.db.prepare("INSERT INTO mail (id, recipient, sender, sendername, subject, content, read, received) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").
-            run(mail.id, mail.recipient, mail.sender, mail.sendername, mail.subject, mail.content, 0, mail.received);
+            run(mail.id, mail.recipient, mail.sender, mail.sendername, mail.subject, mail.content, mail.read, mail.received);
     }
 
     public getMail(id: string) {
@@ -74,6 +74,22 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
               WHERE ${whereClause}
               ORDER BY id ${sortOrder} 
               LIMIT @mailCount
+            `;
+
+        const rows = this.db.prepare(sql).all(params) as Mail[];
+        return rows;
+    }
+
+    public getAllMails(owner: string | undefined) {
+        const params = {
+            owner: owner,
+        };
+
+        const whereClause = owner ? "WHERE " + this.getOwnerWhereClause(owner) : '';
+        const sql = `
+              SELECT id, recipient, sender, sendername, subject, read, received, deleted, content
+              FROM mail 
+              ${whereClause}
             `;
 
         const rows = this.db.prepare(sql).all(params) as Mail[];

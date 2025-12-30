@@ -5,6 +5,7 @@ import { createRouter as createAddressRouter } from './routes/address.routes.js'
 import { createRouter as createMailRouter } from './routes/mail.routes.js';
 import { createRouter as createStatusRouter } from './routes/status.routes.js';
 import { createRouter as createAuthRouter } from './routes/auth.routes.js';
+import { createRouter as createExportRouter } from './routes/export.routes.js';
 import { env } from './env/env.js';
 import { passportConfig } from './auth/passport-config.js';
 import { fileURLToPath } from 'url';
@@ -54,7 +55,7 @@ export class HttpServer {
 		app.use('/api', authMiddleware, createAddressRouter(this.db, this.domainName));
 		app.use('/api', authMiddleware, createMailRouter(this.db));
 		app.use('/api', authMiddleware, createStatusRouter(this.db));
-
+		app.use('/api', authMiddleware, createExportRouter(this.db));
 		// catch-all handler for react router. This is needed so that urls that are refreshed activate the react router. The alternative 302 redirect to / would break that.
 		// https://expressjs.com/en/guide/migrating-5.html#path-syntax
 		app.get('/{*splat}', (_req, res) => {

@@ -22,6 +22,7 @@ export interface DatabaseFacade {
         owner: string | undefined,
         direction: string
     ): Mail[];
+    getAllMails(owner: string | undefined) : Mail[];
 
     // Unread
     getUnread(owner: string | undefined): UnreadCount[];
