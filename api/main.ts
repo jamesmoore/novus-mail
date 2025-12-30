@@ -1,11 +1,11 @@
 "use strict";
-import { SMTPServer } from './smtpSrv.js'
-import { HttpServer } from './httpSrv.js'
+import { SMTPServer } from './smtp-server.js'
+import { HttpServer } from './http-server.js'
 import domain from './domain.js'
-import dbinit from './database.js'
-import WebSocketNotifier from './ws/webSocketNotifier.js';
+import dbinit from './sqlite-database-factory.js'
+import WebSocketNotifier from './ws/web-socket-notifier.js';
 import EventEmitter from 'events';
-import { SqliteDatabaseFacade } from './sqliteDatabaseFacade.js';
+import { SqliteDatabaseFacade } from './sqlite-database-facade.js';
 
 const db = dbinit();
 const domainName = domain.getDomainName();

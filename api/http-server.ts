@@ -2,10 +2,10 @@ import express from 'express'
 import cors from 'cors';
 import { Server } from 'http';
 import { createRouter as createAddressRouter } from './routes/address-routes.js';
-import { createRouter as createMailRouter } from './routes/mail.routes.js';
-import { createRouter as createStatusRouter } from './routes/status.routes.js';
+import { createRouter as createMailRouter } from './routes/mail-routes.js';
+import { createRouter as createStatusRouter } from './routes/status-routes.js';
 import { createRouter as createAuthRouter } from './routes/auth-routes.js';
-import { createRouter as createExportRouter } from './routes/export.routes.js';
+import { createRouter as createExportRouter } from './routes/export-routes.js';
 import { env } from './env/env.js';
 import { passportConfig } from './auth/passport-config.js';
 import { fileURLToPath } from 'url';
