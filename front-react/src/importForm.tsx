@@ -5,6 +5,7 @@ import { Upload } from "lucide-react";
 import { importMail } from "./api-client";
 import useAddressResponse from "./useAddressResponse";
 import { toast } from "sonner";
+import { Spinner } from "./components/ui/spinner";
 
 export function ImportForm() {
     const [file, setFile] = useState<File | null>(null);
@@ -40,7 +41,7 @@ export function ImportForm() {
             <Button type="submit" disabled={!file || isUploading}>
                 {isUploading ? (
                     <>
-                        <span className="animate-spin mr-2">⏳</span>
+                        <Spinner className="mr-2" />
                         Importing…
                     </>
                 ) : (

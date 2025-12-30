@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { exportMail } from "./api-client";
 import { toast } from "sonner";
+import { Spinner } from "./components/ui/spinner";
 
 export function ExportButton() {
   const [isExporting, setIsExporting] = useState(false);
@@ -17,7 +18,6 @@ export function ExportButton() {
       const contentDisposition = res.headers.get("content-disposition");
       const filenameMatch = contentDisposition?.match(/filename="?([^"]+)"?/);
       const filename = filenameMatch?.[1] ?? "export.zip";
-      
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
 
@@ -41,7 +41,7 @@ export function ExportButton() {
     <Button onClick={handleExport} disabled={isExporting}>
       {isExporting ? (
         <>
-          <span className="animate-spin mr-2">⏳</span>
+          <Spinner className="mr-2" />
           Exporting…
         </>
       ) : (
