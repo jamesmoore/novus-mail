@@ -33,7 +33,7 @@ export function ImportForm() {
         <form onSubmit={handleSubmit} className="flex gap-2 items-center">
             <Input
                 type="file"
-                accept="application/json"
+                accept="application/zip"
                 onChange={(e) => setFile(e.target.files?.[0] ?? null)}
                 disabled={isUploading}
             />

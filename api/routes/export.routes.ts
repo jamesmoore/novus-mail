@@ -21,7 +21,6 @@ export function createRouter(databaseFacade: DatabaseFacade) {
         const mails = databaseFacade.getAllMails(req.user?.sub);
         const userName = req.user?.name;
         const fileNamePrefix = (userName ? userName + '_' : '') + Date.now();
-        res.setHeader('content-disposition', 'attachment; filename=' + fileNamePrefix + '.zip');
         const mailsObj: ExportFile = {
             addresses: addresses,
             mails: mails,
@@ -30,6 +29,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
         zip.addFile(fileNamePrefix + '.json', Buffer.from(JSON.stringify(mailsObj, null, 4), "utf8"));
         const zipData = zip.toBuffer();
 
+        res.setHeader('content-disposition', 'attachment; filename=' + fileNamePrefix + '.zip');
         res.setHeader('content-type', 'application/zip');
         res.status(200).end(zipData);
     });
@@ -39,22 +39,34 @@ export function createRouter(databaseFacade: DatabaseFacade) {
     router.post('/import', upload.single('file'), (req, res) => {
 
         if (req.file) {
-            const data = JSON.parse(req.file.buffer.toString()) as ExportFile;
-            console.log("Received addresses: " + data.addresses.length);
-            console.log("Received mails: " + data.mails.length);
 
-            data.addresses.forEach((addr) => {
-                const existing = databaseFacade.getAddress(addr.addr);
-                if (!existing) {
-                    databaseFacade.addAddress(addr.addr);
+            var zip = new AdmZip(req.file.buffer);
+            var zipEntries = zip.getEntries();
+
+            zipEntries.forEach((p) => {
+                if (p.entryName.endsWith('.json')) {
+                    console.log('Importing ' + p.entryName);
+                    const data = JSON.parse(p.getData().toString()) as ExportFile;
+                    console.log("Received addresses: " + data.addresses.length);
+                    console.log("Received mails: " + data.mails.length);
+
+                    data.addresses.forEach((addr) => {
+                        const existing = databaseFacade.getAddress(addr.addr);
+                        if (!existing) {
+                            databaseFacade.addAddress(addr.addr);
+                        }
+                    });
+
+                    data.mails.forEach((mail) => {
+                        const existing = databaseFacade.getMail(mail.id); {
+                            if (!existing) {
+                                databaseFacade.addMail(mail);
+                            }
+                        }
+                    });
                 }
-            });
-
-            data.mails.forEach((mail) => {
-                const existing = databaseFacade.getMail(mail.id); {
-                    if (!existing) {
-                        databaseFacade.addMail(mail);
-                    }
+                else {
+                    console.error('Ignoring ' + p.entryName);
                 }
             });
         }
@@ -62,7 +74,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
             res.sendStatus(400);
             return;
         }
-        res.status(200).send();
+        res.sendStatus(200);
     });
 
     return router;
