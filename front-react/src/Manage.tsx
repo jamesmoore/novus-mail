@@ -21,8 +21,8 @@ import {
 } from './components/ui/alert-dialog';
 import { Label } from './components/ui/label';
 import { toast } from 'sonner';
-import { ImportForm } from './importForm';
-import { ExportButton } from './exportButton';
+import { ImportForm } from './import-form';
+import { ExportButton } from './export-button';
 
 function Manage() {
     const [newAddressText, setNewAddressText] = useState('');
