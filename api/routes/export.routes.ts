@@ -45,7 +45,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
 
     router.post('/import', upload.single('file'), (req, res) => {
 
-        const status = {
+        const status: ImportStatus = {
             addresses: 0,
             addressesAdded: 0,
             mails: 0,
