@@ -18,7 +18,8 @@ export function ImportForm() {
 
         try {
             setIsUploading(true);
-            await importMail(file);
+            const result = await importMail(file);
+            console.log(result);
             await refreshAddresses();
             toast.success("Import complete");
         } catch (err) {

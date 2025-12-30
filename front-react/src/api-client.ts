@@ -1,4 +1,5 @@
 import { AddressesResponse } from "./models/addresses-response";
+import { ImportStatus } from "./models/import-status";
 import { Logout } from "./models/logout";
 import { MailMessage } from "./models/mail-message";
 import { MailResponse } from "./models/mail-response";
@@ -208,14 +209,17 @@ const importMail = async (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
 
-    const res = await fetch(`${ApiUrl}/import`, {
+    const response = await fetch(`${ApiUrl}/import`, {
         method: "POST",
         body: formData,
         //credentials: "include", // important if you rely on session/OIDC cookies
     });
 
-    if (!res.ok) {
+    if (!response.ok) {
         throw new Error("Import failed");
+    }
+    else {
+        return response.json() as Promise<ImportStatus>;
     }
 }
 

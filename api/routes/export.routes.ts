@@ -11,6 +11,13 @@ interface ExportFile {
     mails: Mail[],
 }
 
+interface ImportStatus {
+    addresses: number,
+    addressesAdded: number,
+    mails: number,
+    mailsAdded: number,
+}
+
 export function createRouter(databaseFacade: DatabaseFacade) {
 
     const router = Router();
@@ -38,8 +45,13 @@ export function createRouter(databaseFacade: DatabaseFacade) {
 
     router.post('/import', upload.single('file'), (req, res) => {
 
+        const status = {
+            addresses: 0,
+            addressesAdded: 0,
+            mails: 0,
+            mailsAdded: 0,
+        };
         if (req.file) {
-
             const zip = new AdmZip(req.file.buffer);
             const zipEntries = zip.getEntries();
 
@@ -51,16 +63,20 @@ export function createRouter(databaseFacade: DatabaseFacade) {
                     console.log("Received mails: " + data.mails.length);
 
                     data.addresses.forEach((addr) => {
+                        status.addresses++;
                         const existing = databaseFacade.getAddress(addr.addr);
                         if (!existing) {
                             databaseFacade.addAddress(addr.addr);
+                            status.addressesAdded++;
                         }
                     });
 
                     data.mails.forEach((mail) => {
+                        status.mails++;
                         const existing = databaseFacade.getMail(mail.id); {
                             if (!existing) {
                                 databaseFacade.addMail(mail);
+                                status.mailsAdded++;
                             }
                         }
                     });
@@ -74,7 +90,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
             res.sendStatus(400);
             return;
         }
-        res.sendStatus(200);
+        res.json(status);
     });
 
     return router;
