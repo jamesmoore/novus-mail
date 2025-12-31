@@ -6,14 +6,14 @@ export interface DatabaseFacade {
     // Address
     addAddress(address: string): Promise<void>;
     getAddresses(sub: string | undefined): Promise<Address[]>;
-    getAddress(address: string): Promise<Address>;
+    getAddress(address: string): Promise<Address | undefined>;
     updateAddressOwner(address: string, owner: string | null | undefined): Promise<void>;
     deleteAddress(address: string): Promise<void>;
     getAddressCount(): Promise<number>;
 
     // Mails
     addMail(mail: Mail): Promise<void>;
-    getMail(id: string): Promise<Mail>;
+    getMail(id: string): Promise<Mail | undefined>;
     getMails(
         addr: string,
         deleted: boolean,

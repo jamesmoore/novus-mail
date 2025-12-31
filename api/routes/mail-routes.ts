@@ -52,6 +52,10 @@ export function createRouter(databaseFacade: DatabaseFacade) {
         const id = req.params.id;
         try {
             const mail = await databaseFacade.getMail(id);
+            if (!mail) {
+                res.sendStatus(404);
+                return;
+            }
             await checkMailOwnership(req.user?.sub, mail, res, async () => {
                 res.json(mail);
             });
@@ -65,6 +69,10 @@ export function createRouter(databaseFacade: DatabaseFacade) {
         const id = req.params.id;
         try {
             const mail = await databaseFacade.getMail(id);
+            if (!mail) {
+                res.sendStatus(404);
+                return;
+            }
             await checkMailOwnership(req.user?.sub, mail, res, async () => {
                 const changes = mail.deleted ?
                     await databaseFacade.deleteMail(id) :
@@ -112,12 +120,16 @@ export function createRouter(databaseFacade: DatabaseFacade) {
             console.error(err)
             res.status(500).json({ error: "Failed to restore deleted mails" });
         }
-    })    
+    })
 
     router.post('/readMail', async (req, res) => {
         const json = req.body;
         try {
             const mail = await databaseFacade.getMail(json.id);
+            if (!mail) {
+                res.sendStatus(404);
+                return;
+            }
             await checkMailOwnership(req.user?.sub, mail, res, async () => {
                 if (mail.read === 0) {
                     const mailId = json.id;
@@ -162,7 +174,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
         }
     })
 
-    async function checkAddressOwnership(user: string | undefined, address: string, res: Response, handle: () => Promise<void>)  {
+    async function checkAddressOwnership(user: string | undefined, address: string, res: Response, handle: () => Promise<void>) {
         if (!user) {
             handle();
             return;
