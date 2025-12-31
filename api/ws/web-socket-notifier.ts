@@ -63,16 +63,15 @@ class WebSocketNotifier {
 
         this.initialize();
 
-        this.notificationEmitter.on('received', (address: string) => {
-            this.connectedSockets.forEach(ws => {
-
+        this.notificationEmitter.on('received', async (address: string) => {
+            for (const ws of this.connectedSockets) {
                 if (authMode !== 'anonymous') {
                     const sub = ws.user?.sub;
                     console.debug("Received message for sub: ", sub);
 
                     if (!sub) return;
 
-                    const owner = databaseFacade.getAddress(address);
+                    const owner = await databaseFacade.getAddress(address);
 
                     if (owner && owner.owner && owner.owner !== sub) {
                         console.debug("\tSkipping");
@@ -80,8 +79,7 @@ class WebSocketNotifier {
                     }
                 }
                 this.sendWebSocketMessage(ws, { type: 'received', value: address });
-            });
-
+            }
         });
     }
 

@@ -7,9 +7,9 @@ export function createRouter(databaseFacade: DatabaseFacade) {
     const router = Router();
     router.use(noCacheMiddleware);
     
-    router.get('/status', (req, res) => {
-        const unread = databaseFacade.getUnreadMailsCount();
-        const addresses = databaseFacade.getAddressCount();
+    router.get('/status', async (req, res) => {
+        const unread = await databaseFacade.getUnreadMailsCount();
+        const addresses = await databaseFacade.getAddressCount();
         res.json({
             unread: unread,
             addresses: addresses,

@@ -23,9 +23,9 @@ export function createRouter(databaseFacade: DatabaseFacade) {
     const router = Router();
     router.use(noCacheMiddleware);
 
-    router.get('/export', (req, res) => {
-        const addresses = databaseFacade.getAddresses(req.user?.sub);
-        const mails = databaseFacade.getAllMails(req.user?.sub);
+    router.get('/export', async (req, res) => {
+        const addresses = await databaseFacade.getAddresses(req.user?.sub);
+        const mails = await databaseFacade.getAllMails(req.user?.sub);
         const userName = req.user?.name;
         const fileNamePrefix = (userName ? userName + '_' : '') + Date.now();
         const mailsObj: ExportFile = {
@@ -43,7 +43,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
 
     const upload = multer();
 
-    router.post('/import', upload.single('file'), (req, res) => {
+    router.post('/import', upload.single('file'), async (req, res) => {
 
         const status: ImportStatus = {
             addresses: 0,
@@ -55,36 +55,35 @@ export function createRouter(databaseFacade: DatabaseFacade) {
             const zip = new AdmZip(req.file.buffer);
             const zipEntries = zip.getEntries();
 
-            zipEntries.forEach((p) => {
+            for (const p of zipEntries) {
                 if (p.entryName.endsWith('.json')) {
                     console.log('Importing ' + p.entryName);
                     const data = JSON.parse(p.getData().toString()) as ExportFile;
                     console.log("Received addresses: " + data.addresses.length);
                     console.log("Received mails: " + data.mails.length);
 
-                    data.addresses.forEach((addr) => {
+                    for (const addr of data.addresses) {
                         status.addresses++;
-                        const existing = databaseFacade.getAddress(addr.addr);
+                        const existing = await databaseFacade.getAddress(addr.addr);
                         if (!existing) {
-                            databaseFacade.addAddress(addr.addr);
+                            await databaseFacade.addAddress(addr.addr);
                             status.addressesAdded++;
                         }
-                    });
+                    };
 
-                    data.mails.forEach((mail) => {
+                    for (const mail of data.mails) {
                         status.mails++;
-                        const existing = databaseFacade.getMail(mail.id); {
-                            if (!existing) {
-                                databaseFacade.addMail(mail);
-                                status.mailsAdded++;
-                            }
+                        const existing = await databaseFacade.getMail(mail.id);
+                        if (!existing) {
+                            await databaseFacade.addMail(mail);
+                            status.mailsAdded++;
                         }
-                    });
+                    };
                 }
                 else {
                     console.error('Ignoring ' + p.entryName);
                 }
-            });
+            }
         }
         else {
             res.sendStatus(400);

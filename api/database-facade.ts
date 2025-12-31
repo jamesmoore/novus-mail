@@ -4,16 +4,16 @@ import { UnreadCount } from "./models/unread-count.js";
 
 export interface DatabaseFacade {
     // Address
-    addAddress(address: string): void;
-    getAddresses(sub: string | undefined): Address[];
-    getAddress(address: string): Address;
-    updateAddressOwner(address: string, owner: string | null | undefined): void;
-    deleteAddress(address: string): void;
-    getAddressCount(): number;
+    addAddress(address: string): Promise<void>;
+    getAddresses(sub: string | undefined): Promise<Address[]>;
+    getAddress(address: string): Promise<Address>;
+    updateAddressOwner(address: string, owner: string | null | undefined): Promise<void>;
+    deleteAddress(address: string): Promise<void>;
+    getAddressCount(): Promise<number>;
 
     // Mails
-    addMail(mail: Mail): void;
-    getMail(id: string): Mail;
+    addMail(mail: Mail): Promise<void>;
+    getMail(id: string): Promise<Mail>;
     getMails(
         addr: string,
         deleted: boolean,
@@ -21,19 +21,19 @@ export interface DatabaseFacade {
         perPage: number,
         owner: string | undefined,
         direction: string
-    ): Mail[];
-    getAllMails(owner: string | undefined) : Mail[];
+    ): Promise<Mail[]>;
+    getAllMails(owner: string | undefined): Promise<Mail[]>;
 
     // Unread
-    getUnread(owner: string | undefined): UnreadCount[];
-    markMailAsRead(mailId: string): number;
-    markAllAsRead(addr: string): number;
-    getUnreadMailsCount(): number;
+    getUnread(owner: string | undefined): Promise<UnreadCount[]>;
+    markMailAsRead(mailId: string): Promise<number>;
+    markAllAsRead(addr: string): Promise<number>;
+    getUnreadMailsCount(): Promise<number>;
 
     // Deletions
-    softDeleteMail(id: string): number;
-    deleteMail(id: string): number;
-    deleteMailsForAddress(addr: string): number;
-    emptyDeletedMails(owner: string | undefined): number;
-    restoreDeletedMails(owner: string | undefined): number;
+    softDeleteMail(id: string): Promise<number>;
+    deleteMail(id: string): Promise<number>;
+    deleteMailsForAddress(addr: string): Promise<number>;
+    emptyDeletedMails(owner: string | undefined): Promise<number>;
+    restoreDeletedMails(owner: string | undefined): Promise<number>;
 }

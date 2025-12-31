@@ -45,7 +45,7 @@ export class SMTPServer {
 						for (const recipient of mailToAddresses.concat(smtpRcptAddresses).map(p => p.toLowerCase())) {
 
 							const recipientName = recipient.substring(0, recipient.lastIndexOf("@"));
-							const res = databaseFacade.getAddress(recipientName);
+							const res = await databaseFacade.getAddress(recipientName);
 
 							if (res) {
 								const id = ulid();

@@ -4,6 +4,7 @@ import fs from 'fs';
 import { Address } from './models/address.js';
 import { Mail } from './models/mail.js';
 import { ulid } from 'ulid';
+import { SqliteDatabaseFacade } from './sqlite-database-facade.js';
 const v1DatabaseFileName = './data/data.db';
 const v2DatabaseFileName = './data/data2.db';
 
@@ -28,7 +29,7 @@ export default function dbinit() {
 		}
 
 		console.log(`Using database ${db2.name}`);
-		return db2;
+		return new SqliteDatabaseFacade(db2);
 	}
 	catch (err) {
 		console.error("DB init fail")

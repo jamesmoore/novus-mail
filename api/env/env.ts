@@ -29,6 +29,7 @@ export const env = createEnv({
     TRUST_PROXY: z.string().default('false').transform((s) => s.toLowerCase() !== "false" && s !== "0"),
     SESSION_STORE: SessionStoreSchema,
     REDIS_URL: z.string().min(1).optional(),
+    POSTGRES_URL: z.string().min(1).optional(),
   },
 
   /**
