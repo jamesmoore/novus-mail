@@ -75,7 +75,7 @@ class WebSocketNotifier {
 
                     if (owner && owner.owner && owner.owner !== sub) {
                         console.debug("\tSkipping");
-                        return;
+                        continue;
                     }
                 }
                 this.sendWebSocketMessage(ws, { type: 'received', value: address });

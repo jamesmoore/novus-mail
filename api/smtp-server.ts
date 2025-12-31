@@ -63,7 +63,7 @@ export class SMTPServer {
 									content: content
 								}
 
-								databaseFacade.addMail(newMail);
+								await databaseFacade.addMail(newMail);
 								notifier.emit('received', recipientName);
 								break;
 							}
