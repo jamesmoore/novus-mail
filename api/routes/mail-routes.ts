@@ -88,7 +88,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
     router.delete('/mails/:addr', async (req, res) => {
         const addr = req.params.addr;
         try {
-            checkAddressOwnership(req.user?.sub, addr, res, async () => {
+            await checkAddressOwnership(req.user?.sub, addr, res, async () => {
                 const changes = await databaseFacade.deleteMailsForAddress(addr);
                 res.status(200).send(`Deleted ${changes} mails`);
             });
