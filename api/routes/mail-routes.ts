@@ -133,7 +133,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
             await checkMailOwnership(req.user?.sub, mail, res, async () => {
                 if (mail.read === 0) {
                     const mailId = json.id;
-                    const changes = databaseFacade.markMailAsRead(mailId);
+                    const changes = await databaseFacade.markMailAsRead(mailId);
                     res.status(200).send(`Updated ${changes} mails as read`);
                 }
                 else {
