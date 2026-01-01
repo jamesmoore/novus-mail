@@ -19,12 +19,8 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
     }
 
     public async getAddresses(sub: string | undefined) {
-        if (sub) {
-            return await this.sql`SELECT addr, owner FROM address WHERE owner is NULL or owner = ${sub}` as Address[];
-        }
-        else {
-            return await this.sql`SELECT addr, owner FROM address WHERE owner is NULL` as Address[];
-        }
+        const subClause = sub ? this.sql` OR owner = ${sub}` : this.sql``;
+        return await this.sql`SELECT addr, owner FROM address WHERE owner is NULL ${subClause}` as Address[];
     }
 
     public async getAddress(address: string) {
@@ -74,20 +70,20 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
 
     public async getMails(addr: string, deleted: boolean, cursorId: string, perPage: number, owner: string | undefined, direction: string) {
 
-        const deletedClause = deleted ? this.sql` deleted = true `: this.sql` deleted = false `;
-        
-        const cursorClause = cursorId ? 
-        this.sql` AND id ${ direction === 'lt' ? this.sql`<` : this.sql`>` } ${cursorId}` :
-        this.sql``;
-        
-        const recipientClause = addr ? 
-        this.sql` AND recipient = ${ addr }` :
-        this.sql``;
-        
+        const deletedClause = deleted ? this.sql` deleted = true ` : this.sql` deleted = false `;
+
+        const cursorClause = cursorId ?
+            this.sql` AND id ${direction === 'lt' ? this.sql`<` : this.sql`>`} ${cursorId}` :
+            this.sql``;
+
+        const recipientClause = addr ?
+            this.sql` AND recipient = ${addr}` :
+            this.sql``;
+
         const ownerClause = this.getOwnerWhereClause(owner);
-        
+
         const sortOrder = direction === 'lt' ? this.sql`DESC` : this.sql`ASC`;
-        
+
         const rows = await this.sql`
               SELECT id, sender, sendername, subject, read, received 
               FROM mail 
@@ -96,8 +92,8 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
                 ${cursorClause}
                 ${recipientClause}
                 ${ownerClause}
-              ORDER BY id ${ sortOrder }
-              LIMIT ${ perPage}
+              ORDER BY id ${sortOrder}
+              LIMIT ${perPage}
             ` as Mail[];
         return rows;
     }
@@ -169,7 +165,7 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
 
     // Utility
     private getOwnerWhereClause(owner: string | undefined) {
-        return owner ? 
+        return owner ?
             this.sql` AND mail.recipient IN (SELECT addr FROM address WHERE address.owner IS NULL OR address.owner = ${owner})` :
             this.sql``
             ;
