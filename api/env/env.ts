@@ -65,7 +65,7 @@ export const env = createEnv({
 
 console.log("Environment variables:");
 for (const property of Object.keys(env) as Array<keyof typeof env>) {
-  const isSecret = property.toLowerCase().includes("secret");
+  const isSecret = property.toLowerCase().includes("secret") || property.toLowerCase().includes("postgres");
   const value = env[property];
   if (!isSecret || !value) {
     console.log(`\t${property}: ${value}`);

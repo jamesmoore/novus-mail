@@ -7,8 +7,6 @@ import postgres from "postgres";
 export class PostgresDatabaseFacade implements DatabaseFacade {
     private sql: postgres.Sql<{}>;
 
-    private RESULT_CHANGES: number = 111;
-
     constructor(db: postgres.Sql<{}>) {
         this.sql = db;
     }
@@ -119,12 +117,12 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
 
     public async markMailAsRead(mailId: string) {
         const result = await this.sql`UPDATE mail SET read = true where id = ${mailId}`;
-        return this.RESULT_CHANGES;
+        return result.count;
     }
 
     public async markAllAsRead(addr: string) {
         const result = await this.sql`UPDATE mail SET read = true where recipient = ${addr} and read = false`;
-        return this.RESULT_CHANGES;
+        return result.count;
     }
 
     public async getUnreadMailsCount() {
@@ -135,29 +133,29 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
     // Deletions
     public async softDeleteMail(id: string) {
         const result = await this.sql`UPDATE mail SET deleted = true WHERE id = ${id}`;
-        return this.RESULT_CHANGES;
+        return result.count;
     }
 
     public async deleteMail(id: string) {
         const result = await this.sql`DELETE FROM mail WHERE id = ${id}`;
-        return this.RESULT_CHANGES;
+        return result.count;
     }
 
     public async deleteMailsForAddress(addr: string) {
         const result = await this.sql`UPDATE mail SET deleted = true WHERE recipient = ${addr} and deleted = false`;
-        return this.RESULT_CHANGES;
+        return result.count;
     }
 
     public async emptyDeletedMails(owner: string | undefined) {
         const whereClause = this.getOwnerWhereClause(owner);
         const result = await this.sql`DELETE FROM mail WHERE deleted = true ${whereClause}`;
-        return this.RESULT_CHANGES;
+        return result.count;
     }
 
     public async restoreDeletedMails(owner: string | undefined) {
         const whereClause = this.getOwnerWhereClause(owner);
         const result = await this.sql`UPDATE mail SET deleted = false WHERE deleted = true ${whereClause}`;
-        return this.RESULT_CHANGES;
+        return result.count;
     }
 
     // Utility

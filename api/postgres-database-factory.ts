@@ -9,13 +9,13 @@ export default async function dbinit(postgresUrl: string) {
 
     const sql = postgres(postgresUrl);
 
-    const addressCreate = await sql`
+    await sql`
 CREATE TABLE IF NOT EXISTS address (
     addr varchar(254) PRIMARY KEY,
     owner text
 );`
 
-    const mailCreate = await sql`
+    await sql`
 CREATE TABLE IF NOT EXISTS mail (
     id char(26) PRIMARY KEY,
     recipient varchar(254) NOT NULL,
@@ -32,18 +32,17 @@ CREATE TABLE IF NOT EXISTS mail (
         ON DELETE RESTRICT
 );`
 
-    const metaCreate = await sql`
+    await sql`
 CREATE TABLE IF NOT EXISTS meta (
     key text PRIMARY KEY,
     value text NOT NULL
 );`
 
-    const mailRecipientIndexCreate = await sql`
+    await sql`
 CREATE INDEX IF NOT EXISTS idx_mail_recipient_received
     ON mail (recipient, received DESC);`
 
-
-    const initialSchemaInsert = await sql`
+    await sql`
 INSERT INTO meta ${sql({ key: 'schemaVersion', value: '2' })} ON CONFLICT DO NOTHING;`;
 
     return new PostgresDatabaseFacade(sql);
