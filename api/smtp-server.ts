@@ -55,12 +55,12 @@ export class SMTPServer {
 									deleted: false,
 									id: id,
 									read: false,
-									received: dateTime,
+									received:new Date(dateTime),
 									recipient: recipientName,
 									sender: sender,
 									subject: subject,
 									sendername: senderName,
-									content: content
+									content: content ?? ''
 								}
 
 								await databaseFacade.addMail(newMail);

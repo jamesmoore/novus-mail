@@ -5,7 +5,7 @@ export interface Mail {
     recipient: string;
     subject: string;
     read: boolean;
-    received: number;
+    received: Date;
     deleted: boolean;
-    content?: string;
+    content: string;
 }

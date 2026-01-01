@@ -35,7 +35,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
             }
 
             res.json({
-                data: rows,
+                mails: rows,
                 nextId: (rows.length === 0 || rows.length < perPage) ? null : 'lt' + rows[rows.length - 1].id,
                 previousId: rows.length === 0 ? null : 'gt' + rows[0].id,
             });

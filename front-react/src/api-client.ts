@@ -1,10 +1,13 @@
+import { MailResponseDto } from "./dto/mail-response-dto";
+import { Mail } from "./models/mail";
 import { AddressesResponse } from "./models/addresses-response";
 import { ImportStatus } from "./models/import-status";
 import { Logout } from "./models/logout";
 import { MailMessage } from "./models/mail-message";
-import { MailResponse } from "./models/mail-response";
 import { UnreadCount } from "./models/unread-count";
 import { User } from "./models/user";
+import { MailDto } from "./dto/mail-dto";
+import { MailMessageDto } from "./dto/mail-message-dto";
 
 const defaultHeaders = {
     'Content-Type': 'application/json',
@@ -93,7 +96,8 @@ const fetchMails = async (selectedAddress: string, cursorId: string) => {
         ),
         headers: defaultHeaders,
     });
-    return response.json() as Promise<MailResponse>;
+    const responseDto = await response.json() as MailResponseDto;
+    return mapMailResponseDtoToMailResponse(responseDto);
 };
 
 const fetchDeletedMails = async (cursorId: string) => {
@@ -107,7 +111,8 @@ const fetchDeletedMails = async (cursorId: string) => {
         ),
         headers: defaultHeaders,
     });
-    return response.json() as Promise<MailResponse>;
+    const responseDto = await response.json() as MailResponseDto;
+    return mapMailResponseDtoToMailResponse(responseDto);
 };
 
 const fetchMail = async (id: string) => {
@@ -115,7 +120,8 @@ const fetchMail = async (id: string) => {
         method: 'GET',
         headers: defaultHeaders,
     });
-    return response.json() as Promise<MailMessage>;
+    const mailMessageDto = await response.json() as MailMessageDto;
+    return mapMailMessageDtoToMailMessage(mailMessageDto);
 }
 
 const deleteMail = async (id: string) => {
@@ -223,7 +229,6 @@ const importMail = async (file: File) => {
     }
 }
 
-
 export {
     fetchDomain,
     fetchAddress,
@@ -246,3 +251,34 @@ export {
     exportMail,
     importMail,
 };
+
+function mapMailResponseDtoToMailResponse(responseDto: MailResponseDto) {
+    return {
+        nextId: responseDto.nextId,
+        previousId: responseDto.previousId,
+        mails: responseDto.mails.map(mapMailDtoToMail),
+    };
+}
+
+function mapMailDtoToMail(p: MailDto): Mail {
+    return {
+        id: p.id,
+        read: p.read,
+        received: new Date(p.received),
+        sender: p.sender,
+        sendername: p.sendername,
+        subject: p.subject,
+    };
+}
+
+function mapMailMessageDtoToMailMessage(mailMessageDto: MailMessageDto): MailMessage {
+    return {
+        content: mailMessageDto.content,
+        read: mailMessageDto.read,
+        received: new Date(mailMessageDto.received),
+        recipient: mailMessageDto.recipient,
+        sender: mailMessageDto.sender,
+        sendername: mailMessageDto.sendername,
+        subject: mailMessageDto.subject,
+    };
+}
