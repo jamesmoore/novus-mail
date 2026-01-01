@@ -37,8 +37,10 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
     }
 
     public async deleteAddress(address: string) {
-        await this.sql`DELETE FROM mail WHERE recipient = ${address}`;
-        await this.sql`DELETE FROM address WHERE addr = ${address}`;
+        await this.sql.begin(async (sql) => {
+            await sql`DELETE FROM mail WHERE recipient = ${address}`;
+            await sql`DELETE FROM address WHERE addr = ${address}`;
+        });
     }
 
     public async getAddressCount() {
