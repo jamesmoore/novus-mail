@@ -62,10 +62,12 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
             )`;
     }
 
-    public async getMail(id: string) {
-        const rows = await this.sql`SELECT recipient, sender, sendername, subject, content, read, received, deleted FROM mail WHERE id = ${id}`;
-        const mail = rows[0] as Mail;
-        return mail;
+    public async getMail(id: string): Promise<Mail | undefined> {
+        const rows = await this.sql`SELECT recipient, sender, sendername, subject, content, read, received, deleted FROM mail WHERE id = ${id}` as Mail[];
+        if (rows.length === 0) {
+            return undefined;
+        }
+        return rows[0];
     }
 
     public async getMails(addr: string, deleted: boolean, cursorId: string, perPage: number, owner: string | undefined, direction: string) {
