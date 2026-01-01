@@ -42,8 +42,8 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
     }
 
     public async getAddressCount() {
-        const addressCountResult = await this.sql`SELECT count(*) as addresses from address` as unknown as { addresses: number };
-        return addressCountResult.addresses;
+        const addressCountResult = await this.sql`SELECT count(*) as addresses from address` as { addresses: number }[];
+        return addressCountResult[0].addresses;
     }
 
     // Mails
