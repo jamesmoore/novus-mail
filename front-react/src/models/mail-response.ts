@@ -1,7 +1,7 @@
 import { Mail } from "./mail";
 
 export interface MailResponse {
-    data: Mail[],
+    mails: Mail[],
     previousId?: string,
     nextId?: string
 }
