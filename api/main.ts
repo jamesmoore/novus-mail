@@ -5,15 +5,16 @@ import domain from './domain.js'
 import dbinit from './sqlite-database-factory.js'
 import WebSocketNotifier from './ws/web-socket-notifier.js';
 import EventEmitter from 'events';
-import { SqliteDatabaseFacade } from './sqlite-database-facade.js';
+// import postgresInit from './postgres-database-factory.bak';
 
-const db = dbinit();
+// const postgresDb = await postgresInit();
+
 const domainName = domain.getDomainName();
 
 const notificationEventEmitter = new EventEmitter();
 
 
-const databaseFacade = new SqliteDatabaseFacade(db);
+const databaseFacade = dbinit();
 const smtpSrv = new SMTPServer(databaseFacade, 25, notificationEventEmitter);
 smtpSrv.start();
 const httpServer = new HttpServer(databaseFacade, domainName, 80);

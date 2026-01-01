@@ -10,10 +10,10 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string)
     router.use(noCacheMiddleware);
 
     const refreshInterval = env.MAIL_REFRESH_INTERVAL;
-    router.get('/addresses', (req, res) => {
+    router.get('/addresses', async (req, res) => {
         try {
             const sub = req.user?.sub;
-            const rows = databaseFacade.getAddresses(sub);
+            const rows = await databaseFacade.getAddresses(sub);
             res.json({ addresses: rows, refreshInterval: refreshInterval });
         } catch (err) {
             console.error("DB get addresses fail", err);
@@ -29,10 +29,10 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string)
         }
     });
 
-    router.get('/address/:addr', (req, res) => {
+    router.get('/address/:addr', async (req, res) => {
         const address = req.params.addr.toLowerCase();
         try {
-            const addressRow = databaseFacade.getAddress(address);
+            const addressRow = await databaseFacade.getAddress(address);
             if (addressRow) {
                 res.status(200).send((addressRow as { addr: string }).addr);
             } else {
@@ -44,14 +44,14 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string)
         }
     });
 
-    router.put('/address/:addr', (req, res) => {
+    router.put('/address/:addr', async (req, res) => {
         const address = req.params.addr.toLowerCase();
         try {
-            const existing = databaseFacade.getAddress(address);
+            const existing = await databaseFacade.getAddress(address);
             if (existing) {
                 res.status(200).send();
             } else {
-                databaseFacade.addAddress(address);
+                await databaseFacade.addAddress(address);
                 res.status(200).send();
             }
         } catch (err) {
@@ -60,11 +60,11 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string)
         }
     })
 
-    router.post('/address/:addr', (req, res) => {
+    router.post('/address/:addr', async (req, res) => {
         const address = req.params.addr.toLowerCase();
 
         try {
-            const addressRow = databaseFacade.getAddress(address);
+            const addressRow = await databaseFacade.getAddress(address);
             if (addressRow) {
                 const owner = addressRow.owner;
                 if (owner !== req.user?.sub && owner !== null) {
@@ -86,7 +86,7 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string)
 
         const owner = json.private ? req.user?.sub : null;
         try {
-            databaseFacade.updateAddressOwner(address, owner);
+            await databaseFacade.updateAddressOwner(address, owner);
             res.status(200).send();
         } catch (err) {
             console.error("DB update addresses fail", err)
@@ -94,10 +94,10 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string)
         }
     })
 
-    router.delete('/address/:addr', (req, res) => {
+    router.delete('/address/:addr', async (req, res) => {
         const address = req.params.addr.toLowerCase();
         try {
-            const addressRow = databaseFacade.getAddress(address);
+            const addressRow = await databaseFacade.getAddress(address);
             if (!addressRow) {
                 res.status(404).send('Address not found');
                 return;
@@ -109,7 +109,7 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string)
                 return;
             }
 
-            databaseFacade.deleteAddress(address);
+            await databaseFacade.deleteAddress(address);
             res.status(200).send();
         } catch (err) {
             console.error("DB delete address fail");

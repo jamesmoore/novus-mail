@@ -12,45 +12,45 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
     }
 
     // Address
-    public addAddress(address: string) {
+    public async addAddress(address: string) {
         this.db.prepare("INSERT INTO address (addr) VALUES (?)").run(address);
     }
 
-    public getAddresses(sub: string | undefined) {
+    public async getAddresses(sub: string | undefined): Promise<Address[]> {
         return this.db.prepare("SELECT addr, owner FROM address WHERE owner is NULL or owner = ?").all(sub) as Address[];
     }
 
-    public getAddress(address: string) {
+    public async getAddress(address: string) {
         return this.db.prepare("SELECT addr, owner FROM address WHERE addr = ?").get(address) as Address;
     }
 
-    public updateAddressOwner(address: string, owner: string | null | undefined) {
+    public async updateAddressOwner(address: string, owner: string | null | undefined) {
         this.db.prepare("UPDATE address SET owner = ? WHERE addr = ?").run(owner, address);
     }
 
-    public deleteAddress(address: string) {
+    public async deleteAddress(address: string) {
         this.db.prepare("DELETE FROM mail WHERE recipient = ?").run(address);
         this.db.prepare("DELETE FROM address WHERE addr = ?").run(address);
     }
 
-    public getAddressCount() {
+    public async getAddressCount() {
         const addressCountResult = this.db.prepare('SELECT count(*) as addresses from address').get() as { addresses: number };
         return addressCountResult.addresses;
     }
 
     // Mails
-    public addMail(mail: Mail) {
+    public async addMail(mail: Mail) {
         this.db.prepare("INSERT INTO mail (id, recipient, sender, sendername, subject, content, read, received) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").
             run(mail.id, mail.recipient, mail.sender, mail.sendername, mail.subject, mail.content, mail.read, mail.received);
     }
 
-    public getMail(id: string) {
+    public async getMail(id: string) {
         const rows = this.db.prepare("SELECT recipient, sender, sendername, subject, content, read, received, deleted FROM mail WHERE id = ?").all(id);
         const mail = rows[0] as Mail;
         return mail;
     }
 
-    public getMails(addr: string, deleted: boolean, cursorId: string, perPage: number, owner: string | undefined, direction: string) {
+    public async getMails(addr: string, deleted: boolean, cursorId: string, perPage: number, owner: string | undefined, direction: string) {
         const params = {
             recipient: addr,
             cursorId: cursorId,
@@ -80,7 +80,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
         return rows;
     }
 
-    public getAllMails(owner: string | undefined) {
+    public async getAllMails(owner: string | undefined) {
         const params = {
             owner: owner,
         };
@@ -97,7 +97,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
     }
 
     // Unread
-    public getUnread(owner: string | undefined) {
+    public async getUnread(owner: string | undefined) {
         const params = {
             owner: owner,
         };
@@ -117,38 +117,38 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
         return unread as UnreadCount[];
     }
 
-    public markMailAsRead(mailId: string) {
+    public async markMailAsRead(mailId: string) {
         const result = this.db.prepare("UPDATE mail SET read = 1 where id = ?").run(mailId);
         return result.changes;
     }
 
-    public markAllAsRead(addr: string) {
+    public async markAllAsRead(addr: string) {
         const result = this.db.prepare("UPDATE mail SET read = 1 where recipient = ? and read = 0").run(addr);
         return result.changes;
     }
 
-    public getUnreadMailsCount() {
+    public async getUnreadMailsCount() {
         const unreadMailCount = this.db.prepare('SELECT count(*) as unread from mail where read = 0 and deleted = 0').get() as { unread: number };
         return unreadMailCount.unread;
     }
 
     // Deletions
-    public softDeleteMail(id: string) {
+    public async softDeleteMail(id: string) {
         const result = this.db.prepare("UPDATE mail SET deleted = 1 WHERE id = ?").run(id);
         return result.changes;
     }
 
-    public deleteMail(id: string) {
+    public async deleteMail(id: string) {
         const result = this.db.prepare("DELETE FROM mail WHERE id = ?").run(id);
         return result.changes;
     }
 
-    public deleteMailsForAddress(addr: string) {
+    public async deleteMailsForAddress(addr: string) {
         const result = this.db.prepare("UPDATE mail SET deleted = 1 WHERE recipient = ? and deleted = 0").run(addr);
         return result.changes;
     }
 
-    public emptyDeletedMails(owner: string | undefined) {
+    public async emptyDeletedMails(owner: string | undefined) {
         const params = {
             owner: owner,
         };
@@ -164,7 +164,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
         return dbResult.changes;
     }
 
-    public restoreDeletedMails(owner: string | undefined) {
+    public async restoreDeletedMails(owner: string | undefined) {
         const params = {
             owner: owner,
         };

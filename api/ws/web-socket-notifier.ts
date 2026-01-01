@@ -63,25 +63,21 @@ class WebSocketNotifier {
 
         this.initialize();
 
-        this.notificationEmitter.on('received', (address: string) => {
-            this.connectedSockets.forEach(ws => {
-
-                if (authMode !== 'anonymous') {
-                    const sub = ws.user?.sub;
-                    console.debug("Received message for sub: ", sub);
-
-                    if (!sub) return;
-
-                    const owner = databaseFacade.getAddress(address);
-
-                    if (owner && owner.owner && owner.owner !== sub) {
-                        console.debug("\tSkipping");
-                        return;
-                    }
+        this.notificationEmitter.on('received', async (address: string) => {
+            let socketsToNotify: WebSocketWithPassportUser[] = [];
+            if (authMode === 'oidc') {
+                const addressRecord = await databaseFacade.getAddress(address);
+                if (addressRecord) {
+                    // send to sockets that have a user/sub AND if the address has no owner, OR if the address matches
+                    socketsToNotify = this.connectedSockets.filter(p => p.user?.sub).filter(p => !addressRecord.owner || addressRecord.owner === p.user!.sub);
                 }
+            }
+            else {
+                socketsToNotify = this.connectedSockets;
+            }
+            for (const ws of socketsToNotify) {
                 this.sendWebSocketMessage(ws, { type: 'received', value: address });
-            });
-
+            }
         });
     }
 
