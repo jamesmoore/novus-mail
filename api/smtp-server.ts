@@ -52,9 +52,9 @@ export class SMTPServer {
 								const dateTime = mail.date?.getTime() ?? 0;
 
 								const newMail: Mail = {
-									deleted: 0,
+									deleted: false,
 									id: id,
-									read: 0,
+									read: false,
 									received: dateTime,
 									recipient: recipientName,
 									sender: sender,

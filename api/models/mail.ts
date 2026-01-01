@@ -4,8 +4,8 @@ export interface Mail {
     sendername?: string;
     recipient: string;
     subject: string;
-    read: number;
+    read: boolean;
     received: number;
-    deleted: number;
+    deleted: boolean;
     content?: string;
 }
