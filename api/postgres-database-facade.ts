@@ -70,6 +70,8 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
 
     public async getMails(addr: string, deleted: boolean, cursorId: string, perPage: number, owner: string | undefined, direction: string) {
 
+        const ownerClause = this.getOwnerWhereClause(owner);
+
         const deletedClause = deleted ? this.sql` deleted = true `: this.sql` deleted = false `;
 
         const cursorClause = cursorId ? 
@@ -85,7 +87,8 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
         const rows = await this.sql`
               SELECT id, sender, sendername, subject, read, received 
               FROM mail 
-              WHERE 
+              WHERE
+                ${ownerClause}
                 ${deletedClause}
                 ${cursorClause}
                 ${recipientClause}
@@ -128,7 +131,7 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
     }
 
     public async getUnreadMailsCount() {
-        const unreadMailCount = await this.sql`SELECT count(*) as unread from mail where read = false and deleted = false` as unknown as { unread: number }[];
+        const unreadMailCount = await this.sql`SELECT count(*) as unread from mail where read = false and deleted = false` as { unread: number }[];
         return unreadMailCount[0].unread;
     }
 
