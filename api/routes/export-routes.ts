@@ -75,7 +75,20 @@ export function createRouter(databaseFacade: DatabaseFacade) {
                         status.mails++;
                         const existing = await databaseFacade.getMail(mail.id);
                         if (!existing) {
-                            await databaseFacade.addMail(mail);
+                            // recreate from deserialized to handle Date conversion.
+                            const newMail: Mail = {
+                                content: mail.content,
+                                deleted: mail.deleted,
+                                id: mail.id,
+                                read: mail.read,
+                                received: new Date(mail.received),
+                                recipient: mail.recipient,
+                                sender: mail.sender,
+                                subject: mail.subject,
+                                sendername: mail.sendername,
+                            };
+
+                            await databaseFacade.addMail(newMail);
                             status.mailsAdded++;
                         }
                     };

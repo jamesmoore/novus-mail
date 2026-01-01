@@ -4,6 +4,46 @@ import { Address } from "./models/address.js";
 import { DatabaseFacade } from "./database-facade.js";
 import { UnreadCount } from "./models/unread-count.js";
 
+type SqliteMailRow = {
+    id: string;
+    recipient: string;
+    sender: string;
+    sendername: string | null;
+    subject: string;
+    content: string;
+    read: number;      // 0 | 1
+    received: number;  // unix timestamp
+    deleted: number;   // 0 | 1
+};
+
+function GetMail(mail: SqliteMailRow): Mail {
+    return {
+        deleted: mail.deleted === 1,
+        id: mail.id,
+        read: mail.read === 1,
+        received: new Date(mail.received),
+        recipient: mail.recipient,
+        sender: mail.sender,
+        subject: mail.subject,
+        content: mail.content,
+        sendername: mail.sendername ?? undefined,
+    };
+}
+
+function GetSqliteMailRow(mail: Mail): SqliteMailRow {
+    return {
+        deleted: mail.deleted ? 1 : 0,
+        id: mail.id,
+        read: mail.read ? 1 : 0,
+        received: mail.received.getTime(),
+        recipient: mail.recipient,
+        sender: mail.sender,
+        subject: mail.subject,
+        content: mail.content,
+        sendername: mail.sendername ?? null,
+    };
+}
+
 export class SqliteDatabaseFacade implements DatabaseFacade {
     private db: Database;
 
@@ -40,15 +80,16 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
 
     // Mails
     public async addMail(mail: Mail) {
-        this.db.prepare("INSERT INTO mail (id, recipient, sender, sendername, subject, content, read, received) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").
-            run(mail.id, mail.recipient, mail.sender, mail.sendername, mail.subject, mail.content, mail.read, mail.received);
+        this.db.prepare(`INSERT INTO mail (id, recipient, sender, sendername, subject, content, read, received) 
+            VALUES (@id, @recipient, @sender, @sendername, @subject, @content, @read, @received)`).
+            run(GetSqliteMailRow(mail));
     }
 
     public async getMail(id: string) {
-        const rows = this.db.prepare("SELECT recipient, sender, sendername, subject, content, read, received, deleted FROM mail WHERE id = ?").all(id);
-        const mail = rows[0] as Mail;
-        return mail;
+        const mail = this.db.prepare("SELECT recipient, sender, sendername, subject, content, read, received, deleted FROM mail WHERE id = ?").get(id) as SqliteMailRow;
+        return mail ? GetMail(mail) : undefined;
     }
+
 
     public async getMails(addr: string, deleted: boolean, cursorId: string, perPage: number, owner: string | undefined, direction: string) {
         const params = {
@@ -76,8 +117,8 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
               LIMIT @mailCount
             `;
 
-        const rows = this.db.prepare(sql).all(params) as Mail[];
-        return rows;
+        const rows = this.db.prepare(sql).all(params) as SqliteMailRow[];
+        return rows.map(GetMail);
     }
 
     public async getAllMails(owner: string | undefined) {
@@ -92,8 +133,8 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
               ${whereClause}
             `;
 
-        const rows = this.db.prepare(sql).all(params) as Mail[];
-        return rows;
+        const rows = this.db.prepare(sql).all(params) as SqliteMailRow[];
+        return rows.map(GetMail);
     }
 
     // Unread

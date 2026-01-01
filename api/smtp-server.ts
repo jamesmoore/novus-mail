@@ -52,15 +52,15 @@ export class SMTPServer {
 								const dateTime = mail.date?.getTime() ?? 0;
 
 								const newMail: Mail = {
-									deleted: 0,
+									deleted: false,
 									id: id,
-									read: 0,
-									received: dateTime,
+									read: false,
+									received:new Date(dateTime),
 									recipient: recipientName,
 									sender: sender,
 									subject: subject,
 									sendername: senderName,
-									content: content
+									content: content ?? ''
 								}
 
 								await databaseFacade.addMail(newMail);
