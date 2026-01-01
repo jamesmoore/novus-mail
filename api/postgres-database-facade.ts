@@ -5,8 +5,10 @@ import { UnreadCount } from "./models/unread-count.js";
 import postgres from "postgres";
 
 export class PostgresDatabaseFacade implements DatabaseFacade {
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     private sql: postgres.Sql<{}>;
 
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     constructor(db: postgres.Sql<{}>) {
         this.sql = db;
     }
