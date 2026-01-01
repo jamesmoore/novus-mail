@@ -35,7 +35,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
             }
 
             res.json({
-                data: rows,
+                mails: rows,
                 nextId: (rows.length === 0 || rows.length < perPage) ? null : 'lt' + rows[rows.length - 1].id,
                 previousId: rows.length === 0 ? null : 'gt' + rows[0].id,
             });
@@ -131,7 +131,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
                 return;
             }
             await checkMailOwnership(req.user?.sub, mail, res, async () => {
-                if (mail.read === 0) {
+                if (mail.read === false) {
                     const mailId = json.id;
                     const changes = await databaseFacade.markMailAsRead(mailId);
                     res.status(200).send(`Updated ${changes} mails as read`);

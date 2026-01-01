@@ -20,7 +20,7 @@ function TopBarDeleted() {
 
     const { data, hasNextPage } = useDeletedMailItems();
 
-    const total = data?.pages.reduce((p, q) => p + q.data.length, 0) ?? 0;
+    const total = data?.pages.reduce((p, q) => p + q.mails.length, 0) ?? 0;
     const text = total === 0 ? 'Empty' : `${total + (hasNextPage ? '+' : '')} item${total === 1 ? '' : 's'}`;
     const { invalidate: invalidateDeleted } = useInvalidateDeletedMailItemsCache();
     const { invalidate: invalidateAllMails } = useInvalidateAllMailItemsCache();

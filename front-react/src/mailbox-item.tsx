@@ -17,8 +17,8 @@ interface MailboxItemProps {
     opened: boolean;
 }
 
-function timeSince(timeStamp: number) {
-    return humanizeDuration(new Date().getTime() - timeStamp, { largest: 1, round: true });
+function timeSince(timeStamp: Date) {
+    return humanizeDuration(new Date().getTime() - timeStamp.getTime(), { largest: 1, round: true });
 }
 
 function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
@@ -73,7 +73,6 @@ function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
     );
 
     const paperClassName = "rounded-sm bg-sidebar shadow-md";
-
     return (
         <>
             <div
@@ -115,7 +114,7 @@ function MailboxItem({ mail, onSelect, onDelete, opened }: MailboxItemProps) {
                         </div>
 
                         {/* Date */}
-                        {mail.received !== 0 && (
+                        {mail.received && (
                             <div className="text-muted-foreground md:whitespace-nowrap">
                                 <Tooltip delayDuration={700}>
                                     <TooltipTrigger asChild>
