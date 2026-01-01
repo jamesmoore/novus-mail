@@ -87,7 +87,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
 
     public async getMail(id: string) {
         const mail = this.db.prepare("SELECT recipient, sender, sendername, subject, content, read, received, deleted FROM mail WHERE id = ?").get(id) as SqliteMailRow;
-        return GetMail(mail);
+        return mail ? GetMail(mail) : undefined;
     }
 
 
