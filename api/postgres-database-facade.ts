@@ -128,8 +128,8 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
     }
 
     public async getUnreadMailsCount() {
-        const unreadMailCount = await this.sql`SELECT count(*) as unread from mail where read = false and deleted = false` as unknown as { unread: number };
-        return unreadMailCount.unread;
+        const unreadMailCount = await this.sql`SELECT count(*) as unread from mail where read = false and deleted = false` as unknown as { unread: number }[];
+        return unreadMailCount[0].unread;
     }
 
     // Deletions
