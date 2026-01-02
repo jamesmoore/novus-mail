@@ -21,7 +21,7 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
 
     public async getAddresses(sub: string | undefined) {
         const subClause = sub ? this.sql` OR owner = ${sub}` : this.sql``;
-        return await this.sql`SELECT addr, owner FROM address WHERE owner is NULL ${subClause}` as Address[];
+        return await this.sql`SELECT addr, owner FROM address WHERE owner is NULL ${subClause} ORDER BY id` as Address[];
     }
 
     public async getAddress(address: string) {
