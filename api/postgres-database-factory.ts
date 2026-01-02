@@ -8,9 +8,9 @@ export default async function dbinit(postgresUrl: string) {
     }
 
     const sql = postgres(postgresUrl);
-
     console.log("Starting DB schema update...");
-    await sql`
+    await sql.begin(async (tx) => {
+        await tx`
 CREATE TABLE IF NOT EXISTS address (
     id char(26) PRIMARY KEY,
     addr varchar(254) NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS address (
     UNIQUE(addr)
 );`
 
-    await sql`
+        await tx`
 CREATE TABLE IF NOT EXISTS mail (
     id char(26) PRIMARY KEY,
     recipient varchar(254) NOT NULL,
@@ -35,18 +35,19 @@ CREATE TABLE IF NOT EXISTS mail (
         ON DELETE RESTRICT
 );`
 
-    await sql`
+        await tx`
 CREATE TABLE IF NOT EXISTS meta (
     key text PRIMARY KEY,
     value text NOT NULL
 );`
 
-    await sql`
+        await tx`
 CREATE INDEX IF NOT EXISTS idx_mail_recipient_received
     ON mail (recipient, received DESC);`
 
-    await sql`
-INSERT INTO meta ${sql({ key: 'schemaVersion', value: '2' })} ON CONFLICT DO NOTHING;`;
+        await tx`
+INSERT INTO meta ${tx({ key: 'schemaVersion', value: '2' })} ON CONFLICT DO NOTHING;`;
+    });
     console.log("Completed DB schema update");
 
     return new PostgresDatabaseFacade(sql);
