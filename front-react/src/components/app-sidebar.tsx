@@ -73,8 +73,8 @@ export function AppSidebar() {
         unreadByRecipient.get(addr.addr)));
 
       if (mappedPrivate.length > 0 && mappedPublic.length > 0) {
-        mappedPrivate[0].header = "Private"
-        mappedPublic[0].header = "Public"
+        mappedPrivate[0].header = "Private";
+        mappedPublic[0].header = "Public";
       }
 
       items.push(...mappedPrivate);
