@@ -118,7 +118,6 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
                 WHERE read = false AND deleted = false ${whereClause}
                 GROUP BY recipient
                 ` as UnreadCount[];
-        console.log(unread);
         return unread;
     }
 
