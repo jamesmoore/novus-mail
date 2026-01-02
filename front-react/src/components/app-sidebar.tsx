@@ -130,7 +130,7 @@ export function AppSidebar() {
                   {item.header && <SidebarGroupLabel className="text-base my-0.5">{item.header}</SidebarGroupLabel>}
                   {item.hasSeparator && <SidebarSeparator />}
                   <SidebarMenuItem  >
-                    <SidebarMenuButton asChild className={cn("text-base my-0.5", item.indent ? "px-5" : "")} isActive={item.selected}>
+                    <SidebarMenuButton asChild className={cn("text-base my-0.5", item.indent ? "px-6" : "")} isActive={item.selected}>
                       <Link to={item.url}
                         onClick={() => {
                           if (item.selected) {
