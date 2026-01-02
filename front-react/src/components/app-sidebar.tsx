@@ -23,6 +23,7 @@ import useUser from "@/use-user";
 import { logout } from "@/api-client";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { Address } from "@/models/addresses-response";
+import { cn } from "@/lib/utils";
 
 interface SidebarItem {
   key: string,
@@ -33,6 +34,7 @@ interface SidebarItem {
   unreadCount?: number,
   hasSeparator: boolean,
   header?: string,
+  indent?: boolean,
 }
 
 export function AppSidebar() {
@@ -75,6 +77,8 @@ export function AppSidebar() {
       if (mappedPrivate.length > 0 && mappedPublic.length > 0) {
         mappedPrivate[0].header = "Private";
         mappedPublic[0].header = "Public";
+        mappedPrivate.forEach(p => p.indent = true);
+        mappedPublic.forEach(p => p.indent = true);
       }
 
       items.push(...mappedPrivate);
@@ -126,7 +130,7 @@ export function AppSidebar() {
                   {item.header && <SidebarGroupLabel className="text-base my-0.5">{item.header}</SidebarGroupLabel>}
                   {item.hasSeparator && <SidebarSeparator />}
                   <SidebarMenuItem  >
-                    <SidebarMenuButton asChild className="text-base my-0.5" isActive={item.selected}>
+                    <SidebarMenuButton asChild className={cn("text-base my-0.5", item.indent ? "px-5" : "")} isActive={item.selected}>
                       <Link to={item.url}
                         onClick={() => {
                           if (item.selected) {
