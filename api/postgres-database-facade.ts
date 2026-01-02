@@ -41,7 +41,7 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
     }
 
     public async getAddressCount() {
-        const addressCountResult = await this.sql`SELECT count(*) as addresses from address` as { addresses: number }[];
+        const addressCountResult = await this.sql`SELECT count(*)::int as addresses from address` as { addresses: number }[];
         return addressCountResult[0].addresses;
     }
 
@@ -113,11 +113,12 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
     public async getUnread(owner: string | undefined) {
         const whereClause = this.getOwnerWhereClause(owner);
         const unread = await this.sql`
-                SELECT recipient, count(*) as unread
+                SELECT recipient, count(*)::int as unread
                 FROM mail
                 WHERE read = false AND deleted = false ${whereClause}
                 GROUP BY recipient
                 ` as UnreadCount[];
+        console.log(unread);
         return unread;
     }
 
@@ -132,7 +133,7 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
     }
 
     public async getUnreadMailsCount() {
-        const unreadMailCount = await this.sql`SELECT count(*) as unread from mail where read = false and deleted = false` as { unread: number }[];
+        const unreadMailCount = await this.sql`SELECT count(*)::int as unread from mail where read = false and deleted = false` as { unread: number }[];
         return unreadMailCount[0].unread;
     }
 
