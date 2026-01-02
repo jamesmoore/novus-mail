@@ -22,6 +22,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import useUser from "@/use-user";
 import { logout } from "@/api-client";
 import { Avatar, AvatarImage } from "./ui/avatar";
+import { Address } from "@/models/addresses-response";
+import { cn } from "@/lib/utils";
 
 interface SidebarItem {
   key: string,
@@ -31,6 +33,8 @@ interface SidebarItem {
   selected: boolean,
   unreadCount?: number,
   hasSeparator: boolean,
+  header?: string,
+  indent?: boolean,
 }
 
 export function AppSidebar() {
@@ -58,16 +62,27 @@ export function AppSidebar() {
     let items: SidebarItem[] = [];
 
     if (!addressIsLoading && addressesResponse) {
-      const mapped = addressesResponse.addresses.map((addr) => ({
-        key: "ADDR_" + addr.addr,
-        title: addr.addr,
-        url: '/inbox/' + addr.addr,
-        icon: addr.addr === urlAddressSegment ? <MailOpen strokeWidth={3} /> : <Mail />,
-        selected: addr.addr === urlAddressSegment,
-        unreadCount: unreadByRecipient.get(addr.addr),
-        hasSeparator: false,
-      }));
-      items.push(...mapped);
+      const addrPrivate = addressesResponse.addresses.filter(p => p.owner);
+      const addrPublic = addressesResponse.addresses.filter(p => !p.owner);
+
+      const mappedPrivate = addrPrivate.map((addr) => addrToSidebarItem(
+        addr,
+        addr.addr === urlAddressSegment,
+        unreadByRecipient.get(addr.addr)));
+      const mappedPublic = addrPublic.map((addr) => addrToSidebarItem(
+        addr,
+        addr.addr === urlAddressSegment,
+        unreadByRecipient.get(addr.addr)));
+
+      if (mappedPrivate.length > 0 && mappedPublic.length > 0) {
+        mappedPrivate[0].header = "Private";
+        mappedPublic[0].header = "Public";
+        mappedPrivate.forEach(p => p.indent = true);
+        mappedPublic.forEach(p => p.indent = true);
+      }
+
+      items.push(...mappedPrivate);
+      items.push(...mappedPublic);
     }
 
     items.push({
@@ -112,9 +127,10 @@ export function AppSidebar() {
               <SidebarSeparator />
               {items.map((item) => (
                 <Fragment key={item.key}>
+                  {item.header && <SidebarGroupLabel className="text-base my-0.5">{item.header}</SidebarGroupLabel>}
                   {item.hasSeparator && <SidebarSeparator />}
                   <SidebarMenuItem  >
-                    <SidebarMenuButton asChild className="text-base my-0.5" isActive={item.selected}>
+                    <SidebarMenuButton asChild className={cn("text-base my-0.5", item.indent ? "px-6" : "")} isActive={item.selected}>
                       <Link to={item.url}
                         onClick={() => {
                           if (item.selected) {
@@ -161,4 +177,16 @@ export function AppSidebar() {
       </SidebarFooter >
     </Sidebar>
   )
+}
+
+function addrToSidebarItem(addr: Address, selected: boolean, unreadCount?: number): SidebarItem {
+  return {
+    key: "ADDR_" + addr.addr,
+    title: addr.addr,
+    url: '/inbox/' + addr.addr,
+    icon: selected ? <MailOpen strokeWidth={3} /> : <Mail />,
+    selected: selected,
+    unreadCount: unreadCount,
+    hasSeparator: false,
+  };
 }
