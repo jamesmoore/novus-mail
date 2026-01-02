@@ -3,6 +3,7 @@ import { Address } from "./models/address.js";
 import { DatabaseFacade } from "./database-facade.js";
 import { UnreadCount } from "./models/unread-count.js";
 import postgres from "postgres";
+import { ulid } from "ulid";
 
 export class PostgresDatabaseFacade implements DatabaseFacade {
     // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -15,7 +16,7 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
 
     // Address
     public async addAddress(address: string) {
-        await this.sql`INSERT INTO address ${this.sql({ addr: address })}`;
+        await this.sql`INSERT INTO address ${this.sql({ id: ulid(), addr: address })}`;
     }
 
     public async getAddresses(sub: string | undefined) {

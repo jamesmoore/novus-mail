@@ -11,8 +11,10 @@ export default async function dbinit(postgresUrl: string) {
 
     await sql`
 CREATE TABLE IF NOT EXISTS address (
-    addr varchar(254) PRIMARY KEY,
-    owner text
+    id char(26) PRIMARY KEY,
+    addr varchar(254) NOT NULL,
+    owner text,
+    UNIQUE(addr)
 );`
 
     await sql`
