@@ -86,7 +86,7 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
         const sortOrder = direction === 'lt' ? this.sql`DESC` : this.sql`ASC`;
 
         const rows = await this.sql`
-              SELECT id, sender, sendername, subject, read, received 
+              SELECT id, recipient, sender, sendername, subject, read, received 
               FROM mail 
               WHERE
                 ${deletedClause}
