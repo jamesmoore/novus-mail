@@ -71,17 +71,18 @@ for (const property of Object.keys(env) as Array<keyof typeof env>) {
 
 function redact(property: string, value: string | number | boolean | null | undefined) {
   if (property === "POSTGRES_URL") {
-    let redacted = value;
+    if (!value) {
+      return value;
+    }
     try {
       const url = new URL(value as string);
       if (url.password) {
         url.password = "REDACTED";
-        redacted = url.toString();
+        return url.toString();
       }
     } catch {
-      redacted = '[REDACTED]';
+      return '[REDACTED]';
     }
-    return redacted;
   }
   else if (property.includes("SECRET")) {
     return '[REDACTED]';
