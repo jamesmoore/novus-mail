@@ -100,12 +100,14 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
     }
 
     public async getAllMails(owner: string | undefined) {
-        const whereClause = this.getOwnerWhereClause(owner);
+        const ownerClause = owner
+            ? this.sql`WHERE mail.recipient IN (SELECT addr FROM address WHERE address.owner IS NULL OR address.owner = ${owner})`
+            : this.sql``;
 
         const rows = await this.sql`
               SELECT id, recipient, sender, sendername, subject, read, received, deleted, content
-              FROM mail 
-              WHERE 1=1 ${whereClause}` as Mail[];
+              FROM mail
+              ${ownerClause}` as Mail[];
         return rows;
     }
 
