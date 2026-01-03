@@ -210,7 +210,7 @@ function migrateV2toV3(db2: BetterSqlite3Database, db3: BetterSqlite3Database) {
 		"INSERT OR IGNORE INTO address (id, addr, owner) VALUES (?, ?, ?)"
 	);
 	const insertMail = db3.prepare(
-		"INSERT OR IGNORE INTO mail (id, addressId, sender, subject, content, read, received, deleted, sendername) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+		"INSERT OR IGNORE INTO mail (id, addressid, sender, subject, content, read, received, deleted, sendername) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	);
 
 	for (const row of db2.prepare("SELECT addr, owner FROM address").iterate()) {
