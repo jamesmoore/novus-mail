@@ -120,7 +120,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
         const comparisonOperator = direction === 'lt' ? '<' : '>';
         const whereClause = [
             deleted ? 'deleted = 1' : 'deleted <> 1',
-            cursorId && `Id ${comparisonOperator} @cursorId`,
+            cursorId && `mail.id ${comparisonOperator} @cursorId`,
             addr && 'address.addr = @recipient',
             this.getOwnerWhereClause(owner),
         ].filter(Boolean).join(' AND ');
