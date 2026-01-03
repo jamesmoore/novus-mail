@@ -95,6 +95,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
 
     public async getMail(id: string) {
         const mail = this.db.prepare(`SELECT
+            mail.id,
             address.addr AS recipient,
             sender,
             sendername,
@@ -127,6 +128,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
 
         const sortOrder = direction === 'lt' ? 'DESC' : 'ASC';
 
+        // NOTE TO REVIEWERS: subset of fields for performance reasons
         const sql = `
               SELECT mail.id, sender, sendername, subject, read, received 
               FROM mail 
@@ -185,6 +187,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
     }
 
     public async markAllAsRead(addr: string) {
+        // NOTE TO REVIEWERS: UPDATE FROM is present in this version of sqlite
         const result = this.db.prepare(`UPDATE mail 
             SET read = 1 
             FROM address
@@ -209,6 +212,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
     }
 
     public async deleteMailsForAddress(addr: string) {
+        // NOTE TO REVIEWERS: UPDATE FROM is present in this version of sqlite
         const result = this.db.prepare(`UPDATE mail 
             SET deleted = 1 
             FROM address

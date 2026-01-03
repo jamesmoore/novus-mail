@@ -220,12 +220,17 @@ function migrateV2toV3(db2: BetterSqlite3Database, db3: BetterSqlite3Database) {
 
 	const addresses = (db3.prepare("SELECT id, addr FROM address").all() as { id: string, addr: string }[]);
 	const addressMap = new Map(addresses.map(i => [i.addr, i.id]));
-	
+
 	for (const row of db2.prepare("SELECT id, recipient, sender, subject, content, read, received, deleted, sendername FROM mail").iterate()) {
 		const mail = row as Mail;
+		const addressId = addressMap.get(mail.recipient);
+		if (!addressId) {
+			console.error(`Mail Id ${mail.id}: Could not find address record for ${mail.recipient}`);
+			continue;
+		}
 		insertMail.run(
 			mail.id,
-			addressMap.get(mail.recipient),
+			addressId,
 			mail.sender,
 			mail.subject,
 			mail.content,
