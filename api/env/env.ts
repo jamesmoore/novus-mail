@@ -65,11 +65,29 @@ export const env = createEnv({
 
 console.log("Environment variables:");
 for (const property of Object.keys(env) as Array<keyof typeof env>) {
-  const isSecret = property.toLowerCase().includes("secret") || property.toLowerCase().includes("postgres");
-  const value = env[property];
-  if (!isSecret || !value) {
-    console.log(`\t${property}: ${value}`);
-  } else {
-    console.log(`\t${property}: [REDACTED]`);
+  const redacted = redact(property, env[property]);
+  console.log(`    ${property}: ${redacted}`);
+}
+
+function redact(property: string, value: string | number | boolean | null | undefined) {
+  if (property === "POSTGRES_URL") {
+    let redacted = value;
+    try {
+      const url = new URL(value as string);
+      if (url.password) {
+        url.password = "REDACTED";
+        redacted = url.toString();
+      }
+    } catch {
+      redacted = '[REDACTED]';
+    }
+    return redacted;
+  }
+  else if (property.includes("SECRET")) {
+    return '[REDACTED]';
+  }
+  else {
+    return value;
   }
 }
+
