@@ -179,7 +179,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
                 FROM mail
                 JOIN address on (address.id = addressid)
                 WHERE ${whereClause}
-                GROUP BY recipient
+                GROUP BY address.addr
                 `).all(params);
         return unread as UnreadCount[];
     }
