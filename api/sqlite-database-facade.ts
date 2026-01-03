@@ -3,10 +3,11 @@ import { Mail } from "./models/mail.js";
 import { Address } from "./models/address.js";
 import { DatabaseFacade } from "./database-facade.js";
 import { UnreadCount } from "./models/unread-count.js";
+import { ulid } from "ulid";
 
 type SqliteMailRow = {
     id: string;
-    recipient: string;
+    addressid: string;
     sender: string;
     sendername: string | null;
     subject: string;
@@ -16,7 +17,9 @@ type SqliteMailRow = {
     deleted: number;   // 0 | 1
 };
 
-function GetMail(mail: SqliteMailRow): Mail {
+type SqliteMailRowWithRecipient = SqliteMailRow & { recipient: string }
+
+function GetMail(mail: SqliteMailRowWithRecipient): Mail {
     return {
         deleted: mail.deleted === 1,
         id: mail.id,
@@ -30,13 +33,13 @@ function GetMail(mail: SqliteMailRow): Mail {
     };
 }
 
-function GetSqliteMailRow(mail: Mail): SqliteMailRow {
+function GetSqliteMailRow(mail: Mail, addressid: string): SqliteMailRow {
     return {
         deleted: mail.deleted ? 1 : 0,
         id: mail.id,
         read: mail.read ? 1 : 0,
         received: mail.received.getTime(),
-        recipient: mail.recipient,
+        addressid: addressid,
         sender: mail.sender,
         subject: mail.subject,
         content: mail.content,
@@ -53,11 +56,15 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
 
     // Address
     public async addAddress(address: string) {
-        this.db.prepare("INSERT INTO address (addr) VALUES (?)").run(address);
+        this.db.prepare("INSERT INTO address (id, addr) VALUES (?,?)").run(ulid(), address);
     }
 
     public async getAddresses(sub: string | undefined): Promise<Address[]> {
-        return this.db.prepare("SELECT addr, owner FROM address WHERE owner is NULL or owner = ?").all(sub) as Address[];
+        return this.db.prepare(`SELECT addr, owner 
+            FROM address 
+            WHERE owner is NULL or owner = ?
+            ORDER BY id
+            `).all(sub) as Address[];
     }
 
     public async getAddress(address: string) {
@@ -69,7 +76,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
     }
 
     public async deleteAddress(address: string) {
-        this.db.prepare("DELETE FROM mail WHERE recipient = ?").run(address);
+        this.db.prepare("DELETE FROM mail WHERE addressid = (SELECT id from address where addr = ?)").run(address);
         this.db.prepare("DELETE FROM address WHERE addr = ?").run(address);
     }
 
@@ -80,16 +87,27 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
 
     // Mails
     public async addMail(mail: Mail) {
-        this.db.prepare(`INSERT INTO mail (id, recipient, sender, sendername, subject, content, read, received) 
-            VALUES (@id, @recipient, @sender, @sendername, @subject, @content, @read, @received)`).
-            run(GetSqliteMailRow(mail));
+        const address = this.db.prepare('SELECT id from address where addr=?').get(mail.recipient) as { id: string };
+        this.db.prepare(`INSERT INTO mail (id, addressid, sender, sendername, subject, content, read, received) 
+            VALUES (@id, @addressid, @sender, @sendername, @subject, @content, @read, @received)`).
+            run(GetSqliteMailRow(mail, address.id));
     }
 
     public async getMail(id: string) {
-        const mail = this.db.prepare("SELECT recipient, sender, sendername, subject, content, read, received, deleted FROM mail WHERE id = ?").get(id) as SqliteMailRow;
+        const mail = this.db.prepare(`SELECT
+            address.addr AS recipient,
+            sender,
+            sendername,
+            subject,
+            content,
+            read,
+            received,
+            deleted 
+            FROM mail
+            JOIN address on (address.id = addressid)
+            WHERE mail.id = ?`).get(id) as SqliteMailRowWithRecipient;
         return mail ? GetMail(mail) : undefined;
     }
-
 
     public async getMails(addr: string, deleted: boolean, cursorId: string, perPage: number, owner: string | undefined, direction: string) {
         const params = {
@@ -103,21 +121,22 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
         const whereClause = [
             deleted ? 'deleted = 1' : 'deleted <> 1',
             cursorId && `Id ${comparisonOperator} @cursorId`,
-            addr && 'recipient = @recipient',
+            addr && 'address.addr = @recipient',
             this.getOwnerWhereClause(owner),
         ].filter(Boolean).join(' AND ');
 
         const sortOrder = direction === 'lt' ? 'DESC' : 'ASC';
 
         const sql = `
-              SELECT id, sender, sendername, subject, read, received 
+              SELECT mail.id, sender, sendername, subject, read, received 
               FROM mail 
+              JOIN address on (address.id = addressid)
               WHERE ${whereClause}
-              ORDER BY id ${sortOrder} 
+              ORDER BY mail.id ${sortOrder} 
               LIMIT @mailCount
             `;
 
-        const rows = this.db.prepare(sql).all(params) as SqliteMailRow[];
+        const rows = this.db.prepare(sql).all(params) as SqliteMailRowWithRecipient[];
         return rows.map(GetMail);
     }
 
@@ -128,12 +147,13 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
 
         const whereClause = owner ? "WHERE " + this.getOwnerWhereClause(owner) : '';
         const sql = `
-              SELECT id, recipient, sender, sendername, subject, read, received, deleted, content
+              SELECT mail.id, address.addr AS recipient, sender, sendername, subject, read, received, deleted, content
               FROM mail 
+              JOIN address on (address.id = addressid)
               ${whereClause}
             `;
 
-        const rows = this.db.prepare(sql).all(params) as SqliteMailRow[];
+        const rows = this.db.prepare(sql).all(params) as SqliteMailRowWithRecipient[];
         return rows.map(GetMail);
     }
 
@@ -150,8 +170,9 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
         ].filter(Boolean).join(' AND ');
 
         const unread = this.db.prepare(`
-                SELECT recipient, count(*) as unread
+                SELECT address.addr AS recipient, count(*) as unread
                 FROM mail
+                JOIN address on (address.id = addressid)
                 WHERE ${whereClause}
                 GROUP BY recipient
                 `).all(params);
@@ -164,7 +185,10 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
     }
 
     public async markAllAsRead(addr: string) {
-        const result = this.db.prepare("UPDATE mail SET read = 1 where recipient = ? and read = 0").run(addr);
+        const result = this.db.prepare(`UPDATE mail 
+            SET read = 1 
+            FROM address
+            WHERE address.id = addressid AND addr = ? and read = 0`).run(addr);
         return result.changes;
     }
 
@@ -185,7 +209,10 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
     }
 
     public async deleteMailsForAddress(addr: string) {
-        const result = this.db.prepare("UPDATE mail SET deleted = 1 WHERE recipient = ? and deleted = 0").run(addr);
+        const result = this.db.prepare(`UPDATE mail 
+            SET deleted = 1 
+            FROM address
+            WHERE address.id = addressid AND addr = ? and deleted = 0`).run(addr);
         return result.changes;
     }
 
@@ -223,6 +250,6 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
 
     // Utility
     private getOwnerWhereClause(owner: string | undefined) {
-        return owner && 'mail.recipient in (SELECT addr FROM address WHERE address.owner IS NULL OR address.owner = @owner)';
+        return owner && 'mail.addressid in (SELECT id FROM address WHERE address.owner IS NULL OR address.owner = @owner)';
     }
 }
