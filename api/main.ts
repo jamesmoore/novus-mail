@@ -8,9 +8,15 @@ import EventEmitter from 'events';
 import postgresInit from './postgres-database-factory.js';
 import { env } from './env/env.js';
 
-const databaseFacade = env.POSTGRES_URL ? 
-    await postgresInit(env.POSTGRES_URL) : 
-    dbinit();
+let databaseFacade;
+try {
+    databaseFacade = env.POSTGRES_URL ?
+        await postgresInit(env.POSTGRES_URL) :
+        dbinit();
+} catch (error) {
+    console.error('Failed to initialize database:', error);
+    throw error;
+}
 
 const domainName = domain.getDomainName();
 
