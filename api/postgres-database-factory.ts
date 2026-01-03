@@ -7,7 +7,23 @@ export default async function dbinit(postgresUrl: string) {
         throw Error("Postgres URL variable not set")
     }
 
-    const sql = postgres(postgresUrl);
+    let parsedUrl: URL;
+    try {
+        parsedUrl = new URL(postgresUrl);
+    } catch (e) {
+        throw new Error(`Invalid Postgres URL format: ${e instanceof Error ? e.message : String(e)}`);
+    }
+
+    if (parsedUrl.protocol !== 'postgres:' && parsedUrl.protocol !== 'postgresql:') {
+        throw new Error(`Invalid Postgres URL protocol: ${parsedUrl.protocol}. Expected "postgres" or "postgresql".`);
+    }
+
+    let sql;
+    try {
+        sql = postgres(postgresUrl);
+    } catch (e) {
+        throw new Error(`Failed to initialize Postgres client: ${e instanceof Error ? e.message : String(e)}`);
+    }
     console.log("Starting DB schema update...");
     await sql.begin(async (tx) => {
         await tx`
