@@ -87,7 +87,10 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
 
     // Mails
     public async addMail(mail: Mail) {
-        const address = this.db.prepare('SELECT id from address where addr=?').get(mail.recipient) as { id: string };
+        const address = this.db.prepare('SELECT id from address where addr=?').get(mail.recipient) as { id: string } | undefined;
+        if (!address) {
+            throw new Error(`Recipient address not found for mail: ${mail.recipient}`);
+        }
         this.db.prepare(`INSERT INTO mail (id, addressid, sender, sendername, subject, content, read, received) 
             VALUES (@id, @addressid, @sender, @sendername, @subject, @content, @read, @received)`).
             run(GetSqliteMailRow(mail, address.id));
