@@ -78,8 +78,8 @@ function redact(property: string, value: string | number | boolean | null | unde
       const url = new URL(value as string);
       if (url.password) {
         url.password = "REDACTED";
-        return url.toString();
       }
+      return url.toString();
     } catch {
       return '[REDACTED]';
     }
