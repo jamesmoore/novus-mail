@@ -7,13 +7,16 @@ import { ulid } from 'ulid';
 import { SqliteDatabaseFacade } from './sqlite-database-facade.js';
 const v1DatabaseFileName = './data/data.db';
 const v2DatabaseFileName = './data/data2.db';
+const v3DatabaseFileName = './data/data3.db';
 
 export default function dbinit() {
 	try {
 
 		const db1 = fs.existsSync(v1DatabaseFileName) ? getV1Database() : undefined;
 
-		const db2 = getV2Database();
+		const db2 = fs.existsSync(v1DatabaseFileName) || fs.existsSync(v2DatabaseFileName) ? getV2Database() : undefined;
+
+		const db3 = getV3Database();
 
 		if (db1 && db2) {
 			console.log("Migrating schema v1 to v2");
@@ -28,8 +31,21 @@ export default function dbinit() {
 			console.log("Migrating schema v1 to v2 Completed");
 		}
 
-		console.log(`Using database ${db2.name}`);
-		return new SqliteDatabaseFacade(db2);
+		if (db2 && db3) {
+			console.log("Migrating schema v2 to v3");
+			const migrate = db3.transaction(() => {
+				migrateV2toV3(db2, db3);
+			});
+
+			migrate();
+
+			db2.close();
+			fs.renameSync(v2DatabaseFileName, `${v2DatabaseFileName}.bak`);
+			console.log("Migrating schema v2 to v3 Completed");
+		}
+
+		console.log(`Using database ${db3.name}`);
+		return new SqliteDatabaseFacade(db3);
 	}
 	catch (err) {
 		console.error("DB init fail")
@@ -108,6 +124,40 @@ function getV2Database() {
 	return db;
 }
 
+function getV3Database() {
+	const db = Database(v3DatabaseFileName);
+	db.exec("PRAGMA foreign_keys = ON");
+
+	db.exec(`CREATE TABLE IF NOT EXISTS address (
+		id TEXT NOT NULL PRIMARY KEY,
+		addr TEXT NOT NULL UNIQUE,
+		owner TEXT
+		)`);
+
+	db.exec(`CREATE TABLE IF NOT EXISTS mail (
+		id TEXT NOT NULL PRIMARY KEY,
+		addressid TEXT NOT NULL,
+		sender TEXT NOT NULL,
+		subject TEXT NOT NULL,
+		content TEXT NOT NULL,
+		read INTEGER NOT NULL default 0,
+		received INTEGER NOT NULL default 0,
+		deleted INTEGER NOT NULL default 0,
+		sendername TEXT,
+		FOREIGN KEY(addressid) REFERENCES address(id)
+		)`);
+
+	db.exec(`CREATE INDEX IF NOT EXISTS idx_mail_addressid ON mail(addressid)`);
+
+	db.exec(`CREATE TABLE IF NOT EXISTS meta (
+  		key TEXT PRIMARY KEY,
+  		value TEXT NOT NULL
+		)`);
+
+	db.prepare("INSERT OR IGNORE INTO meta (key,value) VALUES (?,?)").run('schemaVersion', '3');
+	return db;
+}
+
 function migrateV1toV2(db1: BetterSqlite3Database, db2: BetterSqlite3Database) {
 	const insertAddress = db2.prepare(
 		"INSERT OR IGNORE INTO address (addr, owner) VALUES (?, ?)"
@@ -153,4 +203,41 @@ function migrateV1toV2(db1: BetterSqlite3Database, db2: BetterSqlite3Database) {
 		);
 	}
 
+}
+
+function migrateV2toV3(db2: BetterSqlite3Database, db3: BetterSqlite3Database) {
+	const insertAddress = db3.prepare(
+		"INSERT OR IGNORE INTO address (id, addr, owner) VALUES (?, ?, ?)"
+	);
+	const insertMail = db3.prepare(
+		"INSERT OR IGNORE INTO mail (id, addressid, sender, subject, content, read, received, deleted, sendername) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	);
+
+	for (const row of db2.prepare("SELECT addr, owner FROM address").iterate()) {
+		const address = row as Address;
+		insertAddress.run(ulid(), address.addr, address.owner ?? null);
+	}
+
+	const addresses = (db3.prepare("SELECT id, addr FROM address").all() as { id: string, addr: string }[]);
+	const addressMap = new Map(addresses.map(i => [i.addr, i.id]));
+
+	for (const row of db2.prepare("SELECT id, recipient, sender, subject, content, read, received, deleted, sendername FROM mail").iterate()) {
+		const mail = row as Mail;
+		const addressId = addressMap.get(mail.recipient);
+		if (!addressId) {
+			console.error(`Mail Id ${mail.id}: Could not find address record for ${mail.recipient}`);
+			continue;
+		}
+		insertMail.run(
+			mail.id,
+			addressId,
+			mail.sender,
+			mail.subject,
+			mail.content,
+			mail.read,
+			mail.received,
+			mail.deleted,
+			mail.sendername ?? null
+		);
+	}
 }
