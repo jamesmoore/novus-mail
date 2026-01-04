@@ -14,7 +14,7 @@ export default function dbinit() {
 
 		const db1 = fs.existsSync(v1DatabaseFileName) ? getV1Database() : undefined;
 
-		const db2 = fs.existsSync(v2DatabaseFileName) ? getV2Database() : undefined;
+		const db2 = fs.existsSync(v1DatabaseFileName) || fs.existsSync(v2DatabaseFileName) ? getV2Database() : undefined;
 
 		const db3 = getV3Database();
 
