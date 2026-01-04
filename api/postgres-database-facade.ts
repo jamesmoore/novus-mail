@@ -35,7 +35,7 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
 
     public async deleteAddress(address: string) {
         await this.sql.begin(async (sql) => {
-            await sql`DELETE FROM mail WHERE recipient = ${address}`;
+            await sql`DELETE FROM mail WHERE addressid = (SELECT id from address where addr = ${address})`;
             await sql`DELETE FROM address WHERE addr = ${address}`;
         });
     }
@@ -47,11 +47,16 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
 
     // Mails
     public async addMail(mail: Mail) {
+
+        const address = await this.sql`SELECT id from address where addr = ${mail.recipient}` as { id: string }[];
+        if (!address || address.length === 0) {
+            throw new Error(`Recipient address not found for mail: ${mail.recipient}`);
+        }
         await this.sql`
-            INSERT INTO mail (id, recipient, sender, sendername, subject, content, read, received)
+            INSERT INTO mail (id, addressid, sender, sendername, subject, content, read, received)
             VALUES (
                 ${mail.id},
-                ${mail.recipient},
+                ${address[0].id},
                 ${mail.sender},
                 ${mail.sendername ?? null},
                 ${mail.subject},
@@ -62,7 +67,18 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
     }
 
     public async getMail(id: string): Promise<Mail | undefined> {
-        const rows = await this.sql`SELECT recipient, sender, sendername, subject, content, read, received, deleted FROM mail WHERE id = ${id}` as Mail[];
+        const rows = await this.sql`SELECT 
+            address.addr AS recipient,
+            sender,
+            sendername,
+            subject,
+            content,
+            read,
+            received,
+            deleted
+            FROM mail 
+            JOIN address on mail.addressid = address.id
+            WHERE mail.id = ${id}` as Mail[];
         if (rows.length === 0) {
             return undefined;
         }
@@ -77,21 +93,24 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
             this.sql` AND id ${direction === 'lt' ? this.sql`<` : this.sql`>`} ${cursorId}` :
             this.sql``;
 
-        const recipientClause = addr ?
-            this.sql` AND recipient = ${addr}` :
+        const addrClause = addr ?
+            this.sql` AND address.addr = ${addr}` :
             this.sql``;
 
-        const ownerClause = this.getOwnerWhereClause(owner);
+        const ownerClause = owner
+            ? this.sql` AND ${this.getOwnerWhereClause(owner)}`
+            : this.sql``;
 
         const sortOrder = direction === 'lt' ? this.sql`DESC` : this.sql`ASC`;
 
         const rows = await this.sql`
-              SELECT id, recipient, sender, sendername, subject, read, received 
-              FROM mail 
+              SELECT mail.id, sender, sendername, subject, read, received 
+              FROM mail
+              JOIN address on (address.id = addressid)
               WHERE
                 ${deletedClause}
                 ${cursorClause}
-                ${recipientClause}
+                ${addrClause}
                 ${ownerClause}
               ORDER BY id ${sortOrder}
               LIMIT ${perPage}
@@ -101,24 +120,28 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
 
     public async getAllMails(owner: string | undefined) {
         const ownerClause = owner
-            ? this.sql`WHERE mail.recipient IN (SELECT addr FROM address WHERE address.owner IS NULL OR address.owner = ${owner})`
+            ? this.sql`WHERE ${this.getOwnerWhereClause(owner)}`
             : this.sql``;
 
         const rows = await this.sql`
-              SELECT id, recipient, sender, sendername, subject, read, received, deleted, content
+              SELECT mail.id, address.addr AS recipient, sender, sendername, subject, read, received, deleted, content
               FROM mail
+              JOIN address on mail.addressid = address.id
               ${ownerClause}` as Mail[];
         return rows;
     }
 
     // Unread
     public async getUnread(owner: string | undefined) {
-        const whereClause = this.getOwnerWhereClause(owner);
+        const ownerClause = owner
+            ? this.sql`AND ${this.getOwnerWhereClause(owner)}`
+            : this.sql``;
         const unread = await this.sql`
-                SELECT recipient, count(*)::int as unread
+                SELECT address.addr AS recipient, count(*)::int as unread
                 FROM mail
-                WHERE read = false AND deleted = false ${whereClause}
-                GROUP BY recipient
+                JOIN address on (address.id = addressid)
+                WHERE read = false AND deleted = false ${ownerClause}
+                GROUP BY address.addr
                 ` as UnreadCount[];
         return unread;
     }
@@ -129,18 +152,24 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
     }
 
     public async markAllAsRead(addr: string) {
-        const result = await this.sql`UPDATE mail SET read = true where recipient = ${addr} and read = false`;
+        const result = await this.sql`UPDATE mail 
+            SET read = true
+            WHERE addressid = (SELECT id from address WHERE addr = ${addr}) AND read = false`;
         return result.count;
     }
 
     public async getUnreadMailsCount() {
-        const unreadMailCount = await this.sql`SELECT count(*)::int as unread from mail where read = false and deleted = false` as { unread: number }[];
+        const unreadMailCount = await this.sql`SELECT count(*)::int as unread 
+            FROM mail
+            WHERE read = false AND deleted = false` as { unread: number }[];
         return unreadMailCount[0].unread;
     }
 
     // Deletions
     public async softDeleteMail(id: string) {
-        const result = await this.sql`UPDATE mail SET deleted = true WHERE id = ${id}`;
+        const result = await this.sql`UPDATE mail
+            SET deleted = true
+            WHERE id = ${id}`;
         return result.count;
     }
 
@@ -150,26 +179,35 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
     }
 
     public async deleteMailsForAddress(addr: string) {
-        const result = await this.sql`UPDATE mail SET deleted = true WHERE recipient = ${addr} and deleted = false`;
+        const result = await this.sql`UPDATE mail
+            SET deleted = true
+            WHERE addressid = (SELECT id from address WHERE addr = ${addr}) AND deleted = false`;
         return result.count;
     }
 
     public async emptyDeletedMails(owner: string | undefined) {
-        const whereClause = this.getOwnerWhereClause(owner);
+        const whereClause = this.getOwnerWhereSubquery(owner);
         const result = await this.sql`DELETE FROM mail WHERE deleted = true ${whereClause}`;
         return result.count;
     }
 
     public async restoreDeletedMails(owner: string | undefined) {
-        const whereClause = this.getOwnerWhereClause(owner);
+        const whereClause = this.getOwnerWhereSubquery(owner);
         const result = await this.sql`UPDATE mail SET deleted = false WHERE deleted = true ${whereClause}`;
         return result.count;
     }
 
     // Utility
+    private getOwnerWhereSubquery(owner: string | undefined) {
+        return owner ?
+            this.sql` AND mail.addressid IN (SELECT id FROM address WHERE address.owner IS NULL OR address.owner = ${owner})` :
+            this.sql``
+            ;
+    }
+
     private getOwnerWhereClause(owner: string | undefined) {
         return owner ?
-            this.sql` AND mail.recipient IN (SELECT addr FROM address WHERE address.owner IS NULL OR address.owner = ${owner})` :
+            this.sql`(address.owner IS NULL OR address.owner = ${owner})` :
             this.sql``
             ;
     }

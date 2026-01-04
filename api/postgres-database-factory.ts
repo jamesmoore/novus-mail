@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS address (
         await tx`
 CREATE TABLE IF NOT EXISTS mail (
     id char(26) PRIMARY KEY,
-    recipient varchar(254) NOT NULL,
+    addressid char(26) NOT NULL,
     sender varchar(254) NOT NULL,
     subject text NOT NULL,
     content text NOT NULL,
@@ -45,9 +45,9 @@ CREATE TABLE IF NOT EXISTS mail (
     received timestamptz NOT NULL DEFAULT now(),
     deleted boolean NOT NULL DEFAULT false,
     sendername text,
-    CONSTRAINT fk_mail_recipient
-        FOREIGN KEY (recipient)
-        REFERENCES address(addr)
+    CONSTRAINT fk_mail_addressid
+        FOREIGN KEY (addressid)
+        REFERENCES address(id)
         ON DELETE RESTRICT
 );`
 
@@ -58,8 +58,8 @@ CREATE TABLE IF NOT EXISTS meta (
 );`
 
         await tx`
-CREATE INDEX IF NOT EXISTS idx_mail_recipient_received
-    ON mail (recipient, received DESC);`
+CREATE INDEX IF NOT EXISTS idx_mail_addressid_received
+    ON mail (addressid, received DESC);`
 
         await tx`
 INSERT INTO meta ${tx({ key: 'schemaVersion', value: '2' })} ON CONFLICT DO NOTHING;`;
