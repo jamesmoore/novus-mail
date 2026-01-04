@@ -21,11 +21,11 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
 
     public async getAddresses(sub: string | undefined) {
         const subClause = sub ? this.sql` OR owner = ${sub}` : this.sql``;
-        return await this.sql`SELECT addr, owner FROM address WHERE owner is NULL ${subClause} ORDER BY id` as Address[];
+        return await this.sql<Address[]>`SELECT addr, owner FROM address WHERE owner is NULL ${subClause} ORDER BY id`;
     }
 
     public async getAddress(address: string) {
-        const addr = await this.sql`SELECT addr, owner FROM address WHERE addr = ${address}` as Address[];
+        const addr = await this.sql<Address[]>`SELECT addr, owner FROM address WHERE addr = ${address}`;
         return addr[0];
     }
 
@@ -41,7 +41,7 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
     }
 
     public async getAddressCount() {
-        const addressCountResult = await this.sql`SELECT count(*)::int as addresses from address` as { addresses: number }[];
+        const addressCountResult = await this.sql<{ addresses: number }[]>`SELECT count(*)::int as addresses from address`;
         return addressCountResult[0].addresses;
     }
 
@@ -67,7 +67,7 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
     }
 
     public async getMail(id: string): Promise<Mail | undefined> {
-        const rows = await this.sql`SELECT
+        const rows = await this.sql<Mail[]>`SELECT
             mail.id,
             address.addr AS recipient,
             sender,
@@ -79,7 +79,7 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
             deleted
             FROM mail 
             JOIN address on mail.addressid = address.id
-            WHERE mail.id = ${id}` as Mail[];
+            WHERE mail.id = ${id}`;
         if (rows.length === 0) {
             return undefined;
         }
@@ -104,7 +104,7 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
 
         const sortOrder = direction === 'lt' ? this.sql`DESC` : this.sql`ASC`;
 
-        const rows = await this.sql`
+        const rows = await this.sql<Mail[]>`
               SELECT mail.id, sender, sendername, subject, read, received 
               FROM mail
               JOIN address on (address.id = addressid)
@@ -114,8 +114,7 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
                 ${addrClause}
                 ${ownerClause}
               ORDER BY id ${sortOrder}
-              LIMIT ${perPage}
-            ` as Mail[];
+              LIMIT ${perPage}`;
         return rows;
     }
 
@@ -124,11 +123,11 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
             ? this.sql`WHERE ${this.getOwnerWhereClause(owner)}`
             : this.sql``;
 
-        const rows = await this.sql`
+        const rows = await this.sql<Mail[]>`
               SELECT mail.id, address.addr AS recipient, sender, sendername, subject, read, received, deleted, content
               FROM mail
               JOIN address on mail.addressid = address.id
-              ${ownerClause}` as Mail[];
+              ${ownerClause}`;
         return rows;
     }
 
@@ -137,13 +136,13 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
         const ownerClause = owner
             ? this.sql`AND ${this.getOwnerWhereClause(owner)}`
             : this.sql``;
-        const unread = await this.sql`
+        const unread = await this.sql<UnreadCount[]>`
                 SELECT address.addr AS recipient, count(*)::int as unread
                 FROM mail
                 JOIN address on (address.id = addressid)
                 WHERE read = false AND deleted = false ${ownerClause}
                 GROUP BY address.addr
-                ` as UnreadCount[];
+                `;
         return unread;
     }
 
@@ -160,9 +159,9 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
     }
 
     public async getUnreadMailsCount() {
-        const unreadMailCount = await this.sql`SELECT count(*)::int as unread 
+        const unreadMailCount = await this.sql<{ unread: number }[]>`SELECT count(*)::int as unread 
             FROM mail
-            WHERE read = false AND deleted = false` as { unread: number }[];
+            WHERE read = false AND deleted = false`;
         return unreadMailCount[0].unread;
     }
 
