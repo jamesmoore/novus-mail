@@ -11,6 +11,7 @@ import { passportConfig } from './auth/passport-config.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { DatabaseFacade } from './database-facade.js';
+import { errorCatchMiddleware } from './routes/error-catch-middleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -46,7 +47,7 @@ export class HttpServer {
 		}
 
 		// app.use(function(req,res,next){setTimeout(next,5000)});
-		
+
 		app.use('/', createAuthRouter());
 
 		app.use(express.static(staticContentPath));
@@ -56,6 +57,8 @@ export class HttpServer {
 		app.use('/api', authMiddleware, createMailRouter(this.db));
 		app.use('/api', authMiddleware, createStatusRouter(this.db));
 		app.use('/api', authMiddleware, createExportRouter(this.db));
+
+		app.use(errorCatchMiddleware);
 		// catch-all handler for react router. This is needed so that urls that are refreshed activate the react router. The alternative 302 redirect to / would break that.
 		// https://expressjs.com/en/guide/migrating-5.html#path-syntax
 		app.get('/{*splat}', (_req, res) => {
