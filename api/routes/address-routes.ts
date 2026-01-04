@@ -40,7 +40,7 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string)
             await databaseFacade.addAddress(address);
             res.sendStatus(200);
         }
-    })
+    });
 
     router.post('/address/:addr', async (req, res) => {
         await checkAddressOwnership(req.params.addr, req.user?.sub, res, async (address: Address) => {
@@ -52,14 +52,14 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string)
             await databaseFacade.updateAddressOwner(address.addr, owner);
             res.sendStatus(200);
         });
-    })
+    });
 
     router.delete('/address/:addr', async (req, res) => {
         await checkAddressOwnership(req.params.addr, req.user?.sub, res, async (address: Address) => {
             await databaseFacade.deleteAddress(address.addr);
             res.sendStatus(200);
         });
-    })
+    });
 
     async function checkAddressOwnership(addr: string, sub: string | undefined, res: Response, handle: (address: Address) => Promise<void>) {
         await checkAddressPresence(addr, res, async (address: Address) => {
