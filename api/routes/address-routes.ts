@@ -1,7 +1,8 @@
-import { Router } from 'express';
+import { Router, Response } from 'express';
 import { noCacheMiddleware } from './no-cache-middleware.js';
 import { env } from '../env/env.js';
 import { DatabaseFacade } from '../database-facade.js';
+import { Address } from '../models/address.js';
 
 export function createRouter(databaseFacade: DatabaseFacade, domainName: string) {
 
@@ -25,67 +26,61 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string)
     });
 
     router.get('/address/:addr', async (req, res) => {
-        const address = req.params.addr.toLowerCase();
-        const addressRow = await databaseFacade.getAddress(address);
-        if (addressRow) {
-            res.status(200).send(addressRow.addr);
-        } else {
-            res.status(404).send('Address not found');
-        }
+        await checkAddressPresence(req.params.addr, res, async (address: Address) => {
+            res.status(200).send(address.addr);
+        });
     });
 
     router.put('/address/:addr', async (req, res) => {
         const address = req.params.addr.toLowerCase();
         const existing = await databaseFacade.getAddress(address);
         if (existing) {
-            res.status(200).send();
+            res.sendStatus(200);
         } else {
             await databaseFacade.addAddress(address);
-            res.status(200).send();
+            res.sendStatus(200);
         }
     })
 
     router.post('/address/:addr', async (req, res) => {
-        const address = req.params.addr.toLowerCase();
+        await checkAddressOwnership(req.params.addr, req.user?.sub, res, async (address: Address) => {
+            const json = req.body as {
+                private: boolean,
+            };
 
-        const addressRow = await databaseFacade.getAddress(address);
-        if (addressRow) {
-            const owner = addressRow.owner;
-            if (owner !== req.user?.sub && owner !== null) {
-                res.status(401).send('Address not yours');
-                return;
-            }
-        } else {
-            res.status(404).send('Address not found');
-            return;
-        }
-
-        const json = req.body as {
-            private: boolean,
-        };
-
-        const owner = json.private ? req.user?.sub : null;
-        await databaseFacade.updateAddressOwner(address, owner);
-        res.status(200).send();
+            const owner = json.private ? req.user?.sub : null;
+            await databaseFacade.updateAddressOwner(address.addr, owner);
+            res.sendStatus(200);
+        });
     })
 
     router.delete('/address/:addr', async (req, res) => {
-        const address = req.params.addr.toLowerCase();
-        const addressRow = await databaseFacade.getAddress(address);
-        if (!addressRow) {
+        await checkAddressOwnership(req.params.addr, req.user?.sub, res, async (address: Address) => {
+            await databaseFacade.deleteAddress(address.addr);
+            res.sendStatus(200);
+        });
+    })
+
+    async function checkAddressOwnership(addr: string, sub: string | undefined, res: Response, handle: (address: Address) => Promise<void>) {
+        await checkAddressPresence(addr, res, async (address: Address) => {
+            const owner = address.owner;
+            if (owner && owner !== sub) {
+                res.status(401).send('Address not yours');
+                return;
+            }
+            await handle(address);
+        });
+    }
+
+    async function checkAddressPresence(addr: string, res: Response, handle: (address: Address) => Promise<void>) {
+        const addressLower = addr.toLowerCase();
+        const address = await databaseFacade.getAddress(addressLower);
+        if (!address) {
             res.status(404).send('Address not found');
             return;
         }
-
-        const owner = addressRow.owner;
-        if (owner && owner !== req.user?.sub) {
-            res.status(401).send('Address not yours');
-            return;
-        }
-
-        await databaseFacade.deleteAddress(address);
-        res.status(200).send();
-    })
+        await handle(address);
+    }
 
     return router;
 }
