@@ -11,14 +11,9 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string)
 
     const refreshInterval = env.MAIL_REFRESH_INTERVAL;
     router.get('/addresses', async (req, res) => {
-        try {
-            const sub = req.user?.sub;
-            const rows = await databaseFacade.getAddresses(sub);
-            res.json({ addresses: rows, refreshInterval: refreshInterval });
-        } catch (err) {
-            console.error("DB get addresses fail", err);
-            res.status(500).send('Failed to get addresses');
-        }
+        const sub = req.user?.sub;
+        const rows = await databaseFacade.getAddresses(sub);
+        res.json({ addresses: rows, refreshInterval: refreshInterval });
     });
 
     router.get('/domain', (req, res) => {
@@ -31,53 +26,38 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string)
 
     router.get('/address/:addr', async (req, res) => {
         const address = req.params.addr.toLowerCase();
-        try {
-            const addressRow = await databaseFacade.getAddress(address);
-            if (addressRow) {
-                res.status(200).send((addressRow as { addr: string }).addr);
-            } else {
-                res.status(404).send('Address not found');
-            }
-        } catch (err) {
-            console.error("DB get addresses fail", err);
-            res.status(500).send('Failed to retrieve address');
+        const addressRow = await databaseFacade.getAddress(address);
+        if (addressRow) {
+            res.status(200).send(addressRow.addr);
+        } else {
+            res.status(404).send('Address not found');
         }
     });
 
     router.put('/address/:addr', async (req, res) => {
         const address = req.params.addr.toLowerCase();
-        try {
-            const existing = await databaseFacade.getAddress(address);
-            if (existing) {
-                res.status(200).send();
-            } else {
-                await databaseFacade.addAddress(address);
-                res.status(200).send();
-            }
-        } catch (err) {
-            console.error("DB add addresses fail", err)
-            res.status(500).json({ error: "Failed to add address" });
+        const existing = await databaseFacade.getAddress(address);
+        if (existing) {
+            res.status(200).send();
+        } else {
+            await databaseFacade.addAddress(address);
+            res.status(200).send();
         }
     })
 
     router.post('/address/:addr', async (req, res) => {
         const address = req.params.addr.toLowerCase();
 
-        try {
-            const addressRow = await databaseFacade.getAddress(address);
-            if (addressRow) {
-                const owner = addressRow.owner;
-                if (owner !== req.user?.sub && owner !== null) {
-                    res.status(401).send('Address not yours');
-                    return;
-                }
-            } else {
-                res.status(404).send('Address not found');
+        const addressRow = await databaseFacade.getAddress(address);
+        if (addressRow) {
+            const owner = addressRow.owner;
+            if (owner !== req.user?.sub && owner !== null) {
+                res.status(401).send('Address not yours');
                 return;
             }
-        } catch (err) {
-            console.error("DB update addresses fail", err)
-            res.status(500).json({ error: "Failed to update address" });
+        } else {
+            res.status(404).send('Address not found');
+            return;
         }
 
         const json = req.body as {
@@ -85,37 +65,26 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string)
         };
 
         const owner = json.private ? req.user?.sub : null;
-        try {
-            await databaseFacade.updateAddressOwner(address, owner);
-            res.status(200).send();
-        } catch (err) {
-            console.error("DB update addresses fail", err)
-            res.status(500).json({ error: "Failed to update address" });
-        }
+        await databaseFacade.updateAddressOwner(address, owner);
+        res.status(200).send();
     })
 
     router.delete('/address/:addr', async (req, res) => {
         const address = req.params.addr.toLowerCase();
-        try {
-            const addressRow = await databaseFacade.getAddress(address);
-            if (!addressRow) {
-                res.status(404).send('Address not found');
-                return;
-            }
-
-            const owner = addressRow.owner;
-            if (owner && owner !== req.user?.sub) {
-                res.status(401).send('Address not yours');
-                return;
-            }
-
-            await databaseFacade.deleteAddress(address);
-            res.status(200).send();
-        } catch (err) {
-            console.error("DB delete address fail");
-            console.error(err)
-            res.status(500).send('Failed to delete address');
+        const addressRow = await databaseFacade.getAddress(address);
+        if (!addressRow) {
+            res.status(404).send('Address not found');
+            return;
         }
+
+        const owner = addressRow.owner;
+        if (owner && owner !== req.user?.sub) {
+            res.status(401).send('Address not yours');
+            return;
+        }
+
+        await databaseFacade.deleteAddress(address);
+        res.status(200).send();
     })
 
     return router;

@@ -19,159 +19,107 @@ export function createRouter(databaseFacade: DatabaseFacade) {
             deleted: boolean
         };
 
-        try {
-            const perPage = env.MAIL_COUNT_PER_PAGE;
+        const perPage = env.MAIL_COUNT_PER_PAGE;
 
-            const directionCursorId = (json.cursorId as string) || 'lt';
-            const direction = directionCursorId.substring(0, 2);
-            const cursorId = directionCursorId.substring(2);
+        const directionCursorId = json.cursorId || 'lt';
+        const direction = directionCursorId.substring(0, 2);
+        const cursorId = directionCursorId.substring(2);
 
-            const owner = req.user?.sub;
+        const owner = req.user?.sub;
 
-            let rows = await databaseFacade.getMails(json.addr, json.deleted, cursorId, perPage, owner, direction);
+        let rows = await databaseFacade.getMails(json.addr, json.deleted, cursorId, perPage, owner, direction);
 
-            if (direction === 'gt') {
-                rows = rows.sort((a, b) => b.id > a.id ? 1 : -1);
-            }
-
-            res.json({
-                mails: rows,
-                nextId: (rows.length === 0 || rows.length < perPage) ? null : 'lt' + rows[rows.length - 1].id,
-                previousId: rows.length === 0 ? null : 'gt' + rows[0].id,
-            });
-
-        } catch (err) {
-            console.error("DB get mails fail");
-            console.error(err);
-            res.status(500).json({ error: "Failed to get mails" });
+        if (direction === 'gt') {
+            rows = rows.sort((a, b) => b.id > a.id ? 1 : -1);
         }
+
+        res.json({
+            mails: rows,
+            nextId: (rows.length === 0 || rows.length < perPage) ? null : 'lt' + rows[rows.length - 1].id,
+            previousId: rows.length === 0 ? null : 'gt' + rows[0].id,
+        });
 
     });
 
     router.get('/mail/:id', async (req, res) => {
         const id = req.params.id;
-        try {
-            const mail = await databaseFacade.getMail(id);
-            if (!mail) {
-                res.sendStatus(404);
-                return;
-            }
-            await checkMailOwnership(req.user?.sub, mail, res, async () => {
-                res.json(mail);
-            });
-        } catch (err) {
-            console.error("DB get mail data fail", err)
-            res.status(500).json({ error: "Failed to get mail" });
+        const mail = await databaseFacade.getMail(id);
+        if (!mail) {
+            res.sendStatus(404);
+            return;
         }
+        await checkMailOwnership(req.user?.sub, mail, res, async () => {
+            res.json(mail);
+        });
     });
 
     router.delete('/mail/:id', async (req, res) => {
         const id = req.params.id;
-        try {
-            const mail = await databaseFacade.getMail(id);
-            if (!mail) {
-                res.sendStatus(404);
-                return;
-            }
-            await checkMailOwnership(req.user?.sub, mail, res, async () => {
-                const changes = mail.deleted ?
-                    await databaseFacade.deleteMail(id) :
-                    await databaseFacade.softDeleteMail(id);
-                res.status(200).send(`Deleted ${changes} mails`);
-            });
-        } catch (err) {
-            console.error("DB delete mail fail", err)
-            res.status(500).json({ error: "Failed to delete mail" });
+        const mail = await databaseFacade.getMail(id);
+        if (!mail) {
+            res.sendStatus(404);
+            return;
         }
+        await checkMailOwnership(req.user?.sub, mail, res, async () => {
+            const changes = mail.deleted ?
+                await databaseFacade.deleteMail(id) :
+                await databaseFacade.softDeleteMail(id);
+            res.status(200).send(`Deleted ${changes} mails`);
+        });
     });
 
     router.delete('/mails/:addr', async (req, res) => {
         const addr = req.params.addr;
-        try {
-            await checkAddressOwnership(req.user?.sub, addr, res, async () => {
-                const changes = await databaseFacade.deleteMailsForAddress(addr);
-                res.status(200).send(`Deleted ${changes} mails`);
-            });
-        } catch (err) {
-            console.error("DB delete mails fail", err)
-            res.status(500).json({ error: "Failed to delete mails" });
-        }
+        await checkAddressOwnership(req.user?.sub, addr, res, async () => {
+            const changes = await databaseFacade.deleteMailsForAddress(addr);
+            res.status(200).send(`Deleted ${changes} mails`);
+        });
     })
 
     router.post('/emptyDeletedMails', async (req, res) => {
-        try {
-            const owner = req.user?.sub;
-            const changes = await databaseFacade.emptyDeletedMails(owner);
-            res.status(200).send(`Deleted ${changes} mails`);
-        } catch (err) {
-            console.error("DB empty deleted mails fail")
-            console.error(err)
-            res.status(500).json({ error: "Failed to empty deleted mails" });
-        }
+        const owner = req.user?.sub;
+        const changes = await databaseFacade.emptyDeletedMails(owner);
+        res.status(200).send(`Deleted ${changes} mails`);
     })
 
     router.post('/restoreDeletedMails', async (req, res) => {
-        try {
-            const owner = req.user?.sub;
-            const changes = await databaseFacade.restoreDeletedMails(owner);
-            res.status(200).send(`Restored ${changes} mails`);
-        } catch (err) {
-            console.error("DB restore deleted mails fail")
-            console.error(err)
-            res.status(500).json({ error: "Failed to restore deleted mails" });
-        }
+        const owner = req.user?.sub;
+        const changes = await databaseFacade.restoreDeletedMails(owner);
+        res.status(200).send(`Restored ${changes} mails`);
     })
 
     router.post('/readMail', async (req, res) => {
         const json = req.body;
-        try {
-            const mail = await databaseFacade.getMail(json.id);
-            if (!mail) {
-                res.sendStatus(404);
-                return;
-            }
-            await checkMailOwnership(req.user?.sub, mail, res, async () => {
-                if (mail.read === false) {
-                    const mailId = json.id;
-                    const changes = await databaseFacade.markMailAsRead(mailId);
-                    res.status(200).send(`Updated ${changes} mails as read`);
-                }
-                else {
-                    res.status(200).send("Mail already read");
-                }
-            });
-        } catch (err) {
-            console.error("DB update mail fail")
-            console.error(err)
-            res.status(500).json({ error: "Failed to update mail as read" });
+        const mail = await databaseFacade.getMail(json.id);
+        if (!mail) {
+            res.sendStatus(404);
+            return;
         }
+        await checkMailOwnership(req.user?.sub, mail, res, async () => {
+            if (mail.read === false) {
+                const mailId = json.id;
+                const changes = await databaseFacade.markMailAsRead(mailId);
+                res.status(200).send(`Updated ${changes} mails as read`);
+            }
+            else {
+                res.status(200).send("Mail already read");
+            }
+        });
     })
 
     router.post('/readAllMail', async (req, res) => {
         const addr = req.body.address;
-        try {
-            await checkAddressOwnership(req.user?.sub, addr, res, async () => {
-                const changes = await databaseFacade.markAllAsRead(addr);
-                res.status(200).send(`Marked ${changes} mails read`);
-            }
-            );
-        } catch (err) {
-            console.error("DB read all mail fail")
-            console.error(err)
-            res.status(500).json({ error: "Failed to mark all mails as read" });
+        await checkAddressOwnership(req.user?.sub, addr, res, async () => {
+            const changes = await databaseFacade.markAllAsRead(addr);
+            res.status(200).send(`Marked ${changes} mails read`);
         }
+        );
     })
 
     router.get('/unreadCounts', async (req, res) => {
-
-        try {
-            const owner = req.user?.sub;
-            const unread = await databaseFacade.getUnread(owner);
-            res.json(unread);
-        } catch (err) {
-            console.error("unread counts select fail", err);
-            res.status(500).json({ error: "Failed to get unread counts" });
-        }
+        const owner = req.user?.sub;
+        const unread = await databaseFacade.getUnread(owner);
+        res.json(unread);
     })
 
     async function checkAddressOwnership(user: string | undefined, address: string, res: Response, handle: () => Promise<void>) {
