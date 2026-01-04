@@ -219,7 +219,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
         const result = this.db.prepare(`UPDATE mail 
             SET deleted = 1 
             FROM address
-            WHERE address.id = addressid AND addr = ? and deleted = 0`).run(addr);
+            WHERE address.id = addressid AND address.addr = ? and deleted = 0`).run(addr);
         return result.changes;
     }
 
