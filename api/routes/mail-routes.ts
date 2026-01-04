@@ -27,11 +27,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
 
         const owner = req.user?.sub;
 
-        let rows = await databaseFacade.getMails(json.addr, json.deleted, cursorId, perPage, owner, direction);
-
-        if (direction === 'gt') {
-            rows = rows.sort((a, b) => b.id > a.id ? 1 : -1);
-        }
+        const rows = await databaseFacade.getMails(json.addr, json.deleted, cursorId, perPage, owner, direction);
 
         res.json({
             mails: rows,
@@ -109,7 +105,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
 
     async function checkAddressOwnership(user: string | undefined, address: string, res: Response, handle: () => Promise<void>) {
         if (!user) {
-            handle();
+            await handle();
             return;
         }
 
@@ -137,26 +133,9 @@ export function createRouter(databaseFacade: DatabaseFacade) {
             return;
         }
 
-        if (!user) {
+        await checkAddressOwnership(user, mail.recipient, res, async () => {
             await handle(mail);
-            return;
-        }
-
-        const addressRow = await databaseFacade.getAddress(mail.recipient);
-
-        if (!addressRow) {
-            res.status(404).send();
-            return;
-        }
-
-        const { owner } = addressRow;
-
-        if (owner !== user && owner !== null) {
-            res.status(401).send();
-        }
-        else {
-            await handle(mail);
-        }
+        });
     };
 
     return router;
