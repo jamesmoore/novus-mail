@@ -90,7 +90,7 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
         const deletedClause = deleted ? this.sql` deleted = true ` : this.sql` deleted = false `;
 
         const cursorClause = cursorId ?
-            this.sql` AND id ${direction === 'lt' ? this.sql`<` : this.sql`>`} ${cursorId}` :
+            this.sql` AND mail.id ${direction === 'lt' ? this.sql`<` : this.sql`>`} ${cursorId}` :
             this.sql``;
 
         const addrClause = addr ?

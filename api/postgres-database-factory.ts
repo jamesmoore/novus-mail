@@ -62,7 +62,7 @@ CREATE INDEX IF NOT EXISTS idx_mail_addressid_received
     ON mail (addressid, received DESC);`
 
         await tx`
-INSERT INTO meta ${tx({ key: 'schemaVersion', value: '2' })} ON CONFLICT DO NOTHING;`;
+INSERT INTO meta ${tx({ key: 'schemaVersion', value: '3' })} ON CONFLICT DO NOTHING;`;
     });
     console.log("Completed DB schema update");
 
