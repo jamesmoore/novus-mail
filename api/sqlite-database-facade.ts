@@ -56,28 +56,28 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
 
     // Address
     public async addAddress(address: string) {
-        this.db.prepare("INSERT INTO address (id, addr) VALUES (?,?)").run(ulid(), address);
+        this.db.prepare("INSERT INTO address (id, addr) VALUES (@id, @address)").run({ id: ulid(), address });
     }
 
     public async getAddresses(sub: string | undefined): Promise<Address[]> {
         return this.db.prepare(`SELECT addr, owner 
             FROM address 
-            WHERE owner is NULL or owner = ?
+            WHERE owner is NULL or owner = @owner
             ORDER BY id
-            `).all(sub) as Address[];
+            `).all({ owner: sub }) as Address[];
     }
 
     public async getAddress(address: string) {
-        return this.db.prepare("SELECT addr, owner FROM address WHERE addr = ?").get(address) as Address;
+        return this.db.prepare("SELECT addr, owner FROM address WHERE addr = @address").get({ address }) as Address;
     }
 
     public async updateAddressOwner(address: string, owner: string | null | undefined) {
-        this.db.prepare("UPDATE address SET owner = ? WHERE addr = ?").run(owner, address);
+        this.db.prepare("UPDATE address SET owner = @owner WHERE addr = @address").run({ owner, address });
     }
 
     public async deleteAddress(address: string) {
-        this.db.prepare("DELETE FROM mail WHERE addressid = (SELECT id from address where addr = ?)").run(address);
-        this.db.prepare("DELETE FROM address WHERE addr = ?").run(address);
+        this.db.prepare("DELETE FROM mail WHERE addressid = (SELECT id from address where addr = @address)").run({ address });
+        this.db.prepare("DELETE FROM address WHERE addr = @address").run({ address });
     }
 
     public async getAddressCount() {
@@ -87,7 +87,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
 
     // Mails
     public async addMail(mail: Mail) {
-        const address = this.db.prepare('SELECT id from address where addr=?').get(mail.recipient) as { id: string } | undefined;
+        const address = this.db.prepare('SELECT id from address where addr = @address').get({ address: mail.recipient }) as { id: string } | undefined;
         if (!address) {
             throw new Error(`Recipient address not found for mail: ${mail.recipient}`);
         }
@@ -109,7 +109,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
             deleted 
             FROM mail
             JOIN address on (address.id = addressid)
-            WHERE mail.id = ?`).get(id) as SqliteMailRowWithRecipient;
+            WHERE mail.id = @id`).get({ id }) as SqliteMailRowWithRecipient;
         return mail ? GetMail(mail) : undefined;
     }
 
@@ -185,7 +185,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
     }
 
     public async markMailAsRead(mailId: string) {
-        const result = this.db.prepare("UPDATE mail SET read = 1 where id = ?").run(mailId);
+        const result = this.db.prepare("UPDATE mail SET read = 1 where id = @id").run({ id: mailId });
         return result.changes;
     }
 
@@ -194,7 +194,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
         const result = this.db.prepare(`UPDATE mail 
             SET read = 1 
             FROM address
-            WHERE address.id = addressid AND address.addr = ? and read = 0`).run(addr);
+            WHERE address.id = addressid AND address.addr = @address and read = 0`).run({ address: addr });
         return result.changes;
     }
 
@@ -205,12 +205,12 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
 
     // Deletions
     public async softDeleteMail(id: string) {
-        const result = this.db.prepare("UPDATE mail SET deleted = 1 WHERE id = ?").run(id);
+        const result = this.db.prepare("UPDATE mail SET deleted = 1 WHERE id = @id").run({ id });
         return result.changes;
     }
 
     public async deleteMail(id: string) {
-        const result = this.db.prepare("DELETE FROM mail WHERE id = ?").run(id);
+        const result = this.db.prepare("DELETE FROM mail WHERE id = @id").run({ id });
         return result.changes;
     }
 
@@ -219,7 +219,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
         const result = this.db.prepare(`UPDATE mail 
             SET deleted = 1 
             FROM address
-            WHERE address.id = addressid AND address.addr = ? and deleted = 0`).run(addr);
+            WHERE address.id = addressid AND address.addr = @address and deleted = 0`).run({ address: addr });
         return result.changes;
     }
 
