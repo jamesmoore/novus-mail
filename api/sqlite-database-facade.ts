@@ -230,7 +230,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
 
         const whereClause = [
             'deleted = 1',
-            this.getOwnerWhereClause(owner),
+            this.getOwnerWhereSubquery(owner),
         ].filter(Boolean).join(' AND ');
 
         const sql = `DELETE FROM mail WHERE ${whereClause}`;
@@ -246,7 +246,7 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
 
         const whereClause = [
             'deleted = 1',
-            this.getOwnerWhereClause(owner),
+            this.getOwnerWhereSubquery(owner),
         ].filter(Boolean).join(' AND ');
 
         const sql = `UPDATE mail SET deleted = 0 WHERE ${whereClause}`;
@@ -256,7 +256,11 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
     }
 
     // Utility
-    private getOwnerWhereClause(owner: string | undefined) {
+    private getOwnerWhereSubquery(owner: string | undefined) {
         return owner && 'mail.addressid in (SELECT id FROM address WHERE address.owner IS NULL OR address.owner = @owner)';
+    }
+
+    private getOwnerWhereClause(owner: string | undefined) {
+        return owner && '(address.owner IS NULL OR address.owner = @owner)';
     }
 }
