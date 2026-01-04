@@ -48,6 +48,9 @@ export function createRouter(databaseFacade: DatabaseFacade) {
             res.sendStatus(404);
             return;
         }
+        await checkMailOwnership(req.user?.sub, mail, res, async () => {
+            res.json(mail);
+        });
     });
 
     router.delete('/mail/:id', async (req, res) => {
