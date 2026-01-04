@@ -4,7 +4,7 @@ import { PostgresDatabaseFacade } from './postgres-database-facade.js';
 export default async function dbinit(postgresUrl: string) {
 
     if (!postgresUrl) {
-        throw Error("Postgres URL variable not set")
+        throw Error("Postgres URL variable not set");
     }
 
     let parsedUrl: URL;
