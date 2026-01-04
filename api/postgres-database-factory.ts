@@ -25,8 +25,9 @@ export default async function dbinit(postgresUrl: string) {
         throw new Error(`Failed to initialize Postgres client: ${e instanceof Error ? e.message : String(e)}`);
     }
     console.log("Starting DB schema update...");
-    await sql.begin(async (tx) => {
-        await tx`
+    try {
+        await sql.begin(async (tx) => {
+            await tx`
 CREATE TABLE IF NOT EXISTS address (
     id char(26) PRIMARY KEY,
     addr varchar(254) NOT NULL,
@@ -34,7 +35,7 @@ CREATE TABLE IF NOT EXISTS address (
     UNIQUE(addr)
 );`
 
-        await tx`
+            await tx`
 CREATE TABLE IF NOT EXISTS mail (
     id char(26) PRIMARY KEY,
     addressid char(26) NOT NULL,
@@ -51,20 +52,23 @@ CREATE TABLE IF NOT EXISTS mail (
         ON DELETE RESTRICT
 );`
 
-        await tx`
+            await tx`
 CREATE TABLE IF NOT EXISTS meta (
     key text PRIMARY KEY,
     value text NOT NULL
 );`
 
-        await tx`
+            await tx`
 CREATE INDEX IF NOT EXISTS idx_mail_addressid_received
     ON mail (addressid, received DESC);`
 
-        await tx`
+            await tx`
 INSERT INTO meta ${tx({ key: 'schemaVersion', value: '3' })} ON CONFLICT DO NOTHING;`;
-    });
-    console.log("Completed DB schema update");
+        });
+        console.log("Completed DB schema update");
+    } catch (e) {
+        throw new Error(`Failed to initialize database schema: ${e instanceof Error ? e.message : String(e)}`);
+    }
 
     return new PostgresDatabaseFacade(sql);
 }
