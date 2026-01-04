@@ -59,8 +59,9 @@ CREATE TABLE IF NOT EXISTS meta (
 );`
 
             await tx`
-CREATE INDEX IF NOT EXISTS idx_mail_id_addressid
-    ON mail (id DESC, addressid);`
+CREATE INDEX IF NOT EXISTS idx_mail_addressid_id_desc_active
+    ON mail (addressid, id DESC)
+    WHERE deleted = false`
 
             await tx`
 INSERT INTO meta ${tx({ key: 'schemaVersion', value: '3' })} ON CONFLICT DO NOTHING;`;
