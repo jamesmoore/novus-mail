@@ -43,24 +43,14 @@ export function createRouter(databaseFacade: DatabaseFacade) {
 
     router.get('/mail/:id', async (req, res) => {
         const id = req.params.id;
-        const mail = await databaseFacade.getMail(id);
-        if (!mail) {
-            res.sendStatus(404);
-            return;
-        }
-        await checkMailOwnership(req.user?.sub, mail, res, async () => {
+        await checkMailOwnership(req.user?.sub, id, res, async (mail) => {
             res.json(mail);
         });
     });
 
     router.delete('/mail/:id', async (req, res) => {
         const id = req.params.id;
-        const mail = await databaseFacade.getMail(id);
-        if (!mail) {
-            res.sendStatus(404);
-            return;
-        }
-        await checkMailOwnership(req.user?.sub, mail, res, async () => {
+        await checkMailOwnership(req.user?.sub, id, res, async (mail) => {
             const changes = mail.deleted ?
                 await databaseFacade.deleteMail(id) :
                 await databaseFacade.softDeleteMail(id);
@@ -90,12 +80,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
 
     router.post('/readMail', async (req, res) => {
         const json = req.body;
-        const mail = await databaseFacade.getMail(json.id);
-        if (!mail) {
-            res.sendStatus(404);
-            return;
-        }
-        await checkMailOwnership(req.user?.sub, mail, res, async () => {
+        await checkMailOwnership(req.user?.sub, json.id, res, async (mail) => {
             if (mail.read === false) {
                 const mailId = json.id;
                 const changes = await databaseFacade.markMailAsRead(mailId);
@@ -145,14 +130,15 @@ export function createRouter(databaseFacade: DatabaseFacade) {
         }
     };
 
-    async function checkMailOwnership(user: string | undefined, mail: Mail, res: Response, handle: () => Promise<void>) {
+    async function checkMailOwnership(user: string | undefined, id: string, res: Response, handle: (mail: Mail) => Promise<void>) {
+        const mail = await databaseFacade.getMail(id);
         if (!mail) {
-            res.status(404).send();
+            res.sendStatus(404);
             return;
         }
 
         if (!user) {
-            handle();
+            await handle(mail);
             return;
         }
 
@@ -169,7 +155,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
             res.status(401).send();
         }
         else {
-            await handle();
+            await handle(mail);
         }
     };
 
