@@ -138,7 +138,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
         }
 
         if (!user) {
-            handle(mail);
+            await handle(mail);
             return;
         }
 
