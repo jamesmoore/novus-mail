@@ -88,7 +88,7 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
 
     public async getMails(addr: string, deleted: boolean, cursorId: string, perPage: number, owner: string | undefined, direction: string) {
 
-        const deletedClause = deleted ? this.sql` deleted = true ` : this.sql` deleted = false `;
+        const deletedClause = this.sql` deleted = ${deleted ? 'true' : 'false'} `;
 
         const cursorClause = cursorId ?
             this.sql` AND mail.id ${direction === 'lt' ? this.sql`<` : this.sql`>`} ${cursorId}` :
