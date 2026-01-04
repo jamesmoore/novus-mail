@@ -67,7 +67,8 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
     }
 
     public async getMail(id: string): Promise<Mail | undefined> {
-        const rows = await this.sql`SELECT 
+        const rows = await this.sql`SELECT
+            mail.id,
             address.addr AS recipient,
             sender,
             sendername,
