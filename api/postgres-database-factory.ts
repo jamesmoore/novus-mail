@@ -3,34 +3,9 @@ import { PostgresDatabaseFacade } from './postgres-database-facade.js';
 
 export default async function dbinit(postgresUrl: string, postgresLogSql: boolean) {
 
-    if (!postgresUrl) {
-        throw Error("Postgres URL variable not set");
-    }
+    validatePostgresUrl(postgresUrl);
 
-    let parsedUrl: URL;
-    try {
-        parsedUrl = new URL(postgresUrl);
-    } catch (e) {
-        throw new Error(`Invalid Postgres URL format: ${e instanceof Error ? e.message : String(e)}`);
-    }
-
-    if (parsedUrl.protocol !== 'postgres:' && parsedUrl.protocol !== 'postgresql:') {
-        throw new Error(`Invalid Postgres URL protocol: ${parsedUrl.protocol}. Expected "postgres" or "postgresql".`);
-    }
-
-    let sql;
-    try {
-        // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-        const postgresOptions: postgres.Options<{}> | undefined = postgresLogSql ? {
-            debug: (connection, query, params) => {
-                console.log('SQL:', query);
-                console.log('Params:', params);
-            }
-        } : undefined;
-        sql = postgres(postgresUrl, postgresOptions);
-    } catch (e) {
-        throw new Error(`Failed to initialize Postgres client: ${e instanceof Error ? e.message : String(e)}`);
-    }
+    const sql = getPostgresClient(postgresLogSql, postgresUrl);
     console.log("Starting DB schema update...");
     try {
         await sql.begin(async (tx) => {
@@ -79,4 +54,38 @@ INSERT INTO meta ${tx({ key: 'schemaVersion', value: '3' })} ON CONFLICT DO NOTH
     }
 
     return new PostgresDatabaseFacade(sql);
+}
+
+function validatePostgresUrl(postgresUrl: string) {
+    if (!postgresUrl) {
+        throw Error("Postgres URL variable not set");
+    }
+    const parsedUrl = getPostgresUrl(postgresUrl);
+
+    if (parsedUrl.protocol !== 'postgres:' && parsedUrl.protocol !== 'postgresql:') {
+        throw new Error(`Invalid Postgres URL protocol: ${parsedUrl.protocol}. Expected "postgres" or "postgresql".`);
+    }
+}
+
+function getPostgresUrl(postgresUrl: string) {
+    try {
+        return new URL(postgresUrl);
+    } catch (e) {
+        throw new Error(`Invalid Postgres URL format: ${e instanceof Error ? e.message : String(e)}`);
+    }
+}
+
+function getPostgresClient(postgresLogSql: boolean, postgresUrl: string) {
+    try {
+        // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+        const postgresOptions: postgres.Options<{}> | undefined = postgresLogSql ? {
+            debug: (connection, query, params) => {
+                console.log('SQL:', query);
+                console.log('Params:', params);
+            }
+        } : undefined;
+        return postgres(postgresUrl, postgresOptions);
+    } catch (e) {
+        throw new Error(`Failed to initialize Postgres client: ${e instanceof Error ? e.message : String(e)}`);
+    }
 }
