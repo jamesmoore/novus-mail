@@ -11,7 +11,7 @@ import { env } from './env/env.js';
 let databaseFacade;
 try {
     databaseFacade = env.POSTGRES_URL ?
-        await postgresInit(env.POSTGRES_URL) :
+        await postgresInit(env.POSTGRES_URL, env.POSTGRES_LOG_SQL) :
         dbinit();
 } catch (error) {
     console.error('Failed to initialize database:', error);

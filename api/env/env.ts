@@ -10,6 +10,7 @@ const SessionStoreSchema = z.union([
   z.literal('REDIS'),
 ]).default('LOKI');
 
+const booleanValue = z.string().default('false').transform((s) => s.toLowerCase() !== "false" && s !== "0");
 export const env = createEnv({
   server: {
     MAIL_COUNT_PER_PAGE: z.string().optional().default("50").transform((s) => parseInt(s, 10)).pipe(z.number().min(1)),
@@ -25,11 +26,12 @@ export const env = createEnv({
       .optional()
       .transform((value) => value ?? fallbackSessionSecret()),
 
-    CORS_ALLOW_ALL_ORIGINS: z.string().default('false').transform((s) => s.toLowerCase() !== "false" && s !== "0"),
-    TRUST_PROXY: z.string().default('false').transform((s) => s.toLowerCase() !== "false" && s !== "0"),
+    CORS_ALLOW_ALL_ORIGINS: booleanValue,
+    TRUST_PROXY: booleanValue,
     SESSION_STORE: SessionStoreSchema,
     REDIS_URL: z.string().min(1).optional(),
     POSTGRES_URL: z.string().min(1).optional(),
+    POSTGRES_LOG_SQL: booleanValue,
   },
 
   /**

@@ -1,7 +1,7 @@
 import postgres from 'postgres'
 import { PostgresDatabaseFacade } from './postgres-database-facade.js';
 
-export default async function dbinit(postgresUrl: string) {
+export default async function dbinit(postgresUrl: string, postgresLogSql: boolean) {
 
     if (!postgresUrl) {
         throw Error("Postgres URL variable not set");
@@ -20,7 +20,14 @@ export default async function dbinit(postgresUrl: string) {
 
     let sql;
     try {
-        sql = postgres(postgresUrl);
+        // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+        const postgresOptions: postgres.Options<{}> | undefined = postgresLogSql ? {
+            debug: (connection, query, params) => {
+                console.log('SQL:', query);
+                console.log('Params:', params);
+            }
+        } : undefined;
+        sql = postgres(postgresUrl, postgresOptions);
     } catch (e) {
         throw new Error(`Failed to initialize Postgres client: ${e instanceof Error ? e.message : String(e)}`);
     }

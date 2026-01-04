@@ -41,7 +41,8 @@ Configuration is done through environment variables, which can be set in the doc
 | TRUST_PROXY                | true                                 | ```true``` \| ```false``` Whether the application trusts the proxy server to provide the correct X-FORWARDED headers. This is needed for the OIDC implementation to determine the scheme. |
 |SESSION_STORE               |NONE           |```NONE```\|```LOKI```\|```REDIS``` Which session store to use. `NONE`: in memory session store will be used. `LOKI` (default): then on disk file will be used. `REDIS`: redis store will be used (requires `REDIS_URL` to work).|
 |REDIS_URL|redis://redis:6379|Redis url if `REDIS` session store is to be used. See https://redis.io/docs/latest/develop/clients/nodejs/connect/| 
-
+|POSTGRES_URL|postgres://user:pass@host:5432/db|Postgres URL if Postgres DB is to be used. If absent local Sqlite will be used.| 
+|POSTGRES_LOG_SQL|false|```true``` \| ```false``` If set the Postgres SQL and parameters will be logged.|
 # Adding TLS / Encryption (optional) 🔒
 copy your certificate and private key files into the `data` folder (usually, the file extensions are `.crt` and `.key`). The file name and extension don't actually matter as Novus Mail can automatically detect which one is which
 
