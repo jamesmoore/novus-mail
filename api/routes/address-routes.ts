@@ -10,11 +10,10 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string)
 
     router.use(noCacheMiddleware);
 
-    const refreshInterval = env.MAIL_REFRESH_INTERVAL;
     router.get('/addresses', async (req, res) => {
         const sub = req.user?.sub;
         const rows = await databaseFacade.getAddresses(sub);
-        res.json({ addresses: rows, refreshInterval: refreshInterval });
+        res.json({ addresses: rows });
     });
 
     router.get('/domain', (req, res) => {
