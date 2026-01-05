@@ -3,9 +3,8 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "dev": "node --loader ts-node/esm --watch -r ts-node/register --env-file=.env --env-file=.env.development ./main.ts",
+    "dev": "tsx watch main.ts",
     "build": "tsc",
-    "bundle": "ncc build main.js",
     "lint": "eslint ."
   },
   "author": "",
@@ -19,6 +18,7 @@
     "connect-loki": "^1.2.0",
     "connect-redis": "^9.0.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-session": "^1.18.2",
     "mailparser": "^3.9.1",
@@ -49,10 +49,8 @@
     "@types/passport-anonymous": "^1.0.5",
     "@types/smtp-server": "^3.5.12",
     "@types/ws": "^8.18.1",
-    "@vercel/ncc": "^0.38.4",
     "eslint": "^9.39.2",
-    "nodemon": "^3.1.11",
-    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.51.0"
   }
