@@ -53,7 +53,7 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
             throw new Error(`Recipient address not found for mail: ${mail.recipient}`);
         }
         await this.sql`
-            INSERT INTO mail (id, addressid, sender, sendername, subject, content, read, received)
+            INSERT INTO mail (id, addressid, sender, sendername, subject, content, read, received, deleted)
             VALUES (
                 ${mail.id},
                 ${address[0].id},
@@ -62,7 +62,8 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
                 ${mail.subject},
                 ${mail.content ?? ''},
                 ${mail.read},
-                ${mail.received}
+                ${mail.received},
+                ${mail.deleted}
             )`;
     }
 
@@ -87,8 +88,7 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
     }
 
     public async getMails(addr: string, deleted: boolean, cursorId: string, perPage: number, owner: string | undefined, direction: string) {
-
-        const deletedClause = this.sql` deleted = ${deleted ? 'true' : 'false'} `;
+        const deletedClause = this.sql` mail.deleted = ${deleted} `;
 
         const cursorClause = cursorId ?
             this.sql` AND mail.id ${direction === 'lt' ? this.sql`<` : this.sql`>`} ${cursorId}` :
