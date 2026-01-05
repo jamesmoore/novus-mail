@@ -15,7 +15,9 @@ import { errorCatchMiddleware } from './routes/error-catch-middleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const staticContentPath = './front-react/dist';
+
+// Resolve the frontend dist directory relative to *this file*
+const frontendDistPath = join(__dirname, '..', 'front-react', 'dist');
 
 export class HttpServer {
 	private db: DatabaseFacade;
@@ -50,7 +52,7 @@ export class HttpServer {
 
 		app.use('/', createAuthRouter());
 
-		app.use(express.static(staticContentPath));
+		app.use(express.static(frontendDistPath));
 
 		const authMiddleware = passportConfig.middleware;
 		app.use('/api', authMiddleware, createAddressRouter(this.db, this.domainName));
@@ -62,12 +64,12 @@ export class HttpServer {
 		// catch-all handler for react router. This is needed so that urls that are refreshed activate the react router. The alternative 302 redirect to / would break that.
 		// https://expressjs.com/en/guide/migrating-5.html#path-syntax
 		app.get('/{*splat}', (_req, res) => {
-			res.sendFile(join(__dirname, staticContentPath, 'index.html'), (err) => {
+			res.sendFile(join(frontendDistPath, 'index.html'), (err) => {
 				if (err) {
-					res.status(500).send(err)
+					res.status(500).send(err);
 				}
 			});
-		})
+		});
 
 		const server = app.listen(this.port, () => {
 			console.log('http server listening at port: ' + this.port);
