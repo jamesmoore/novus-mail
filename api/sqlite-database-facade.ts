@@ -91,8 +91,8 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
         if (!address) {
             throw new Error(`Recipient address not found for mail: ${mail.recipient}`);
         }
-        this.db.prepare(`INSERT INTO mail (id, addressid, sender, sendername, subject, content, read, received) 
-            VALUES (@id, @addressid, @sender, @sendername, @subject, @content, @read, @received)`).
+        this.db.prepare(`INSERT INTO mail (id, addressid, sender, sendername, subject, content, read, received, deleted) 
+            VALUES (@id, @addressid, @sender, @sendername, @subject, @content, @read, @received, @deleted)`).
             run(GetSqliteMailRow(mail, address.id));
     }
 
