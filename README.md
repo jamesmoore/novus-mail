@@ -52,5 +52,23 @@ The current mail transfer protocol is very old and by default it doesn't require
 # Hosting multiple domains
 You can set the MX records for additional domains to point to the mail server host of the primary domain. 
 
+# Developing
+## API
+Run `npm i` and then `npm run dev` in the /api folder. This will start node for api on port 80.
+
+## Front end
+Run `npm i` and then `npm run dev` in the /front-react folder. This will launch the front-end on port 5173. 
+
+## API - Front end connectivity
+The API can be set in the front-end by adding a file named `/front-react/.env.development.local`
+```env
+VITE_API_BASE_URL=http://localhost:80
+```
+
+With the API and front-end running on different ports this will trigger CORS issues. To work around this, add a file named `/api/.env` containing:
+```env
+CORS_ALLOW_ALL_ORIGINS=true
+```
+
 # Contributing 🤝
 Contributions and suggestions are welcome.
