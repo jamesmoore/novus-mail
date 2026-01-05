@@ -27,7 +27,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
 
         const owner = req.user?.sub;
 
-        const rows = await databaseFacade.getMails(json.addr, json.deleted, cursorId, perPage, owner, direction);
+        const rows = await databaseFacade.getMails(json.addr, json.deleted ?? false, cursorId, perPage, owner, direction);
 
         if (direction === 'gt') {
             // When paginating backwards, the database returns rows in ASC order.
