@@ -26,6 +26,7 @@
     "openid-client": "^6.8.1",
     "passport": "^0.7.0",
     "passport-anonymous": "^1.0.1",
+    "postgres": "^3.4.7",
     "redis": "^5.10.0",
     "smtp-server": "^3.18.0",
     "ulid": "^3.0.2",
@@ -34,7 +35,7 @@
   },
   "type": "module",
   "devDependencies": {
-    "@types/adm-zip": "^0.5.7",    
+    "@types/adm-zip": "^0.5.7",
     "@types/better-sqlite3": "^7.6.13",
     "@types/connect-ensure-login": "^0.1.9",
     "@types/cookie-parser": "^1.4.10",

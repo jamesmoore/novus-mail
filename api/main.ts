@@ -5,16 +5,23 @@ import domain from './domain.js'
 import dbinit from './sqlite-database-factory.js'
 import WebSocketNotifier from './ws/web-socket-notifier.js';
 import EventEmitter from 'events';
-// import postgresInit from './postgres-database-factory.bak';
+import postgresInit from './postgres-database-factory.js';
+import { env } from './env/env.js';
 
-// const postgresDb = await postgresInit();
+let databaseFacade;
+try {
+    databaseFacade = env.POSTGRES_URL ?
+        await postgresInit(env.POSTGRES_URL, env.POSTGRES_LOG_SQL) :
+        dbinit();
+} catch (error) {
+    console.error('Failed to initialize database:', error);
+    throw error;
+}
 
 const domainName = domain.getDomainName();
 
 const notificationEventEmitter = new EventEmitter();
 
-
-const databaseFacade = dbinit();
 const smtpSrv = new SMTPServer(databaseFacade, 25, notificationEventEmitter);
 smtpSrv.start();
 const httpServer = new HttpServer(databaseFacade, domainName, 80);
