@@ -14,8 +14,6 @@ const booleanValue = z.string().default('false').transform((s) => s.toLowerCase(
 export const env = createEnv({
   server: {
     MAIL_COUNT_PER_PAGE: z.string().optional().default("50").transform((s) => parseInt(s, 10)).pipe(z.number().min(1)),
-    MAIL_REFRESH_INTERVAL: z.string().optional().default("3").transform((s) => parseInt(s, 10)).pipe(z.number().min(1)),
-
     OIDC_CLIENT_ID: z.string().min(1).optional(),
     OIDC_CLIENT_SECRET: z.string().min(10).optional(),
     OIDC_ISSUER: z.union([z.string().url().nullish(), z.literal("")]),

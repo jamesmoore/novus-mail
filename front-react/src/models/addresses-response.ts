@@ -5,5 +5,4 @@ export interface Address {
 
 export interface AddressesResponse {
     addresses: Address[];
-    refreshInterval: number;
 }
