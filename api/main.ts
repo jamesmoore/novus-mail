@@ -1,4 +1,5 @@
 "use strict";
+import 'dotenv/config'; // imported directly to load .env file first
 import { SMTPServer } from './smtp-server.js'
 import { HttpServer } from './http-server.js'
 import domain from './domain.js'
