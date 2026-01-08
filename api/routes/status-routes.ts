@@ -6,7 +6,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
 
     const router = Router();
     router.use(noCacheMiddleware);
-    
+
     router.get('/status', async (req, res) => {
         const unread = await databaseFacade.getUnreadMailsCount();
         const addresses = await databaseFacade.getAddressCount();
@@ -14,6 +14,10 @@ export function createRouter(databaseFacade: DatabaseFacade) {
             unread: unread,
             addresses: addresses,
         });
+    });
+
+    router.get('/health', (_req, res) => {
+        res.status(200).json({ status: 'ok' });
     });
 
     return router;
