@@ -53,11 +53,11 @@ export class HttpServer {
 		app.use('/', createAuthRouter());
 
 		app.use(express.static(frontendDistPath));
+		app.use('/api', createStatusRouter(this.db));
 
 		const authMiddleware = passportConfig.middleware;
 		app.use('/api', authMiddleware, createAddressRouter(this.db, this.domainName));
 		app.use('/api', authMiddleware, createMailRouter(this.db));
-		app.use('/api', authMiddleware, createStatusRouter(this.db));
 		app.use('/api', authMiddleware, createExportRouter(this.db));
 
 		app.use(errorCatchMiddleware);

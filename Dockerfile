@@ -38,4 +38,7 @@ COPY --from=build /app/api/package.json ./package.json
 COPY --from=build /app/api/data ./data
 COPY --from=build /app/front-react/dist ./front-react/dist
 
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:80/api/health || exit 1
+
 CMD ["node", "dist/main.js"]

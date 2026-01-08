@@ -17,9 +17,9 @@ const authConfig = {
 
 export const authMode =
   authConfig.clientID &&
-  authConfig.clientSecret &&
-  authConfig.issuer &&
-  authConfig.redirectUri ? 'oidc' : 'anonymous';
+    authConfig.clientSecret &&
+    authConfig.issuer &&
+    authConfig.redirectUri ? 'oidc' : 'anonymous';
 
 console.log(`Auth mode: ${authMode}`);
 
@@ -63,13 +63,12 @@ const verify: VerifyFunctionWithRequest = async (req, tokens, verified) => {
 export const passportConfig = authMode === 'oidc' ? {
   strategy: new CustomStrategy(oidcStrategyOptions, verify),
   middleware: (_req: Request, res: Response, next: NextFunction) => {
-    if (
-      _req.isAuthenticated() ||
-      _req.path.startsWith('/api/status') ||
-      _req.path.startsWith('/status')
-    ) 
-    return next();
-    res.status(401).send();
+    if (_req.isAuthenticated()) {
+      return next();
+    }
+    else {
+      res.status(401).send();
+    }
   }
 } : {
   strategy: new AnonymousStrategy(),
