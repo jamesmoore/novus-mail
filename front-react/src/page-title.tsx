@@ -1,17 +1,64 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import useUnreadCounts from "./use-unread-counts";
+import { AppTitle } from "./app";
 
 export default function PageTitle() {
 
     const { data: unreadCounts } = useUnreadCounts();
 
+    const setFaviconBadge = useCallback((showBadge: boolean) => {
+        const iconLinks = Array.from(
+            document.querySelectorAll<HTMLLinkElement>("link[rel~='icon'], link[rel='shortcut icon']")
+        );
+        if (iconLinks.length === 0) return;
+
+        if (!showBadge) {
+            for (const link of iconLinks) {
+                const originalHref = link.dataset.originalHref;
+                if (originalHref) link.href = originalHref;
+            }
+            return;
+        }
+
+        for (const link of iconLinks) {
+            if (!link.dataset.originalHref) link.dataset.originalHref = link.href;
+        }
+        const sourceLink = iconLinks.find(link => link.href.endsWith(".png")) ?? iconLinks[0];
+        const img = new Image();
+        img.onload = () => {
+            const size = Math.max(img.naturalWidth || 0, img.naturalHeight || 0) || 96;
+            const canvas = document.createElement("canvas");
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) return;
+            ctx.drawImage(img, 0, 0, size, size);
+            const dotRadius = Math.max(16, Math.round(size * 0.16));
+            const margin = Math.max(2, Math.round(size * 0.04));
+            const cx = size - margin - dotRadius;
+            const cy = margin + dotRadius;
+            ctx.fillStyle = "#ef4444"; // bg-red-500
+            ctx.beginPath();
+            ctx.arc(cx, cy, dotRadius, 0, Math.PI * 2);
+            ctx.fill();
+            const dataUrl = canvas.toDataURL("image/png");
+            for (const link of iconLinks) {
+                link.href = dataUrl;
+            }
+        };
+        img.src = sourceLink.href;
+    }, []);
+
     // update page titles
     useEffect(() => {
         const unreadCount = unreadCounts?.map(p => p.unread).reduce((p, q) => p + q, 0) ?? 0;
-        const title = `NovusMail${import.meta.env.DEV ? ' [DEV]' : ''}${unreadCount > 0 ? ` (${unreadCount})` : ''}`;
+        const title = `${AppTitle}${import.meta.env.DEV ? ' [DEV]' : ''}${unreadCount > 0 ? ` (${unreadCount})` : ''}`;
         //document.title = ''; // https://stackoverflow.com/questions/72982365/setting-document-title-doesnt-change-the-tabs-text-after-pressing-back-in-the
         document.title = title;
-    }, [unreadCounts]);
+
+        setFaviconBadge(unreadCount > 0);
+
+    }, [unreadCounts, setFaviconBadge]);
 
     return null;
 }
