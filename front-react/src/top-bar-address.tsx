@@ -74,7 +74,10 @@ function TopBarAddress() {
                     <p>Copy</p>
                 </TooltipContent>
                 <TooltipTrigger asChild>
-                    <Button onClick={copyClicked} variant="ghost">
+                    <Button
+                        onClick={copyClicked}
+                        variant="ghost"
+                        onPointerDown={(e) => e.preventDefault()}>
                         <Copy />
                     </Button>
                 </TooltipTrigger>
@@ -113,7 +116,10 @@ function TopBarAddress() {
                     <p>Mark all as read</p>
                 </TooltipContent>
                 <TooltipTrigger asChild>
-                    <Button variant="ghost" onClick={onMarkAllAsRead} disabled={total === 0}>
+                    <Button variant="ghost"
+                        onClick={onMarkAllAsRead}
+                        disabled={total === 0}
+                        onPointerDown={(e) => e.preventDefault()}>
                         <CheckCheck />
                     </Button>
                 </TooltipTrigger>
