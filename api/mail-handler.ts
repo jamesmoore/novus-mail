@@ -1,5 +1,5 @@
 import { simpleParser, AddressObject } from 'mailparser';
-import EventEmitter from 'node:events';
+import EventEmitter from 'events';
 import { SMTPServerDataStream, SMTPServerSession } from 'smtp-server';
 import { ulid } from 'ulid';
 import { DatabaseFacade } from './database-facade.js';
