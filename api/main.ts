@@ -8,6 +8,7 @@ import WebSocketNotifier from './ws/web-socket-notifier.js';
 import EventEmitter from 'events';
 import postgresInit from './postgres-database-factory.js';
 import { env } from './env/env.js';
+import { MailHandler } from './mail-handler.js';
 
 let databaseFacade;
 try {
@@ -22,8 +23,8 @@ try {
 const domainName = domain.getDomainName();
 
 const notificationEventEmitter = new EventEmitter();
-
-const smtpSrv = new SMTPServer(databaseFacade, 25, notificationEventEmitter);
+const mailHandler = new MailHandler(databaseFacade, notificationEventEmitter);
+const smtpSrv = new SMTPServer(mailHandler, 25);
 smtpSrv.start();
 const httpServer = new HttpServer(databaseFacade, domainName, 80);
 const server = httpServer.start();
