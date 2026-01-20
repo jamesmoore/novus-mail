@@ -2,8 +2,8 @@ import { simpleParser, AddressObject } from 'mailparser';
 import EventEmitter from 'events';
 import { SMTPServerDataStream, SMTPServerSession } from 'smtp-server';
 import { ulid } from 'ulid';
-import { DatabaseFacade } from './database-facade.js';
-import { Mail } from './models/mail.js';
+import { DatabaseFacade } from '../db/database-facade.js';
+import { Mail } from '../models/mail.js';
 
 
 export class MailHandler {

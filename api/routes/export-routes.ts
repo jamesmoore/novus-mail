@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { noCacheMiddleware } from './no-cache-middleware.js';
-import { DatabaseFacade } from '../database-facade.js';
+import { DatabaseFacade } from '../db/database-facade.js';
 import multer from "multer";
 import { Address } from '../models/address.js';
 import { Mail } from '../models/mail.js';

@@ -1,8 +1,8 @@
 import { Database } from "better-sqlite3";
-import { Mail } from "./models/mail.js";
-import { Address } from "./models/address.js";
+import { Mail } from "../models/mail.js";
+import { Address } from "../models/address.js";
 import { DatabaseFacade } from "./database-facade.js";
-import { UnreadCount } from "./models/unread-count.js";
+import { UnreadCount } from "../models/unread-count.js";
 import { ulid } from "ulid";
 
 type SqliteMailRow = {

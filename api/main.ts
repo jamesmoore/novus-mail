@@ -1,14 +1,14 @@
 "use strict";
 import 'dotenv/config'; // imported directly to load .env file first
-import { SMTPServer } from './smtp-server.js'
+import { SMTPServer } from './smtp/smtp-server.js'
 import { HttpServer } from './http-server.js'
 import domain from './domain.js'
-import dbinit from './sqlite-database-factory.js'
+import dbinit from './db/sqlite-database-factory.js'
 import WebSocketNotifier from './ws/web-socket-notifier.js';
 import EventEmitter from 'events';
-import postgresInit from './postgres-database-factory.js';
+import postgresInit from './db/postgres-database-factory.js';
 import { env } from './env/env.js';
-import { MailHandler } from './mail-handler.js';
+import { MailHandler } from './smtp/mail-handler.js';
 
 let databaseFacade;
 try {
