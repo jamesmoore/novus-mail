@@ -15,7 +15,7 @@ export class MailHandler {
 		this.databaseFacade = databaseFacade;
 	}
 
-	public async newFunction(stream: SMTPServerDataStream, _session: SMTPServerSession): Promise<boolean> {
+	public async handleIncomingMail(stream: SMTPServerDataStream, _session: SMTPServerSession): Promise<boolean> {
 		const mail = await simpleParser(stream);
 
 		const senderAddress = mail.from?.value?.at(0);
