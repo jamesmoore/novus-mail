@@ -18,7 +18,7 @@ export class SMTPServer {
 
 			async onData(stream, _session, callback) {
 				try {
-					await mailHandler.newFunction(stream, _session);
+					await mailHandler.handleIncomingMail(stream, _session);
 				} catch (err) {
 					console.log("Processing email error");
 					console.log(err);

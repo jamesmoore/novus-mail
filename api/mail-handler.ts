@@ -15,7 +15,7 @@ export class MailHandler {
 		this.databaseFacade = databaseFacade;
 	}
 
-	public async handleIncomingMail(stream: SMTPServerDataStream, _session: SMTPServerSession): Promise<boolean> {
+	public async handleIncomingMail(stream: SMTPServerDataStream, session: SMTPServerSession): Promise<void> {
 		const mail = await simpleParser(stream);
 
 		const senderAddress = mail.from?.value?.at(0);
@@ -26,46 +26,41 @@ export class MailHandler {
 		const subject = mail.subject ?? 'No Subject';
 		const content = mail.html ? mail.html : mail.textAsHtml;
 
-		try {
-
-			const mailToAddresses = (mail.to as AddressObject)?.value?.filter(p => p.address).map(p => p.address!) ?? [];
-			const smtpRcptAddresses = _session.envelope.rcptTo.map(p => p.address);
-
-			for (const recipient of mailToAddresses.concat(smtpRcptAddresses).map(p => p.toLowerCase())) {
-
-				const recipientName = recipient.substring(0, recipient.lastIndexOf("@"));
-				const res = await this.databaseFacade.getAddress(recipientName);
-
-				if (res) {
-					const id = ulid();
-					const dateTime = mail.date?.getTime() ?? 0;
-
-					const newMail: Mail = {
-						deleted: false,
-						id: id,
-						read: false,
-						received: new Date(dateTime),
-						recipient: recipientName,
-						sender: sender,
-						subject: subject,
-						sendername: senderName,
-						content: content ?? ''
-					};
-
-					await this.databaseFacade.addMail(newMail);
-					this.notifier.emit('received', recipientName);
-					break;
-				}
-				else {
-					console.log("No address matched for: " + recipient);
-				}
-			}
-
-		} catch (err) {
-			console.log("Inbound email error");
-			console.log(err);
+		if (session.secure === false) {
+			console.warn(`WARN: Insecure session from ${senderName}/${sender}`)
 		}
 
-		return true;
+		const mailToAddresses = (mail.to as AddressObject)?.value?.filter(p => p.address).map(p => p.address!) ?? [];
+		const smtpRcptAddresses = session.envelope.rcptTo.map(p => p.address);
+
+		for (const recipient of mailToAddresses.concat(smtpRcptAddresses).map(p => p.toLowerCase())) {
+
+			const recipientName = recipient.substring(0, recipient.lastIndexOf("@"));
+			const res = await this.databaseFacade.getAddress(recipientName);
+
+			if (res) {
+				const id = ulid();
+				const dateTime = mail.date?.getTime() ?? 0;
+
+				const newMail: Mail = {
+					deleted: false,
+					id: id,
+					read: false,
+					received: new Date(dateTime),
+					recipient: recipientName,
+					sender: sender,
+					subject: subject,
+					sendername: senderName,
+					content: content ?? ''
+				};
+
+				await this.databaseFacade.addMail(newMail);
+				this.notifier.emit('received', recipientName);
+				break;
+			}
+			else {
+				console.log("No address matched for: " + recipient);
+			}
+		}
 	}
 }
