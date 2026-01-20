@@ -30,7 +30,7 @@ export class SMTPServer {
 			onConnect(_session, callback) {
 				return callback();
 			},
-		}
+		};
 		
 		try {
 			//automatically detect public / private key
