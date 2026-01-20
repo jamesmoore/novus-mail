@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { noCacheMiddleware } from './no-cache-middleware.js';
-import { DatabaseFacade } from '../database-facade.js';
+import { DatabaseFacade } from '../db/database-facade.js';
 
 export function createRouter(databaseFacade: DatabaseFacade) {
 

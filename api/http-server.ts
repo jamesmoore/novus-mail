@@ -10,7 +10,7 @@ import { env } from './env/env.js';
 import { passportConfig } from './auth/passport-config.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { DatabaseFacade } from './database-facade.js';
+import { DatabaseFacade } from './db/database-facade.js';
 import { errorCatchMiddleware } from './routes/error-catch-middleware.js';
 
 const __filename = fileURLToPath(import.meta.url);

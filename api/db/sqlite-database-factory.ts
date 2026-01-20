@@ -1,8 +1,8 @@
 import Database from 'better-sqlite3';
 import type { Database as BetterSqlite3Database } from 'better-sqlite3';
 import fs from 'fs';
-import { Address } from './models/address.js';
-import { Mail } from './models/mail.js';
+import { Address } from '../models/address.js';
+import { Mail } from '../models/mail.js';
 import { ulid } from 'ulid';
 import { SqliteDatabaseFacade } from './sqlite-database-facade.js';
 const v1DatabaseFileName = './data/data.db';

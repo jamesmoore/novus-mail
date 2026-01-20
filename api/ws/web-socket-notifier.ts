@@ -5,7 +5,7 @@ import { WebSocketMessage } from "./web-socket-message.js";
 import { sessionParser } from "../routes/auth-routes.js";
 import { authMode } from "../auth/passport-config.js";
 import { Request, Response } from "express";
-import { DatabaseFacade } from "../database-facade.js";
+import { DatabaseFacade } from "../db/database-facade.js";
 
 import { IncomingMessage } from "http";
 import { Session } from "express-session";
