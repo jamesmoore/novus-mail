@@ -33,19 +33,18 @@ export class MailHandler {
 		const allAddresses = mailToAddresses.concat(smtpRcptAddresses);
 
 		if (allAddresses.length === 0) {
-			console.log(`No recipients found for mail from ${sender}`);
+			console.log(`No recipients present in mail from ${sender}`);
 			return;
 		}
 		
 		const combinedRecipientAddresses = [...new Set(allAddresses.map(a => normalizeEmailUsername(a)))];
-		
 
 		let found = false;
 		for (const recipient of combinedRecipientAddresses) {
 			const matchedRecipient = await this.databaseFacade.getAddress(recipient);
 			if (matchedRecipient) {
 				found = true;
-				const newMail: Mail = createMail(mail, matchedRecipient, sender, senderName);
+				const newMail = createMail(mail, matchedRecipient, sender, senderName);
 				await this.databaseFacade.addMail(newMail);
 				this.notifier.emit('received', matchedRecipient.addr);
 			}
