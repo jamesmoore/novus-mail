@@ -31,23 +31,20 @@ export class MailHandler {
 		const mailToAddresses = (mail.to as AddressObject)?.value?.filter(p => p.address).map(p => p.address!) ?? [];
 		const smtpRcptAddresses = session.envelope.rcptTo.map(p => p.address);
 		const allAddresses = mailToAddresses.concat(smtpRcptAddresses);
-		const combinedRecipientAddresses = [...new Set(allAddresses.map(a => a.toLowerCase()))];
+		const combinedRecipientAddresses = [...new Set(allAddresses.map(a => normalizeEmailUsername(a)))];
 		
-		const mapped = combinedRecipientAddresses.map(p => { 
-			return {
-				addr: normalizeEmailUsername(p)
-			};
-		});
-		
-		
+		if (combinedRecipientAddresses.length === 0) {
+			console.log(`No recipients found for mail from ${sender}`);
+		}
+
 		let found = false;
-		for (const recipient of mapped) {
-			const matchedRecipient = await this.databaseFacade.getAddress(recipient.addr);
+		for (const recipient of combinedRecipientAddresses) {
+			const matchedRecipient = await this.databaseFacade.getAddress(recipient);
 			if (matchedRecipient) {
 				found = true;
 				const newMail: Mail = createMail(mail, matchedRecipient, sender, senderName);
 				await this.databaseFacade.addMail(newMail);
-				this.notifier.emit('received', matchedRecipient.addr);
+				this.notifier.emit('received', matchedRecipient);
 			}
 		}
 
