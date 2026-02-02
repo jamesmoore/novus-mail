@@ -60,6 +60,9 @@ Run `npm i` and then `npm run dev` in the /api folder. This will start node for 
 Run `npm i` and then `npm run dev` in the /front-react folder. This will launch the front-end on port 5173. 
 
 ## API - Front end connectivity
+`vite.config.ts` contains proxy configuration. Browsing to http://localhost:5173/ will forward any API reqiests to the API endpoint
+
+### Old method (no longer needed with Vite proxy)
 The API can be set in the front-end by adding a file named `/front-react/.env.development.local`
 ```env
 VITE_API_BASE_URL=http://localhost:80
