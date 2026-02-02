@@ -35,10 +35,10 @@ export class MailHandler {
 		
 		const mapped = combinedRecipientAddresses.map(p => { 
 			return {
-				original: p,
 				addr: normalizeEmailUsername(p)
 			};
 		});
+		
 		
 		let found = false;
 		for (const recipient of mapped) {
