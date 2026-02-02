@@ -31,11 +31,14 @@ export class MailHandler {
 		const mailToAddresses = (mail.to as AddressObject)?.value?.filter(p => p.address).map(p => p.address!) ?? [];
 		const smtpRcptAddresses = session.envelope.rcptTo.map(p => p.address);
 		const allAddresses = mailToAddresses.concat(smtpRcptAddresses);
+
+		if (allAddresses.length === 0) {
+			console.log(`No recipients found for mail from ${sender}`);
+			return;
+		}
+		
 		const combinedRecipientAddresses = [...new Set(allAddresses.map(a => normalizeEmailUsername(a)))];
 		
-		if (combinedRecipientAddresses.length === 0) {
-			console.log(`No recipients found for mail from ${sender}`);
-		}
 
 		let found = false;
 		for (const recipient of combinedRecipientAddresses) {
@@ -44,17 +47,17 @@ export class MailHandler {
 				found = true;
 				const newMail: Mail = createMail(mail, matchedRecipient, sender, senderName);
 				await this.databaseFacade.addMail(newMail);
-				this.notifier.emit('received', matchedRecipient);
+				this.notifier.emit('received', matchedRecipient.addr);
 			}
 		}
 
 		if (!found) {
-			console.log(`No matching recipient found for mail from ${sender} to ${combinedRecipientAddresses.join(", ")}`);
+			console.log(`No matching recipient found for mail from ${sender} to ${allAddresses.join(", ")}`);
 		}
 	}
 }
 
-function createMail(mail: ParsedMail, res: Address, sender: string, senderName: string | undefined) {
+function createMail(mail: ParsedMail, recipientAddress: Address, sender: string, senderName: string | undefined) {
 	const id = ulid();
 	const dateTime = mail.date?.getTime() ?? 0;
 	const content = mail.html ? mail.html : mail.textAsHtml;
@@ -65,7 +68,7 @@ function createMail(mail: ParsedMail, res: Address, sender: string, senderName: 
 		id: id,
 		read: false,
 		received: new Date(dateTime),
-		recipient: res.addr,
+		recipient: recipientAddress.addr,
 		sender: sender,
 		subject: subject,
 		sendername: senderName,
