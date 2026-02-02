@@ -1,5 +1,6 @@
 /* Custom stylings */
 @layer base {
+
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
@@ -7,63 +8,63 @@
 }
 
 .delayed-fade-in {
-    animation: delayedFadeIn 5s;
+  animation: delayedFadeIn 5s;
 }
 
 @keyframes delayedFadeIn {
-    0% {
-        opacity: 0;
-    }
+  0% {
+    opacity: 0;
+  }
 
-    20% {
-        opacity: 0;
-    }
+  20% {
+    opacity: 0;
+  }
 
-    100% {
-        opacity: 1;
-    }
+  100% {
+    opacity: 1;
+  }
 }
 
 .divider {
-    flex-shrink: 0;
-    display: flex;
-    width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  width: 100%;
 }
 
 .divider::before,
 .divider::after {
-    width: 100%;
-    border-top: thin solid rgba(255, 255, 255, 0.12);
-    content: "";
-    align-self: center;
+  width: 100%;
+  border-top: thin solid rgba(255, 255, 255, 0.12);
+  content: "";
+  align-self: center;
 }
 
 .divider-wrapper {
-    padding-left: calc(8px * 1.2);
-    padding-right: calc(8px * 1.2);
-    white-space: nowrap;
+  padding-left: calc(8px * 1.2);
+  padding-right: calc(8px * 1.2);
+  white-space: nowrap;
 }
 
 :root {
-    --highlight-color: oklch(0.4 0.0896 243.62);
+  --highlight-color: oklch(0.4 0.0896 243.62);
 }
 
 .dark {
-    --highlight-color: oklch(0.8163 0.0896 243.62);
+  --highlight-color: oklch(0.8163 0.0896 243.62);
 }
 
 .highlight-color {
-    color: var(--highlight-color);
+  color: var(--highlight-color);
 }
 
 .bg-highlight-color {
-    background-color: var(--highlight-color);
+  background-color: var(--highlight-color);
 }
 
 /* Sidebar-specific scrollbar styling */
 [data-sidebar="content"] {
   /* Firefox */
-  scrollbar-color: rgba(0,0,0,0.35) transparent;
+  scrollbar-color: rgba(0, 0, 0, 0.35) transparent;
 }
 
 [data-sidebar="content"]::-webkit-scrollbar-track {
@@ -71,7 +72,7 @@
 }
 
 [data-sidebar="content"]::-webkit-scrollbar-thumb {
-  background-color: rgba(0,0,0,0.35);
+  background-color: rgba(0, 0, 0, 0.35);
   border-radius: 9999px;
   border: 2px solid transparent;
   background-clip: padding-box;
@@ -79,9 +80,9 @@
 
 /* Dark mode overrides */
 .dark [data-sidebar="content"] {
-  scrollbar-color: rgba(255,255,255,0.15) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
 
 .dark [data-sidebar="content"]::-webkit-scrollbar-thumb {
-  background-color: rgba(255,255,255,0.15);
+  background-color: rgba(255, 255, 255, 0.15);
 }
