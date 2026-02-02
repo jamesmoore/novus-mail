@@ -78,6 +78,7 @@ function createMail(mail: ParsedMail, res: Address, sender: string, senderName: 
 }
 
 function normalizeEmailUsername(p: string): string {
-	return p.substring(0, p.lastIndexOf("@")).toLowerCase();
+	const atIndex = p.lastIndexOf("@");
+	return atIndex !== -1 ? p.substring(0, atIndex).toLowerCase() : p.toLowerCase();
 }
 
