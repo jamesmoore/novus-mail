@@ -1,9 +1,10 @@
-import { simpleParser, AddressObject } from 'mailparser';
+import { simpleParser, AddressObject, ParsedMail } from 'mailparser';
 import EventEmitter from 'events';
-import { SMTPServerDataStream, SMTPServerSession } from 'smtp-server';
+import { SMTPServerAddress, SMTPServerDataStream, SMTPServerSession } from 'smtp-server';
 import { ulid } from 'ulid';
 import { DatabaseFacade } from '../db/database-facade.js';
 import { Mail } from '../models/mail.js';
+import { Address } from '../models/address.js';
 
 
 export class MailHandler {
@@ -19,48 +20,69 @@ export class MailHandler {
 		const mail = await simpleParser(stream);
 
 		const senderAddress = mail.from?.value?.at(0);
-
 		const senderName = senderAddress?.name;
 
 		const sender = senderAddress?.address ?? senderAddress?.name ?? 'unknown sender';
-		const subject = mail.subject ?? 'No Subject';
-		const content = mail.html ? mail.html : mail.textAsHtml;
-
+		
 		if (session.secure === false) {
 			console.warn(`WARN: Insecure session from ${senderName}/${sender}`)
 		}
+		
+		const allRecipientAddresses = getUniqueRecipientAddresses(mail.to, session.envelope.rcptTo);
 
-		const mailToAddresses = (mail.to as AddressObject)?.value?.filter(p => p.address).map(p => p.address!) ?? [];
-		const smtpRcptAddresses = session.envelope.rcptTo.map(p => p.address);
+		if (allRecipientAddresses.length === 0) {
+			console.log(`No recipients present in mail from ${sender}`);
+			return;
+		}
+		
+		const combinedRecipientAddresses = [...new Set(allRecipientAddresses.map(a => normalizeEmailUsername(a)))];
 
-		for (const recipient of mailToAddresses.concat(smtpRcptAddresses).map(p => p.toLowerCase())) {
-
-			const recipientName = recipient.substring(0, recipient.lastIndexOf("@"));
-			const res = await this.databaseFacade.getAddress(recipientName);
-
-			if (res) {
-				const id = ulid();
-				const dateTime = mail.date?.getTime() ?? 0;
-
-				const newMail: Mail = {
-					deleted: false,
-					id: id,
-					read: false,
-					received: new Date(dateTime),
-					recipient: recipientName,
-					sender: sender,
-					subject: subject,
-					sendername: senderName,
-					content: content ?? ''
-				};
-
+		let found = false;
+		for (const recipient of combinedRecipientAddresses) {
+			const matchedRecipient = await this.databaseFacade.getAddress(recipient);
+			if (matchedRecipient) {
+				found = true;
+				const newMail = createMail(mail, matchedRecipient, sender, senderName);
 				await this.databaseFacade.addMail(newMail);
-				this.notifier.emit('received', recipientName);
-				break;
+				this.notifier.emit('received', matchedRecipient.addr);
 			}
-			else {
-				console.log("No address matched for: " + recipient);
-			}
+		}
+
+		if (!found) {
+			console.log(`No matching recipient found for mail from ${sender} to ${allRecipientAddresses.join(", ")}`);
 		}
 	}
 }
+
+function getUniqueRecipientAddresses(to: AddressObject | AddressObject[] | undefined, rcptTo : SMTPServerAddress[]) {
+	const mailToAddresses = (Array.isArray(to) ? to : [to])
+		.flatMap(addressObj => addressObj?.value?.filter(p => p.address).map(p => p.address!) ?? []);
+	const smtpRcptAddresses = rcptTo.map(p => p.address);
+	return [...new Set(mailToAddresses.concat(smtpRcptAddresses))];
+}
+
+function createMail(mail: ParsedMail, recipientAddress: Address, sender: string, senderName: string | undefined) {
+	const id = ulid();
+	const dateTime = mail.date?.getTime() ?? 0;
+	const content = mail.html ? mail.html : mail.textAsHtml;
+	const subject = mail.subject ?? 'No Subject';
+
+	const newMail: Mail = {
+		deleted: false,
+		id: id,
+		read: false,
+		received: new Date(dateTime),
+		recipient: recipientAddress.addr,
+		sender: sender,
+		subject: subject,
+		sendername: senderName,
+		content: content ?? ''
+	};
+	return newMail;
+}
+
+function normalizeEmailUsername(email: string): string {
+	const atIndex = email.lastIndexOf("@");
+	return atIndex !== -1 ? email.substring(0, atIndex).toLowerCase() : email.toLowerCase();
+}
+
