@@ -44,14 +44,14 @@ export function createRouter(databaseFacade: DatabaseFacade) {
 
     router.get('/mail/:id', async (req, res) => {
         const id = req.params.id;
-        await checkMailOwnership(req.user?.sub, id, res, async (mail) => {
+        await checkMailOwnership(req.user?.sub, id, res, async (mail, address) => {
             res.json(mail);
         });
     });
 
     router.delete('/mail/:id', async (req, res) => {
         const id = req.params.id;
-        await checkMailOwnership(req.user?.sub, id, res, async (mail) => {
+        await checkMailOwnership(req.user?.sub, id, res, async (mail, address) => {
             const changes = mail.deleted ?
                 await databaseFacade.deleteMail(id) :
                 await databaseFacade.softDeleteMail(id);
@@ -81,7 +81,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
 
     router.post('/readMail', async (req, res) => {
         const json = req.body;
-        await checkMailOwnership(req.user?.sub, json.id, res, async (mail) => {
+        await checkMailOwnership(req.user?.sub, json.id, res, async (mail, address) => {
             if (mail.read === false) {
                 const mailId = json.id;
                 const changes = await databaseFacade.markMailAsRead(mailId);
@@ -131,7 +131,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
         }
     };
 
-    async function checkMailOwnership(user: string | undefined, id: string, res: Response, handle: (mail: Mail) => Promise<void>) {
+    async function checkMailOwnership(user: string | undefined, id: string, res: Response, handle: (mail: Mail, address: string) => Promise<void>) {
         const mail = await databaseFacade.getMail(id);
         if (!mail) {
             res.sendStatus(404);
@@ -139,7 +139,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
         }
 
         await checkAddressOwnership(user, mail.recipient, res, async () => {
-            await handle(mail);
+            await handle(mail, mail.recipient);
         });
     };
 
