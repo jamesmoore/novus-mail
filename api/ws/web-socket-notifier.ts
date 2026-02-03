@@ -80,15 +80,15 @@ class WebSocketNotifier {
         };
 
         const broadcastGlobalEvent = (eventType: 'binEmptied' | 'binRestored') => {
-            for (const ws of this.connectedSockets) {
-                if (authMode === 'oidc') {
-                    if (ws.user?.sub) {
-                        this.sendWebSocketMessage(ws, { type: eventType });
-                    }
-                }
-                else {
-                    this.sendWebSocketMessage(ws, { type: eventType });
-                }
+            let socketsToNotify: WebSocketWithPassportUser[];
+            if (authMode === 'oidc') {
+                socketsToNotify = this.connectedSockets.filter(ws => ws.user?.sub);
+            } else {
+                socketsToNotify = this.connectedSockets;
+            }
+
+            for (const ws of socketsToNotify) {
+                this.sendWebSocketMessage(ws, { type: eventType });
             }
         };
 
