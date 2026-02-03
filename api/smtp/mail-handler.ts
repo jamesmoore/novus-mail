@@ -1,5 +1,5 @@
 import { simpleParser, AddressObject, ParsedMail } from 'mailparser';
-import EventEmitter from 'events';
+import { NotificationEmitter } from '../events/notification-emitter.js';
 import { SMTPServerAddress, SMTPServerDataStream, SMTPServerSession } from 'smtp-server';
 import { ulid } from 'ulid';
 import { DatabaseFacade } from '../db/database-facade.js';
@@ -8,10 +8,10 @@ import { Address } from '../models/address.js';
 
 
 export class MailHandler {
-	private notifier: EventEmitter;
+	private notifier: NotificationEmitter;
 	private databaseFacade: DatabaseFacade;
 
-	constructor(databaseFacade: DatabaseFacade, notifier: EventEmitter) {
+	constructor(databaseFacade: DatabaseFacade, notifier: NotificationEmitter) {
 		this.notifier = notifier;
 		this.databaseFacade = databaseFacade;
 	}

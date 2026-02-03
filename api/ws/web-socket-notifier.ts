@@ -1,5 +1,5 @@
 import { Server } from "http";
-import { EventEmitter } from "events";
+import { NotificationEmitter } from "../events/notification-emitter.js";
 import WebSocket, { WebSocketServer } from 'ws';
 import { WebSocketMessage } from "./web-socket-message.js";
 import { sessionParser } from "../routes/auth-routes.js";
@@ -34,9 +34,9 @@ interface WebSocketWithPassportUser extends WebSocket {
 class WebSocketNotifier {
     private wss: WebSocketServer;
     private connectedSockets: Array<WebSocketWithPassportUser>;
-    private notificationEmitter: EventEmitter;
+    private notificationEmitter: NotificationEmitter;
 
-    constructor(server: Server, databaseFacade: DatabaseFacade, notificationEmitter: EventEmitter) {
+    constructor(server: Server, databaseFacade: DatabaseFacade, notificationEmitter: NotificationEmitter) {
         this.wss = new WebSocketServer({ noServer: true });
         this.notificationEmitter = notificationEmitter;
         this.connectedSockets = [];

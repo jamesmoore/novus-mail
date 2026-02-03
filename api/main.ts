@@ -5,7 +5,7 @@ import { HttpServer } from './http-server.js'
 import domain from './domain.js'
 import dbinit from './db/sqlite-database-factory.js'
 import WebSocketNotifier from './ws/web-socket-notifier.js';
-import EventEmitter from 'events';
+import { NotificationEmitter } from './events/notification-emitter.js';
 import postgresInit from './db/postgres-database-factory.js';
 import { env } from './env/env.js';
 import { MailHandler } from './smtp/mail-handler.js';
@@ -22,7 +22,7 @@ try {
 
 const domainName = domain.getDomainName();
 
-const notificationEventEmitter = new EventEmitter();
+const notificationEventEmitter = new NotificationEmitter();
 const mailHandler = new MailHandler(databaseFacade, notificationEventEmitter);
 const smtpSrv = new SMTPServer(mailHandler, 25);
 smtpSrv.start();
