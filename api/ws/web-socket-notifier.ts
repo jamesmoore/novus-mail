@@ -79,9 +79,9 @@ class WebSocketNotifier {
             }
         };
 
-        const broadcastGlobalEvent = (eventType: 'binEmptied' | 'binRestored') => {
+        const broadcastGlobalEvent = (eventType: 'binEmptied' | 'binRestored', owner: string | undefined) => {
             const socketsToNotify = authMode === 'oidc' ? 
-                this.connectedSockets.filter(ws => ws.user?.sub) : 
+                this.connectedSockets.filter(ws => ws.user?.sub === owner) : 
                 this.connectedSockets;
 
             for (const ws of socketsToNotify) {
@@ -89,28 +89,28 @@ class WebSocketNotifier {
             }
         };
 
-        this.notificationEmitter.on('received', (address: string) => {
-            broadcastAddressEvent('received', address);
+        this.notificationEmitter.on('received', async (address: string) => {
+            await broadcastAddressEvent('received', address);
         });
 
-        this.notificationEmitter.on('read', (address: string) => {
-            broadcastAddressEvent('read', address);
+        this.notificationEmitter.on('read', async (address: string) => {
+            await broadcastAddressEvent('read', address);
         });
 
-        this.notificationEmitter.on('softDeleted', (address: string) => {
-            broadcastAddressEvent('softDeleted', address);
+        this.notificationEmitter.on('softDeleted', async (address: string) => {
+            await broadcastAddressEvent('softDeleted', address);
         });
 
-        this.notificationEmitter.on('hardDeleted', (address: string) => {
-            broadcastAddressEvent('hardDeleted', address);
+        this.notificationEmitter.on('hardDeleted', async (address: string) => {
+            await broadcastAddressEvent('hardDeleted', address);
         });
 
-        this.notificationEmitter.on('binEmptied', () => {
-            broadcastGlobalEvent('binEmptied');
+        this.notificationEmitter.on('binEmptied', (owner: string | undefined) => {
+            broadcastGlobalEvent('binEmptied', owner);
         });
 
-        this.notificationEmitter.on('binRestored', () => {
-            broadcastGlobalEvent('binRestored');
+        this.notificationEmitter.on('binRestored', (owner: string | undefined) => {
+            broadcastGlobalEvent('binRestored', owner);
         });
     }
 

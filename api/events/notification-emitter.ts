@@ -5,8 +5,8 @@ export interface NotificationEvents {
     read: (address: string) => void;
     softDeleted: (address: string) => void;
     hardDeleted: (address: string) => void;
-    binEmptied: () => void;
-    binRestored: () => void;
+    binEmptied: (owner: string | undefined) => void;
+    binRestored: (owner: string | undefined) => void;
 }
 
 export class NotificationEmitter extends EventEmitter {

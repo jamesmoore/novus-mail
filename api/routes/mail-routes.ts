@@ -81,7 +81,7 @@ export function createRouter(databaseFacade: DatabaseFacade, notificationEmitter
         const changes = await databaseFacade.emptyDeletedMails(owner);
         res.status(200).send(`Deleted ${changes} mails`);
         if (changes > 0) {
-            notificationEmitter?.emit('binEmptied');
+            notificationEmitter?.emit('binEmptied', owner);
         }
     })
 
@@ -90,7 +90,7 @@ export function createRouter(databaseFacade: DatabaseFacade, notificationEmitter
         const changes = await databaseFacade.restoreDeletedMails(owner);
         res.status(200).send(`Restored ${changes} mails`);
         if (changes > 0) {
-            notificationEmitter?.emit('binRestored');
+            notificationEmitter?.emit('binRestored', owner);
         }
     })
 
