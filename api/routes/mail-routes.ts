@@ -45,8 +45,7 @@ export function createRouter(databaseFacade: DatabaseFacade, notificationEmitter
 
     router.get('/mail/:id', async (req, res) => {
         const id = req.params.id;
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        await checkMailOwnership(req.user?.sub, id, res, async (mail, _) => {
+        await checkMailOwnership(req.user?.sub, id, res, async (mail, _address) => {
             res.json(mail);
         });
     });
