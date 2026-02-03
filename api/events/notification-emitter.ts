@@ -2,9 +2,11 @@ import { EventEmitter } from 'events';
 
 export interface NotificationEvents {
     received: (address: string) => void;
-    // Future events can be added here:
-    // read: (mailId: string, address: string) => void;
-    // deleted: (mailId: string, address: string) => void;
+    read: (address: string) => void;
+    softDeleted: (address: string) => void;
+    hardDeleted: (address: string) => void;
+    binEmptied: () => void;
+    binRestored: () => void;
 }
 
 export class NotificationEmitter extends EventEmitter {

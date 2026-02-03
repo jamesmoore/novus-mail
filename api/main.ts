@@ -26,6 +26,6 @@ const notificationEventEmitter = new NotificationEmitter();
 const mailHandler = new MailHandler(databaseFacade, notificationEventEmitter);
 const smtpSrv = new SMTPServer(mailHandler, 25);
 smtpSrv.start();
-const httpServer = new HttpServer(databaseFacade, domainName, 80);
+const httpServer = new HttpServer(databaseFacade, domainName, 80, notificationEventEmitter);
 const server = httpServer.start();
 new WebSocketNotifier(server, databaseFacade, notificationEventEmitter);

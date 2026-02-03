@@ -11,6 +11,7 @@ import { passportConfig } from './auth/passport-config.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { DatabaseFacade } from './db/database-facade.js';
+import { NotificationEmitter } from './events/notification-emitter.js';
 import { errorCatchMiddleware } from './routes/error-catch-middleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -23,11 +24,13 @@ export class HttpServer {
 	private db: DatabaseFacade;
 	private port: number;
 	private domainName: string;
+	private notificationEmitter: NotificationEmitter;
 
-	constructor(db: DatabaseFacade, domainName: string, port: number) {
+	constructor(db: DatabaseFacade, domainName: string, port: number, notificationEmitter: NotificationEmitter) {
 		this.db = db;
 		this.port = port;
 		this.domainName = domainName;
+		this.notificationEmitter = notificationEmitter;
 	}
 
 	public start(): Server {
@@ -57,7 +60,7 @@ export class HttpServer {
 
 		const authMiddleware = passportConfig.middleware;
 		app.use('/api', authMiddleware, createAddressRouter(this.db, this.domainName));
-		app.use('/api', authMiddleware, createMailRouter(this.db));
+		app.use('/api', authMiddleware, createMailRouter(this.db, this.notificationEmitter));
 		app.use('/api', authMiddleware, createExportRouter(this.db));
 
 		app.use(errorCatchMiddleware);

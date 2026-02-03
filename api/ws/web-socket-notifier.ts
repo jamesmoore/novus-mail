@@ -63,12 +63,11 @@ class WebSocketNotifier {
 
         this.initialize();
 
-        this.notificationEmitter.on('received', async (address: string) => {
+        const broadcastAddressEvent = async (eventType: 'received' | 'read' | 'softDeleted' | 'hardDeleted', address: string) => {
             let socketsToNotify: WebSocketWithPassportUser[] = [];
             if (authMode === 'oidc') {
                 const addressRecord = await databaseFacade.getAddress(address);
                 if (addressRecord) {
-                    // send to sockets that have a user/sub AND if the address has no owner, OR if the address matches
                     socketsToNotify = this.connectedSockets.filter(p => p.user?.sub).filter(p => !addressRecord.owner || addressRecord.owner === p.user!.sub);
                 }
             }
@@ -76,8 +75,45 @@ class WebSocketNotifier {
                 socketsToNotify = this.connectedSockets;
             }
             for (const ws of socketsToNotify) {
-                this.sendWebSocketMessage(ws, { type: 'received', value: address });
+                this.sendWebSocketMessage(ws, { type: eventType, value: address });
             }
+        };
+
+        const broadcastGlobalEvent = (eventType: 'binEmptied' | 'binRestored') => {
+            for (const ws of this.connectedSockets) {
+                if (authMode === 'oidc') {
+                    if (ws.user?.sub) {
+                        this.sendWebSocketMessage(ws, { type: eventType });
+                    }
+                }
+                else {
+                    this.sendWebSocketMessage(ws, { type: eventType });
+                }
+            }
+        };
+
+        this.notificationEmitter.on('received', (address: string) => {
+            broadcastAddressEvent('received', address);
+        });
+
+        this.notificationEmitter.on('read', (address: string) => {
+            broadcastAddressEvent('read', address);
+        });
+
+        this.notificationEmitter.on('softDeleted', (address: string) => {
+            broadcastAddressEvent('softDeleted', address);
+        });
+
+        this.notificationEmitter.on('hardDeleted', (address: string) => {
+            broadcastAddressEvent('hardDeleted', address);
+        });
+
+        this.notificationEmitter.on('binEmptied', () => {
+            broadcastGlobalEvent('binEmptied');
+        });
+
+        this.notificationEmitter.on('binRestored', () => {
+            broadcastGlobalEvent('binRestored');
         });
     }
 
