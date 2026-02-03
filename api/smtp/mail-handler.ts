@@ -55,12 +55,10 @@ export class MailHandler {
 }
 
 function getUniqueRecipientAddresses(to: AddressObject | AddressObject[] | undefined, rcptTo : SMTPServerAddress[]) {
-	const toArray = Array.isArray(to) ? to : [to];
-	const mailToAddresses = toArray
+	const mailToAddresses = (Array.isArray(to) ? to : [to])
 		.flatMap(addressObj => addressObj?.value?.filter(p => p.address).map(p => p.address!) ?? []);
 	const smtpRcptAddresses = rcptTo.map(p => p.address);
-	const allRecipientAddresses = [...new Set(mailToAddresses.concat(smtpRcptAddresses))];
-	return allRecipientAddresses;
+	return [...new Set(mailToAddresses.concat(smtpRcptAddresses))];
 }
 
 function createMail(mail: ParsedMail, recipientAddress: Address, sender: string, senderName: string | undefined) {
