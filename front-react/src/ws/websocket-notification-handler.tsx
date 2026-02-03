@@ -91,7 +91,10 @@ export default function WebSocketNotificationHandler() {
                     unreadRefetch();
                     invalidateDeleted();
                     invalidateAllMails();
-                    mailItemsRefetch();
+                    // We don't know whether the current mailbox had mails restored, so refetch if we have an address segment
+                    if (urlAddressSegment) {
+                        mailItemsRefetch();
+                    }
                 }
                 break;
 
