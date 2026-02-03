@@ -1,6 +1,6 @@
 import { simpleParser, AddressObject, ParsedMail } from 'mailparser';
 import EventEmitter from 'events';
-import { SMTPServerDataStream, SMTPServerSession } from 'smtp-server';
+import { SMTPServerAddress, SMTPServerDataStream, SMTPServerSession } from 'smtp-server';
 import { ulid } from 'ulid';
 import { DatabaseFacade } from '../db/database-facade.js';
 import { Mail } from '../models/mail.js';
@@ -28,16 +28,14 @@ export class MailHandler {
 			console.warn(`WARN: Insecure session from ${senderName}/${sender}`)
 		}
 		
-		const mailToAddresses = (mail.to as AddressObject)?.value?.filter(p => p.address).map(p => p.address!) ?? [];
-		const smtpRcptAddresses = session.envelope.rcptTo.map(p => p.address);
-		const allAddresses = mailToAddresses.concat(smtpRcptAddresses);
+		const allRecipientAddresses = getUniqueRecipientAddresses(mail.to, session.envelope.rcptTo);
 
-		if (allAddresses.length === 0) {
+		if (allRecipientAddresses.length === 0) {
 			console.log(`No recipients present in mail from ${sender}`);
 			return;
 		}
 		
-		const combinedRecipientAddresses = [...new Set(allAddresses.map(a => normalizeEmailUsername(a)))];
+		const combinedRecipientAddresses = [...new Set(allRecipientAddresses.map(a => normalizeEmailUsername(a)))];
 
 		let found = false;
 		for (const recipient of combinedRecipientAddresses) {
@@ -51,9 +49,17 @@ export class MailHandler {
 		}
 
 		if (!found) {
-			console.log(`No matching recipient found for mail from ${sender} to ${allAddresses.join(", ")}`);
+			console.log(`No matching recipient found for mail from ${sender} to ${allRecipientAddresses.join(", ")}`);
 		}
 	}
+}
+
+function getUniqueRecipientAddresses(to: AddressObject | AddressObject[] | undefined, rcptTo : SMTPServerAddress[]) {
+	// TODO: Handle case where 'to' is an array of AddressObjects
+	const mailToAddresses = (to as AddressObject)?.value?.filter(p => p.address).map(p => p.address!) ?? [];
+	const smtpRcptAddresses = rcptTo.map(p => p.address);
+	const allRecipientAddresses = [...new Set(mailToAddresses.concat(smtpRcptAddresses))];
+	return allRecipientAddresses;
 }
 
 function createMail(mail: ParsedMail, recipientAddress: Address, sender: string, senderName: string | undefined) {
