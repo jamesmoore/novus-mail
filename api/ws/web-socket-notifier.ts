@@ -68,7 +68,7 @@ class WebSocketNotifier {
             if (authMode === 'oidc') {
                 const addressRecord = await databaseFacade.getAddress(address);
                 if (addressRecord) {
-                    socketsToNotify = this.connectedSockets.filter(p => p.user?.sub).filter(p => !addressRecord.owner || addressRecord.owner === p.user!.sub);
+                    socketsToNotify = this.connectedSockets.filter(ws => ws.user?.sub).filter(ws => !addressRecord.owner || addressRecord.owner === ws.user!.sub);
                 }
             }
             else {
@@ -80,12 +80,9 @@ class WebSocketNotifier {
         };
 
         const broadcastGlobalEvent = (eventType: 'binEmptied' | 'binRestored') => {
-            let socketsToNotify: WebSocketWithPassportUser[];
-            if (authMode === 'oidc') {
-                socketsToNotify = this.connectedSockets.filter(ws => ws.user?.sub);
-            } else {
-                socketsToNotify = this.connectedSockets;
-            }
+            const socketsToNotify = authMode === 'oidc' ? 
+                this.connectedSockets.filter(ws => ws.user?.sub) : 
+                this.connectedSockets;
 
             for (const ws of socketsToNotify) {
                 this.sendWebSocketMessage(ws, { type: eventType });
