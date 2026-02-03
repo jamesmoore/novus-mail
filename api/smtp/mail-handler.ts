@@ -55,8 +55,9 @@ export class MailHandler {
 }
 
 function getUniqueRecipientAddresses(to: AddressObject | AddressObject[] | undefined, rcptTo : SMTPServerAddress[]) {
-	// TODO: Handle case where 'to' is an array of AddressObjects
-	const mailToAddresses = (to as AddressObject)?.value?.filter(p => p.address).map(p => p.address!) ?? [];
+	const toArray = Array.isArray(to) ? to : [to];
+	const mailToAddresses = toArray
+		.flatMap(addressObj => addressObj?.value?.filter(p => p.address).map(p => p.address!) ?? []);
 	const smtpRcptAddresses = rcptTo.map(p => p.address);
 	const allRecipientAddresses = [...new Set(mailToAddresses.concat(smtpRcptAddresses))];
 	return allRecipientAddresses;
