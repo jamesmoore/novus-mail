@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useWebSocketNotifier, WebSocketMessage } from "./use-websocket-notifier";
-import { useInvalidateMailItemsCache, useMailItems } from "../use-mail-items";
+import { useInvalidateAllMailItemsCache, useInvalidateDeletedMailItemsCache, useInvalidateMailItemsCache, useMailItems } from "../use-mail-items";
 import { useParams } from "react-router-dom";
 import useUnreadCounts from "../use-unread-counts";
 import { toast } from "sonner";
@@ -12,6 +12,8 @@ export default function WebSocketNotificationHandler() {
     const { refetch: mailItemsRefetch } = useMailItems(urlAddressSegment);
     const { refetch: unreadRefetch } = useUnreadCounts();
     const { invalidate: invalidateMailItems } = useInvalidateMailItemsCache();
+    const { invalidate: invalidateDeleted } = useInvalidateDeletedMailItemsCache();
+    const { invalidate: invalidateAllMails } = useInvalidateAllMailItemsCache();
     const [lastReceivedMessage, setLastReceivedMessage] = useState<WebSocketMessage | null>(null);
 
     useEffect(() => {
@@ -37,6 +39,62 @@ export default function WebSocketNotificationHandler() {
                 }
                 break;
 
+            case 'read':
+                {
+                    unreadRefetch();
+                    const address = lastReceivedMessage.value;
+                    if (urlAddressSegment === address) {
+                        mailItemsRefetch();
+                    } else {
+                        invalidateMailItems(address);
+                    }
+                }
+                break;
+
+            case 'softDeleted':
+                {
+                    // Mail moved to trash - refresh source mailbox and invalidate deleted
+                    unreadRefetch();
+                    const address = lastReceivedMessage.value;
+                    if (urlAddressSegment === address) {
+                        mailItemsRefetch();
+                    } else {
+                        invalidateMailItems(address);
+                    }
+                    invalidateDeleted();
+                }
+                break;
+
+            case 'hardDeleted':
+                {
+                    // Mail permanently deleted from trash - refresh deleted mailbox
+                    const address = lastReceivedMessage.value;
+                    if (urlAddressSegment === address) {
+                        mailItemsRefetch();
+                    } else {
+                        invalidateMailItems(address);
+                    }
+                    invalidateDeleted();
+                }
+                break;
+
+            case 'binEmptied':
+                {
+                    // All deleted mails removed - just invalidate deleted cache
+                    invalidateDeleted();
+                }
+                break;
+
+            case 'binRestored':
+                {
+                    // Deleted mails restored to inbox - invalidate both deleted and all mailboxes
+                    unreadRefetch();
+                    invalidateDeleted();
+                    invalidateAllMails();
+                    mailItemsRefetch();
+                }
+                break;
+
             case 'connected':
                 // Handle connected state if needed
                 break;
@@ -46,7 +104,7 @@ export default function WebSocketNotificationHandler() {
         }
 
         setLastReceivedMessage(null);
-    }, [lastReceivedMessage, invalidateMailItems, unreadRefetch, mailItemsRefetch, urlAddressSegment, setLastReceivedMessage]);
+    }, [lastReceivedMessage, invalidateMailItems, invalidateDeleted, invalidateAllMails, unreadRefetch, mailItemsRefetch, urlAddressSegment, setLastReceivedMessage]);
 
     return null;
 }
