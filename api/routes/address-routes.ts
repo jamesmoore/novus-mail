@@ -37,7 +37,7 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string,
             res.sendStatus(200);
         } else {
             await databaseFacade.addAddress(address);
-            notificationEmitter?.emit('addressAdded', req.user?.sub);
+            notificationEmitter?.emit('addressAdded', undefined);
             res.sendStatus(200);
         }
     });
@@ -50,7 +50,7 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string,
 
             const owner = json.private ? req.user?.sub : null;
             await databaseFacade.updateAddressOwner(address.addr, owner);
-            notificationEmitter?.emit('addressUpdated', req.user?.sub);
+            notificationEmitter?.emit('addressUpdated', owner || undefined);
             res.sendStatus(200);
         });
     });
@@ -58,7 +58,7 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string,
     router.delete('/address/:addr', async (req, res) => {
         await checkAddressOwnership(req.params.addr, req.user?.sub, res, async (address: Address) => {
             await databaseFacade.deleteAddress(address.addr);
-            notificationEmitter?.emit('addressDeleted', req.user?.sub);
+            notificationEmitter?.emit('addressDeleted', address.owner);
             res.sendStatus(200);
         });
     });

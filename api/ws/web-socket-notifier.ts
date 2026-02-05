@@ -80,7 +80,7 @@ class WebSocketNotifier {
         };
 
         const broadcastGlobalEvent = (eventType: 'binEmptied' | 'binRestored' | 'addressAdded' | 'addressUpdated' | 'addressDeleted', owner: string | undefined) => {
-            const socketsToNotify = authMode === 'oidc' ? 
+            const socketsToNotify = authMode === 'oidc' && owner ? 
                 this.connectedSockets.filter(ws => ws.user?.sub === owner) : 
                 this.connectedSockets;
 
