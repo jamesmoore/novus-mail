@@ -3,8 +3,9 @@ import { noCacheMiddleware } from './no-cache-middleware.js';
 import { env } from '../env/env.js';
 import { DatabaseFacade } from '../db/database-facade.js';
 import { Mail } from '../models/mail.js';
+import { NotificationEmitter } from '../events/notification-emitter.js';
 
-export function createRouter(databaseFacade: DatabaseFacade) {
+export function createRouter(databaseFacade: DatabaseFacade, notificationEmitter?: NotificationEmitter) {
 
     const router = Router();
 
@@ -44,18 +45,23 @@ export function createRouter(databaseFacade: DatabaseFacade) {
 
     router.get('/mail/:id', async (req, res) => {
         const id = req.params.id;
-        await checkMailOwnership(req.user?.sub, id, res, async (mail) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        await checkMailOwnership(req.user?.sub, id, res, async (mail, _) => {
             res.json(mail);
         });
     });
 
     router.delete('/mail/:id', async (req, res) => {
         const id = req.params.id;
-        await checkMailOwnership(req.user?.sub, id, res, async (mail) => {
+        await checkMailOwnership(req.user?.sub, id, res, async (mail, address) => {
             const changes = mail.deleted ?
                 await databaseFacade.deleteMail(id) :
                 await databaseFacade.softDeleteMail(id);
             res.status(200).send(`Deleted ${changes} mails`);
+            if (changes > 0) {
+                const eventType = mail.deleted ? 'hardDeleted' : 'softDeleted';
+                notificationEmitter?.emit(eventType, address);
+            }
         });
     });
 
@@ -64,6 +70,9 @@ export function createRouter(databaseFacade: DatabaseFacade) {
         await checkAddressOwnership(req.user?.sub, addr, res, async () => {
             const changes = await databaseFacade.deleteMailsForAddress(addr);
             res.status(200).send(`Deleted ${changes} mails`);
+            if (changes > 0) {
+                notificationEmitter?.emit('softDeleted', addr);
+            }
         });
     })
 
@@ -71,21 +80,30 @@ export function createRouter(databaseFacade: DatabaseFacade) {
         const owner = req.user?.sub;
         const changes = await databaseFacade.emptyDeletedMails(owner);
         res.status(200).send(`Deleted ${changes} mails`);
+        if (changes > 0) {
+            notificationEmitter?.emit('binEmptied', owner);
+        }
     })
 
     router.post('/restoreDeletedMails', async (req, res) => {
         const owner = req.user?.sub;
         const changes = await databaseFacade.restoreDeletedMails(owner);
         res.status(200).send(`Restored ${changes} mails`);
+        if (changes > 0) {
+            notificationEmitter?.emit('binRestored', owner);
+        }
     })
 
     router.post('/readMail', async (req, res) => {
         const json = req.body;
-        await checkMailOwnership(req.user?.sub, json.id, res, async (mail) => {
+        await checkMailOwnership(req.user?.sub, json.id, res, async (mail, address) => {
             if (mail.read === false) {
                 const mailId = json.id;
                 const changes = await databaseFacade.markMailAsRead(mailId);
                 res.status(200).send(`Updated ${changes} mails as read`);
+                if (changes > 0) {
+                    notificationEmitter?.emit('read', address);
+                }
             }
             else {
                 res.status(200).send("Mail already read");
@@ -98,6 +116,9 @@ export function createRouter(databaseFacade: DatabaseFacade) {
         await checkAddressOwnership(req.user?.sub, addr, res, async () => {
             const changes = await databaseFacade.markAllAsRead(addr);
             res.status(200).send(`Marked ${changes} mails read`);
+            if (changes > 0) {
+                notificationEmitter?.emit('read', addr);
+            }
         }
         );
     })
@@ -131,7 +152,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
         }
     };
 
-    async function checkMailOwnership(user: string | undefined, id: string, res: Response, handle: (mail: Mail) => Promise<void>) {
+    async function checkMailOwnership(user: string | undefined, id: string, res: Response, handle: (mail: Mail, address: string) => Promise<void>) {
         const mail = await databaseFacade.getMail(id);
         if (!mail) {
             res.sendStatus(404);
@@ -139,7 +160,7 @@ export function createRouter(databaseFacade: DatabaseFacade) {
         }
 
         await checkAddressOwnership(user, mail.recipient, res, async () => {
-            await handle(mail);
+            await handle(mail, mail.recipient);
         });
     };
 

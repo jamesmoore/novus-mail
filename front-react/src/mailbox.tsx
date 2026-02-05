@@ -1,43 +1,31 @@
 import { deleteMail, readMail } from "./api-client";
 import { Mail } from "./models/mail";
 import { useParams } from "react-router-dom";
-import useUnreadCounts from "./use-unread-counts";
-import { useInvalidateDeletedMailItemsCache, useMailItems } from './use-mail-items';
+import { useMailItems } from './use-mail-items';
 import MailboxItems from "./mailbox-items";
 
 function Mailbox() {
     const { address: selectedAddress } = useParams();
 
-    const { invalidate: invalidateDeleted } = useInvalidateDeletedMailItemsCache();
-
     async function onMailItemSelect(mail: Mail) {
         if (!mail.read) {
             await readMail(mail.id);
             mail.read = true;
-            refetchUnread();
         }
     }
 
     async function onMailItemDelete(mail: Mail) {
         try {
             await deleteMail(mail.id);
-            await refetch();
-            if (!mail.read) {
-                await refetchUnread();
-            }
-            await invalidateDeleted();
         }
         catch (error) {
             console.error('Failed to delete mail ' + error);
         };
     }
 
-    const { refetch: refetchUnread } = useUnreadCounts();
-
     const {
         fetchNextPage,
         error,
-        refetch,
         isFetching,
         isFetchingNextPage,
         isRefetching,

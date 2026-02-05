@@ -7,4 +7,27 @@ export type ReceivedWebSocketMessage = {
     value: string
 };
 
-export type WebSocketMessage = ReceivedWebSocketMessage | ConnectedWebSocketMessage;
+export type ReadWebSocketMessage = {
+    type: 'read',
+    value: string
+};
+
+export type SoftDeletedWebSocketMessage = {
+    type: 'softDeleted',
+    value: string
+};
+
+export type HardDeletedWebSocketMessage = {
+    type: 'hardDeleted',
+    value: string
+};
+
+export type BinEmptiedWebSocketMessage = {
+    type: 'binEmptied'
+};
+
+export type BinRestoredWebSocketMessage = {
+    type: 'binRestored'
+};
+
+export type WebSocketMessage = ReceivedWebSocketMessage | ConnectedWebSocketMessage | ReadWebSocketMessage | SoftDeletedWebSocketMessage | HardDeletedWebSocketMessage | BinEmptiedWebSocketMessage | BinRestoredWebSocketMessage;

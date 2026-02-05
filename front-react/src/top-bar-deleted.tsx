@@ -1,4 +1,4 @@
-import { useDeletedMailItems, useInvalidateAllMailItemsCache, useInvalidateDeletedMailItemsCache } from "./use-mail-items";
+import { useDeletedMailItems } from "./use-mail-items";
 import { emptyDeletedMails, restoreDeletedMails } from "./api-client";
 import { Trash, Undo } from 'lucide-react';
 import { Button } from "./components/ui/button";
@@ -14,7 +14,6 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "./components/ui/alert-dialog";
-import useUnreadCounts from "./use-unread-counts";
 
 function TopBarDeleted() {
 
@@ -22,20 +21,13 @@ function TopBarDeleted() {
 
     const total = data?.pages.reduce((p, q) => p + q.mails.length, 0) ?? 0;
     const text = total === 0 ? 'Empty' : `${total + (hasNextPage ? '+' : '')} item${total === 1 ? '' : 's'}`;
-    const { invalidate: invalidateDeleted } = useInvalidateDeletedMailItemsCache();
-    const { invalidate: invalidateAllMails } = useInvalidateAllMailItemsCache();
-    const { refetch: refetchUread } = useUnreadCounts();
 
     const onDeleteAllMails = async () => {
         await emptyDeletedMails();
-        await invalidateDeleted();
     }
 
     const onRestoreDeletedMails = async () => {
         await restoreDeletedMails();
-        await invalidateDeleted();
-        await invalidateAllMails();
-        await refetchUread();
     }
 
     return (

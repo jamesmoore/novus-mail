@@ -1,5 +1,5 @@
 import { Server } from "http";
-import { EventEmitter } from "events";
+import { NotificationEmitter } from "../events/notification-emitter.js";
 import WebSocket, { WebSocketServer } from 'ws';
 import { WebSocketMessage } from "./web-socket-message.js";
 import { sessionParser } from "../routes/auth-routes.js";
@@ -34,9 +34,9 @@ interface WebSocketWithPassportUser extends WebSocket {
 class WebSocketNotifier {
     private wss: WebSocketServer;
     private connectedSockets: Array<WebSocketWithPassportUser>;
-    private notificationEmitter: EventEmitter;
+    private notificationEmitter: NotificationEmitter;
 
-    constructor(server: Server, databaseFacade: DatabaseFacade, notificationEmitter: EventEmitter) {
+    constructor(server: Server, databaseFacade: DatabaseFacade, notificationEmitter: NotificationEmitter) {
         this.wss = new WebSocketServer({ noServer: true });
         this.notificationEmitter = notificationEmitter;
         this.connectedSockets = [];
@@ -63,21 +63,54 @@ class WebSocketNotifier {
 
         this.initialize();
 
-        this.notificationEmitter.on('received', async (address: string) => {
+        const broadcastAddressEvent = async (eventType: 'received' | 'read' | 'softDeleted' | 'hardDeleted', address: string) => {
             let socketsToNotify: WebSocketWithPassportUser[] = [];
             if (authMode === 'oidc') {
                 const addressRecord = await databaseFacade.getAddress(address);
                 if (addressRecord) {
-                    // send to sockets that have a user/sub AND if the address has no owner, OR if the address matches
-                    socketsToNotify = this.connectedSockets.filter(p => p.user?.sub).filter(p => !addressRecord.owner || addressRecord.owner === p.user!.sub);
+                    socketsToNotify = this.connectedSockets.filter(ws => ws.user?.sub).filter(ws => !addressRecord.owner || addressRecord.owner === ws.user!.sub);
                 }
             }
             else {
                 socketsToNotify = this.connectedSockets;
             }
             for (const ws of socketsToNotify) {
-                this.sendWebSocketMessage(ws, { type: 'received', value: address });
+                this.sendWebSocketMessage(ws, { type: eventType, value: address });
             }
+        };
+
+        const broadcastGlobalEvent = (eventType: 'binEmptied' | 'binRestored', owner: string | undefined) => {
+            const socketsToNotify = authMode === 'oidc' ? 
+                this.connectedSockets.filter(ws => ws.user?.sub === owner) : 
+                this.connectedSockets;
+
+            for (const ws of socketsToNotify) {
+                this.sendWebSocketMessage(ws, { type: eventType });
+            }
+        };
+
+        this.notificationEmitter.on('received', async (address: string) => {
+            await broadcastAddressEvent('received', address);
+        });
+
+        this.notificationEmitter.on('read', async (address: string) => {
+            await broadcastAddressEvent('read', address);
+        });
+
+        this.notificationEmitter.on('softDeleted', async (address: string) => {
+            await broadcastAddressEvent('softDeleted', address);
+        });
+
+        this.notificationEmitter.on('hardDeleted', async (address: string) => {
+            await broadcastAddressEvent('hardDeleted', address);
+        });
+
+        this.notificationEmitter.on('binEmptied', (owner: string | undefined) => {
+            broadcastGlobalEvent('binEmptied', owner);
+        });
+
+        this.notificationEmitter.on('binRestored', (owner: string | undefined) => {
+            broadcastGlobalEvent('binRestored', owner);
         });
     }
 

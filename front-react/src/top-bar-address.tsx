@@ -1,8 +1,7 @@
 import useDomain from "./use-domain";
 import { useParams } from "react-router-dom";
 import { deleteMails, readAllMail } from "./api-client";
-import useUnreadCounts from "./use-unread-counts";
-import { useInvalidateDeletedMailItemsCache, useMailItems } from "./use-mail-items";
+import { useMailItems } from "./use-mail-items";
 import { CheckCheck, Copy, Trash } from 'lucide-react';
 import { Button } from "./components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip";
@@ -33,9 +32,7 @@ function TopBarAddress() {
 
     const { data: domainName } = useDomain();
     const { address: selectedAddress } = useParams();
-    const { refetch: refetchUread } = useUnreadCounts();
-    const { refetch, data, hasNextPage } = useMailItems(selectedAddress);
-    const { invalidate: invalidateDeleted } = useInvalidateDeletedMailItemsCache();
+    const { data, hasNextPage } = useMailItems(selectedAddress);
 
     async function copyClicked() {
         await handleCopy(getFullAddress());
@@ -47,15 +44,10 @@ function TopBarAddress() {
 
     const onDeleteAllMails = async () => {
         await deleteMails(selectedAddress!);
-        await refetchUread();
-        await refetch();
-        await invalidateDeleted();
     }
 
     const onMarkAllAsRead = async () => {
         await readAllMail(selectedAddress!);
-        await refetchUread();
-        await refetch();
     }
 
     const total = data?.pages.reduce((p, q) => p + q.mails.length, 0) ?? 0;
