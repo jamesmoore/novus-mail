@@ -4,6 +4,7 @@ import { useInvalidateAllMailItemsCache, useInvalidateDeletedMailItemsCache, use
 import { useParams } from "react-router-dom";
 import useUnreadCounts from "../use-unread-counts";
 import { toast } from "sonner";
+import { useInvalidateAddressCache } from "../use-address-response";
 
 export default function WebSocketNotificationHandler() {
 
@@ -14,6 +15,7 @@ export default function WebSocketNotificationHandler() {
     const { invalidate: invalidateMailItems } = useInvalidateMailItemsCache();
     const { invalidate: invalidateDeleted } = useInvalidateDeletedMailItemsCache();
     const { invalidate: invalidateAllMails } = useInvalidateAllMailItemsCache();
+    const { invalidate: invalidateAddresses } = useInvalidateAddressCache();
     const [lastReceivedMessage, setLastReceivedMessage] = useState<WebSocketMessage | null>(null);
 
     useEffect(() => {
@@ -98,6 +100,15 @@ export default function WebSocketNotificationHandler() {
                 }
                 break;
 
+            case 'addressAdded':
+            case 'addressUpdated':
+            case 'addressDeleted':
+                {
+                    // Address list changed - invalidate addresses cache
+                    invalidateAddresses();
+                }
+                break;
+
             case 'connected':
                 // Handle connected state if needed
                 break;
@@ -107,7 +118,7 @@ export default function WebSocketNotificationHandler() {
         }
 
         setLastReceivedMessage(null);
-    }, [lastReceivedMessage, invalidateMailItems, invalidateDeleted, invalidateAllMails, unreadRefetch, mailItemsRefetch, urlAddressSegment, setLastReceivedMessage]);
+    }, [lastReceivedMessage, invalidateMailItems, invalidateDeleted, invalidateAllMails, invalidateAddresses, unreadRefetch, mailItemsRefetch, urlAddressSegment, setLastReceivedMessage]);
 
     return null;
 }
