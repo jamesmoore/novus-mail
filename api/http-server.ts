@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors';
 import { Server } from 'http';
+import { rateLimit } from 'express-rate-limit';
 import { createRouter as createAddressRouter } from './routes/address-routes.js';
 import { createRouter as createMailRouter } from './routes/mail-routes.js';
 import { createRouter as createStatusRouter } from './routes/status-routes.js';
@@ -38,6 +39,17 @@ export class HttpServer {
 		const app = express();
 
 		app.set('trust proxy', env.TRUST_PROXY);
+
+		// Rate limiting middleware
+		const limiter = rateLimit({
+			windowMs: 60 * 1000, // 1 minute
+			max: env.RATE_LIMIT_MAX_REQUESTS, // Limit each IP to configurable max requests per minute
+			standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+			legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+			message: 'Too many requests from this IP, please try again later.'
+		});
+
+		app.use(limiter);
 
 		app.use(express.json());
 
