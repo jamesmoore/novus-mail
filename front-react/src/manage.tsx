@@ -30,7 +30,7 @@ function Manage() {
 
     const { data: domainName } = useDomain();
 
-    const { data: addressesResponse, error, refetch: refreshAddresses } = useAddressResponse();
+    const { data: addressesResponse, error } = useAddressResponse();
 
     const isValidAddress = useMemo(() => {
         const regex = /^(?!\.)(?!.*\.\.)(?!.*\.$)[A-Za-z0-9!#$%&'*+/=?^_`{|}~.-]{1,64}$/;
@@ -69,7 +69,6 @@ function Manage() {
             if (result) {
                 toast.success('Added ' + newAddressText);
                 setNewAddressText("");
-                await refreshAddresses();
             }
             else {
                 toast.error('Failed to add address');
@@ -81,7 +80,6 @@ function Manage() {
         const success = await deleteAddress(addr);
         if (success) {
             toast.success('Deleted ' + addr);
-            await refreshAddresses();
         }
         else {
             toast.error('Failed to delete ' + addr);
@@ -91,7 +89,6 @@ function Manage() {
     async function setVisibility(addr: string, makePrivate: boolean) {
         const success = await updateAddress(addr, makePrivate);
         if (success) {
-            await refreshAddresses();
             toast.success(addr + (makePrivate ? ' made private 🔒' : ' made public 🔓'));
         }
         else {

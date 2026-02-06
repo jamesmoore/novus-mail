@@ -2,8 +2,9 @@ import { Router, Response } from 'express';
 import { noCacheMiddleware } from './no-cache-middleware.js';
 import { DatabaseFacade } from '../db/database-facade.js';
 import { Address } from '../models/address.js';
+import { NotificationEmitter } from '../events/notification-emitter.js';
 
-export function createRouter(databaseFacade: DatabaseFacade, domainName: string) {
+export function createRouter(databaseFacade: DatabaseFacade, domainName: string, notificationEmitter?: NotificationEmitter) {
 
     const router = Router();
 
@@ -36,6 +37,7 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string)
             res.sendStatus(200);
         } else {
             await databaseFacade.addAddress(address);
+            notificationEmitter?.emit('addressAdded', undefined); // Notify all users since we don't know the owner yet
             res.sendStatus(200);
         }
     });
@@ -48,6 +50,7 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string)
 
             const owner = json.private ? req.user?.sub : null;
             await databaseFacade.updateAddressOwner(address.addr, owner);
+            notificationEmitter?.emit('addressUpdated', undefined); // Notify all users since the address will have switched between private/public
             res.sendStatus(200);
         });
     });
@@ -55,6 +58,7 @@ export function createRouter(databaseFacade: DatabaseFacade, domainName: string)
     router.delete('/address/:addr', async (req, res) => {
         await checkAddressOwnership(req.params.addr, req.user?.sub, res, async (address: Address) => {
             await databaseFacade.deleteAddress(address.addr);
+            notificationEmitter?.emit('addressDeleted', address.owner); // Notify only the owner, or everyone if owner undefined
             res.sendStatus(200);
         });
     });

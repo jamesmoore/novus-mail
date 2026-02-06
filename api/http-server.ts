@@ -59,7 +59,7 @@ export class HttpServer {
 		app.use('/api', createStatusRouter(this.db));
 
 		const authMiddleware = passportConfig.middleware;
-		app.use('/api', authMiddleware, createAddressRouter(this.db, this.domainName));
+		app.use('/api', authMiddleware, createAddressRouter(this.db, this.domainName, this.notificationEmitter));
 		app.use('/api', authMiddleware, createMailRouter(this.db, this.notificationEmitter));
 		app.use('/api', authMiddleware, createExportRouter(this.db));
 

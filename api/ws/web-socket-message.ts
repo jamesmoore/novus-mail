@@ -30,4 +30,16 @@ export type BinRestoredWebSocketMessage = {
     type: 'binRestored'
 };
 
-export type WebSocketMessage = ReceivedWebSocketMessage | ConnectedWebSocketMessage | ReadWebSocketMessage | SoftDeletedWebSocketMessage | HardDeletedWebSocketMessage | BinEmptiedWebSocketMessage | BinRestoredWebSocketMessage;
+export type AddressAddedWebSocketMessage = {
+    type: 'addressAdded'
+};
+
+export type AddressUpdatedWebSocketMessage = {
+    type: 'addressUpdated'
+};
+
+export type AddressDeletedWebSocketMessage = {
+    type: 'addressDeleted'
+};
+
+export type WebSocketMessage = ReceivedWebSocketMessage | ConnectedWebSocketMessage | ReadWebSocketMessage | SoftDeletedWebSocketMessage | HardDeletedWebSocketMessage | BinEmptiedWebSocketMessage | BinRestoredWebSocketMessage | AddressAddedWebSocketMessage | AddressUpdatedWebSocketMessage | AddressDeletedWebSocketMessage;
