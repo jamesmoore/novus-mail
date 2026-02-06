@@ -32,6 +32,7 @@ Configuration is done through environment variables, which can be set in the doc
 | Environment Variable       | Example Value                                | Description                                   |
 |----------------------------|--------------------------------------|-----------------------------------------------|
 | MAIL_COUNT_PER_PAGE        | 50                                   | Number of emails displayed per page. When you scroll to the end of the page the next page will automatically load.         |
+| RATE_LIMIT_MAX_REQUESTS    | 60                                   | Maximum number of requests per IP address per minute. Helps prevent abuse and DoS attacks. Default is 60 requests per minute. |
 | OIDC_CLIENT_ID             | novusmail                            | OpenID Connect client identifier.            |
 | OIDC_CLIENT_SECRET         | *your secret id*                   | Secret key for OpenID Connect client.        |
 | OIDC_ISSUER                | https://auth.yourdomain.net          | Issuer URL of the OpenID Connect provider.    |
