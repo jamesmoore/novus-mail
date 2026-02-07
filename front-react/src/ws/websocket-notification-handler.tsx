@@ -32,7 +32,10 @@ export default function WebSocketNotificationHandler() {
                     invalidateUnreadCounts();
                     const address = lastReceivedMessage.value;
                     reconcile(address);
-                    toast.info("New mail for " + address);
+                    // Only show a toast if the user is not currently viewing this mailbox
+                    if (urlAddressSegment !== address) {
+                        toast.info("New mail for " + address);
+                    }
                 }
                 break;
 
