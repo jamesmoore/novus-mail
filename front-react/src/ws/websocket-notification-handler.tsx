@@ -55,7 +55,7 @@ export default function WebSocketNotificationHandler() {
 
             case 'softDeleted':
                 {
-                    // Mail moved to trash - refresh source mailbox and invalidate deleted
+                    // Mail moved to trash - refresh source mailbox and reset deleted mailbox cache
                     invalidateUnreadCounts();
                     const address = lastReceivedMessage.value;
                     if (urlAddressSegment === address) {
