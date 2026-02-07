@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchDeletedMails, fetchMails } from "./api-client";
 import { MailResponse } from "./models/mail-response";
+import { useCallback, useMemo } from "react";
 
 const mailItemsKey0 = 'mail' as const;
 const getUseMailItemsQueryKey = (address?: string) =>
@@ -21,12 +22,12 @@ const useMailItems = (selectedAddress?: string) => {
 
 const useResetMailItemsCache = () => {
     const queryClient = useQueryClient();
-    const reset = (address: string) => {
+    const reset = useCallback((address: string) => {
         const queryKey = getUseMailItemsQueryKey(address);
         return queryClient.resetQueries({ queryKey: queryKey });
-    }
+    }, [queryClient]);
 
-    return { reset };
+    return useMemo(() => ({ reset }), [reset]);
 }
 
 const getUseDeletedMailItemsQueryKey = ['deletedmail'];
@@ -47,18 +48,18 @@ const useDeletedMailItems = () => {
 
 const useResetDeletedMailItemsCache = () => {
     const queryClient = useQueryClient();
-    const reset = () => {
+    const reset = useCallback(() => {
         return queryClient.resetQueries({ queryKey: getUseDeletedMailItemsQueryKey });
-    }
-    return { reset };
+    }, [queryClient]);
+    return useMemo(() => ({ reset }), [reset]);
 }
 
 const useResetAllMailItemsCache = () => {
     const queryClient = useQueryClient();
-    const reset = () => {
+    const reset = useCallback(() => {
         return queryClient.resetQueries({ predicate: p => p.queryKey[0] === mailItemsKey0 });
-    }
-    return { reset };
+    }, [queryClient]);
+    return useMemo(() => ({ reset }), [reset]);
 }
 
 export {
