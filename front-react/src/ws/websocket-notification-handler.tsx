@@ -120,6 +120,7 @@ export default function WebSocketNotificationHandler() {
         setLastReceivedMessage(null);
     }, [
         lastReceivedMessage,
+        invalidateUnreadCounts,
         invalidateMailItems,
         invalidateDeleted,
         invalidateAllMails,
