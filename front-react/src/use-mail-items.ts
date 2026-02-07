@@ -4,7 +4,7 @@ import { MailResponse } from "./models/mail-response";
 
 const mailItemsKey0 = 'mail' as const;
 const getUseMailItemsQueryKey = (address?: string) =>
-  [mailItemsKey0, address ?? null] as const;
+    [mailItemsKey0, address ?? null] as const;
 const useMailItems = (selectedAddress?: string) => {
     return useInfiniteQuery({
         queryKey: getUseMailItemsQueryKey(selectedAddress),
@@ -61,10 +61,32 @@ const useResetAllMailItemsCache = () => {
     return { reset };
 }
 
+const useReconcileMailbox = () => {
+    const queryClient = useQueryClient();
+
+    const reconcile = (address: string) => {
+        const queryKey = getUseMailItemsQueryKey(address);
+        const queries = queryClient.getQueryCache().findAll({
+            queryKey: queryKey,
+        })
+
+        const isActive = queries.some(q => q.getObserversCount() > 0)
+
+        if (isActive) {
+            queryClient.invalidateQueries({ queryKey: queryKey })
+        } else {
+            queryClient.resetQueries({ queryKey: queryKey })
+        }
+    }
+    return { reconcile };
+}
+
+
 export {
     useMailItems,
     useDeletedMailItems,
     useResetMailItemsCache,
     useResetDeletedMailItemsCache,
     useResetAllMailItemsCache,
+    useReconcileMailbox,
 };
