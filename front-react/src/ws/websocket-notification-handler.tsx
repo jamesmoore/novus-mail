@@ -82,7 +82,7 @@ export default function WebSocketNotificationHandler() {
 
             case 'binEmptied':
                 {
-                    // All deleted mails removed - just invalidate deleted cache
+                    // All deleted mails removed - just reset deleted cache
                     resetDeleted();
                 }
                 break;
