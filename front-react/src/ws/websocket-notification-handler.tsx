@@ -46,7 +46,7 @@ export default function WebSocketNotificationHandler() {
 
             case 'softDeleted':
                 {
-                    // Mail moved to trash - refresh source mailbox and invalidate deleted
+                    // Mail moved to trash - refresh source mailbox and reset deleted mailbox cache
                     invalidateUnreadCounts();
                     const address = lastReceivedMessage.value;
                     reconcile(address);
@@ -63,7 +63,7 @@ export default function WebSocketNotificationHandler() {
 
             case 'binEmptied':
                 {
-                    // All deleted mails removed - just invalidate deleted cache
+                    // All deleted mails removed - just reset deleted cache
                     resetDeleted();
                 }
                 break;
