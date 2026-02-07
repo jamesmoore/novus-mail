@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useWebSocketNotifier, WebSocketMessage } from "./use-websocket-notifier";
 import { useResetAllMailItemsCache, useResetDeletedMailItemsCache, useReconcileMailbox } from "../use-mail-items";
 import { useParams } from "react-router-dom";
@@ -16,6 +16,7 @@ export default function WebSocketNotificationHandler() {
     const { invalidate: invalidateAddresses } = useInvalidateAddress();
     const [lastReceivedMessage, setLastReceivedMessage] = useState<WebSocketMessage | null>(null);
     const { reconcile } = useReconcileMailbox();
+    const hasConnectedOnceRef = useRef(false);
 
     useEffect(() => {
         setLastReceivedMessage(lastJsonMessage);
@@ -90,7 +91,18 @@ export default function WebSocketNotificationHandler() {
                 break;
 
             case 'connected':
-                // Handle connected state if needed
+                if (!hasConnectedOnceRef.current) {
+                    hasConnectedOnceRef.current = true;
+                    break;
+                }
+
+                invalidateUnreadCounts();
+                resetDeleted();
+                resetAllMails();
+                invalidateAddresses();
+                if (urlAddressSegment) {
+                    reconcile(urlAddressSegment);
+                }
                 break;
 
             default:
