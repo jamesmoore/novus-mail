@@ -4,9 +4,7 @@ import { MailResponse } from "./models/mail-response";
 
 const mailItemsKey0 = 'mail' as const;
 const getUseMailItemsQueryKey = (address?: string) =>
-  address ? [mailItemsKey0, address] as const: 
-    [mailItemsKey0, "none"] as const;
-
+  [mailItemsKey0, address ?? null] as const;
 const useMailItems = (selectedAddress?: string) => {
     return useInfiniteQuery({
         queryKey: getUseMailItemsQueryKey(selectedAddress),
