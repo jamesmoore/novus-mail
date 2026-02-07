@@ -104,7 +104,7 @@ export default function WebSocketNotificationHandler() {
             case 'addressUpdated':
             case 'addressDeleted':
                 {
-                    // Address list changed - refetch addresses for immediate UI update
+                    // Address list changed - invalidate addresses query to trigger refetch for active observers / mark data as stale
                     invalidateAddresses();
                 }
                 break;
