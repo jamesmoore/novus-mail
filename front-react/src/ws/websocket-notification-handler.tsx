@@ -2,20 +2,20 @@ import { useEffect, useState } from "react";
 import { useWebSocketNotifier, WebSocketMessage } from "./use-websocket-notifier";
 import { useInvalidateAllMailItemsCache, useInvalidateDeletedMailItemsCache, useInvalidateMailItemsCache, useMailItems } from "../use-mail-items";
 import { useParams } from "react-router-dom";
-import useUnreadCounts from "../use-unread-counts";
+import { useInvalidateUnreadCounts } from "../use-unread-counts";
 import { toast } from "sonner";
-import useAddressResponse from "../use-address-response";
+import { useInvalidateAddress } from "../use-address-response";
 
 export default function WebSocketNotificationHandler() {
 
     const { lastJsonMessage } = useWebSocketNotifier();
     const { address: urlAddressSegment } = useParams();
     const { refetch: mailItemsRefetch } = useMailItems(urlAddressSegment);
-    const { refetch: unreadRefetch } = useUnreadCounts();
+    const { invalidate: invalidateUnreadCounts } = useInvalidateUnreadCounts();
     const { invalidate: invalidateMailItems } = useInvalidateMailItemsCache();
     const { invalidate: invalidateDeleted } = useInvalidateDeletedMailItemsCache();
     const { invalidate: invalidateAllMails } = useInvalidateAllMailItemsCache();
-    const { refetch: refetchAddresses } = useAddressResponse();
+    const { invalidate: invalidateAddresses } = useInvalidateAddress();
     const [lastReceivedMessage, setLastReceivedMessage] = useState<WebSocketMessage | null>(null);
 
     useEffect(() => {
@@ -30,7 +30,7 @@ export default function WebSocketNotificationHandler() {
         switch (lastReceivedMessage.type) {
             case 'received':
                 {
-                    unreadRefetch();
+                    invalidateUnreadCounts();
                     const address = lastReceivedMessage.value;
                     if (urlAddressSegment === address) {
                         mailItemsRefetch();
@@ -43,7 +43,7 @@ export default function WebSocketNotificationHandler() {
 
             case 'read':
                 {
-                    unreadRefetch();
+                    invalidateUnreadCounts();
                     const address = lastReceivedMessage.value;
                     if (urlAddressSegment === address) {
                         mailItemsRefetch();
@@ -56,7 +56,7 @@ export default function WebSocketNotificationHandler() {
             case 'softDeleted':
                 {
                     // Mail moved to trash - refresh source mailbox and invalidate deleted
-                    unreadRefetch();
+                    invalidateUnreadCounts();
                     const address = lastReceivedMessage.value;
                     if (urlAddressSegment === address) {
                         mailItemsRefetch();
@@ -90,7 +90,7 @@ export default function WebSocketNotificationHandler() {
             case 'binRestored':
                 {
                     // Deleted mails restored to inbox - invalidate both deleted and all mailboxes
-                    unreadRefetch();
+                    invalidateUnreadCounts();
                     invalidateDeleted();
                     invalidateAllMails();
                     // We don't know whether the current mailbox had mails restored, so refetch if we have an address segment
@@ -105,7 +105,7 @@ export default function WebSocketNotificationHandler() {
             case 'addressDeleted':
                 {
                     // Address list changed - refetch addresses for immediate UI update
-                    refetchAddresses();
+                    invalidateAddresses();
                 }
                 break;
 
@@ -118,7 +118,15 @@ export default function WebSocketNotificationHandler() {
         }
 
         setLastReceivedMessage(null);
-    }, [lastReceivedMessage, invalidateMailItems, invalidateDeleted, invalidateAllMails, refetchAddresses, unreadRefetch, mailItemsRefetch, urlAddressSegment, setLastReceivedMessage]);
+    }, [
+        lastReceivedMessage,
+        invalidateMailItems,
+        invalidateDeleted,
+        invalidateAllMails,
+        invalidateAddresses,
+        mailItemsRefetch,
+        urlAddressSegment,
+        setLastReceivedMessage]);
 
     return null;
 }

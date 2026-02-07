@@ -2,14 +2,14 @@ import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchDeletedMails, fetchMails } from "./api-client";
 import { MailResponse } from "./models/mail-response";
 
-const mailItemsKey0 = 'mail';
-const getUseMailItemsQueryKey = (selectedAddress: string) => {
-    return [mailItemsKey0, selectedAddress];
-}
+const mailItemsKey0 = 'mail' as const;
+const getUseMailItemsQueryKey = (address?: string) =>
+  address ? [mailItemsKey0, address] as const: 
+    [mailItemsKey0, "none"] as const;
 
 const useMailItems = (selectedAddress?: string) => {
     return useInfiniteQuery({
-        queryKey: getUseMailItemsQueryKey(selectedAddress!),
+        queryKey: getUseMailItemsQueryKey(selectedAddress),
         queryFn: async ({
             pageParam,
         }): Promise<MailResponse> => fetchMails(selectedAddress!, pageParam),
