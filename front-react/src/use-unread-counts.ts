@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchUnreadCounts } from "./api-client";
 import useUser from "./use-user";
+import { useCallback, useMemo } from "react";
 
 const queryKey = ["unread-counts"];
 
@@ -20,10 +21,10 @@ const useUnreadCounts = () => {
 
 const useInvalidateUnreadCounts = () => {
     const queryClient = useQueryClient();
-    const invalidate = () => {
+    const invalidate = useCallback(() => {
         return queryClient.invalidateQueries({ queryKey: queryKey  });
-    }
-    return { invalidate };
+    }, [queryClient]);
+    return useMemo(() => ({ invalidate }), [invalidate]);
 }
 
 export default useUnreadCounts;
