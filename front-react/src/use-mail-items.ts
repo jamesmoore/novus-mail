@@ -19,14 +19,14 @@ const useMailItems = (selectedAddress?: string) => {
     });
 }
 
-const useInvalidateMailItemsCache = () => {
+const useResetMailItemsCache = () => {
     const queryClient = useQueryClient();
-    const invalidate = (address: string) => {
+    const reset = (address: string) => {
         const queryKey = getUseMailItemsQueryKey(address);
         return queryClient.resetQueries({ queryKey: queryKey });
     }
 
-    return { invalidate };
+    return { reset };
 }
 
 const getUseDeletedMailItemsQueryKey = ['deletedmail'];
@@ -45,27 +45,26 @@ const useDeletedMailItems = () => {
     });
 }
 
-const useInvalidateDeletedMailItemsCache = () => {
+const useResetDeletedMailItemsCache = () => {
     const queryClient = useQueryClient();
-    const invalidate = () => {
-        const queryKey = getUseDeletedMailItemsQueryKey;
-        return queryClient.resetQueries({ queryKey: queryKey });
+    const reset = () => {
+        return queryClient.resetQueries({ queryKey: getUseDeletedMailItemsQueryKey });
     }
-    return { invalidate };
+    return { reset };
 }
 
-const useInvalidateAllMailItemsCache = () => {
+const useResetAllMailItemsCache = () => {
     const queryClient = useQueryClient();
-    const invalidate = () => {
+    const reset = () => {
         return queryClient.resetQueries({ predicate: p => p.queryKey[0] === mailItemsKey0 });
     }
-    return { invalidate };
+    return { reset };
 }
 
 export {
     useMailItems,
     useDeletedMailItems,
-    useInvalidateMailItemsCache,
-    useInvalidateDeletedMailItemsCache,
-    useInvalidateAllMailItemsCache,
+    useResetMailItemsCache,
+    useResetDeletedMailItemsCache,
+    useResetAllMailItemsCache,
 };

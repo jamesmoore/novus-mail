@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { deleteMail, fetchMail } from './api-client';
 import { useQuery } from '@tanstack/react-query';
 import MailboxItem from './mailbox-item';
-import { useInvalidateMailItemsCache } from './use-mail-items';
+import { useResetMailItemsCache } from './use-mail-items';
 import LoadingSpinner from './loading-spinner';
 
 function Mail() {
@@ -17,13 +17,13 @@ function Mail() {
         }
     );
 
-    const { invalidate } = useInvalidateMailItemsCache();
+    const { reset } = useResetMailItemsCache();
 
     async function onMailItemDelete(itemKey: string) {
         deleteMail(itemKey)
             .then(() => {
                 if (message?.recipient) {
-                    invalidate(message.recipient);
+                    reset(message.recipient);
                 }
                 navigate(-1);
             })

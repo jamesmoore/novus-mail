@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useWebSocketNotifier, WebSocketMessage } from "./use-websocket-notifier";
-import { useInvalidateAllMailItemsCache, useInvalidateDeletedMailItemsCache, useInvalidateMailItemsCache, useMailItems } from "../use-mail-items";
+import { useResetAllMailItemsCache, useResetDeletedMailItemsCache, useResetMailItemsCache, useMailItems } from "../use-mail-items";
 import { useParams } from "react-router-dom";
 import { useInvalidateUnreadCounts } from "../use-unread-counts";
 import { toast } from "sonner";
@@ -12,9 +12,9 @@ export default function WebSocketNotificationHandler() {
     const { address: urlAddressSegment } = useParams();
     const { refetch: mailItemsRefetch } = useMailItems(urlAddressSegment);
     const { invalidate: invalidateUnreadCounts } = useInvalidateUnreadCounts();
-    const { invalidate: invalidateMailItems } = useInvalidateMailItemsCache();
-    const { invalidate: invalidateDeleted } = useInvalidateDeletedMailItemsCache();
-    const { invalidate: invalidateAllMails } = useInvalidateAllMailItemsCache();
+    const { reset: resetMailItems } = useResetMailItemsCache();
+    const { reset: resetDeleted } = useResetDeletedMailItemsCache();
+    const { reset: resetAllMails } = useResetAllMailItemsCache();
     const { invalidate: invalidateAddresses } = useInvalidateAddress();
     const [lastReceivedMessage, setLastReceivedMessage] = useState<WebSocketMessage | null>(null);
 
@@ -35,7 +35,7 @@ export default function WebSocketNotificationHandler() {
                     if (urlAddressSegment === address) {
                         mailItemsRefetch();
                     } else if (address) {
-                        invalidateMailItems(address);
+                        resetMailItems(address);
                         toast.info("New mail for " + address);
                     }
                 }
@@ -48,7 +48,7 @@ export default function WebSocketNotificationHandler() {
                     if (urlAddressSegment === address) {
                         mailItemsRefetch();
                     } else {
-                        invalidateMailItems(address);
+                        resetMailItems(address);
                     }
                 }
                 break;
@@ -61,9 +61,9 @@ export default function WebSocketNotificationHandler() {
                     if (urlAddressSegment === address) {
                         mailItemsRefetch();
                     } else {
-                        invalidateMailItems(address);
+                        resetMailItems(address);
                     }
-                    invalidateDeleted();
+                    resetDeleted();
                 }
                 break;
 
@@ -74,16 +74,16 @@ export default function WebSocketNotificationHandler() {
                     if (urlAddressSegment === address) {
                         mailItemsRefetch();
                     } else {
-                        invalidateMailItems(address);
+                        resetMailItems(address);
                     }
-                    invalidateDeleted();
+                    resetDeleted();
                 }
                 break;
 
             case 'binEmptied':
                 {
                     // All deleted mails removed - just invalidate deleted cache
-                    invalidateDeleted();
+                    resetDeleted();
                 }
                 break;
 
@@ -91,8 +91,8 @@ export default function WebSocketNotificationHandler() {
                 {
                     // Deleted mails restored to inbox - invalidate both deleted and all mailboxes
                     invalidateUnreadCounts();
-                    invalidateDeleted();
-                    invalidateAllMails();
+                    resetDeleted();
+                    resetAllMails();
                     // We don't know whether the current mailbox had mails restored, so refetch if we have an address segment
                     if (urlAddressSegment) {
                         mailItemsRefetch();
@@ -121,9 +121,9 @@ export default function WebSocketNotificationHandler() {
     }, [
         lastReceivedMessage,
         invalidateUnreadCounts,
-        invalidateMailItems,
-        invalidateDeleted,
-        invalidateAllMails,
+        resetMailItems,
+        resetDeleted,
+        resetAllMails,
         invalidateAddresses,
         mailItemsRefetch,
         urlAddressSegment,
