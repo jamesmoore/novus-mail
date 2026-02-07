@@ -1,22 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useWebSocketNotifier, WebSocketMessage } from "./use-websocket-notifier";
-import { useInvalidateAllMailItemsCache, useInvalidateDeletedMailItemsCache, useInvalidateMailItemsCache, useMailItems } from "../use-mail-items";
+import { useResetAllMailItemsCache, useResetDeletedMailItemsCache, useReconcileMailbox } from "../use-mail-items";
 import { useParams } from "react-router-dom";
-import useUnreadCounts from "../use-unread-counts";
+import { useInvalidateUnreadCounts } from "../use-unread-counts";
 import { toast } from "sonner";
-import useAddressResponse from "../use-address-response";
+import { useInvalidateAddress } from "../use-address-response";
 
 export default function WebSocketNotificationHandler() {
 
     const { lastJsonMessage } = useWebSocketNotifier();
     const { address: urlAddressSegment } = useParams();
-    const { refetch: mailItemsRefetch } = useMailItems(urlAddressSegment);
-    const { refetch: unreadRefetch } = useUnreadCounts();
-    const { invalidate: invalidateMailItems } = useInvalidateMailItemsCache();
-    const { invalidate: invalidateDeleted } = useInvalidateDeletedMailItemsCache();
-    const { invalidate: invalidateAllMails } = useInvalidateAllMailItemsCache();
-    const { refetch: refetchAddresses } = useAddressResponse();
+    const { invalidate: invalidateUnreadCounts } = useInvalidateUnreadCounts();
+    const { reset: resetDeleted } = useResetDeletedMailItemsCache();
+    const { reset: resetAllMails } = useResetAllMailItemsCache();
+    const { invalidate: invalidateAddresses } = useInvalidateAddress();
     const [lastReceivedMessage, setLastReceivedMessage] = useState<WebSocketMessage | null>(null);
+    const { reconcile } = useReconcileMailbox();
+    const hasConnectedOnceRef = useRef(false);
 
     useEffect(() => {
         setLastReceivedMessage(lastJsonMessage);
@@ -30,12 +30,11 @@ export default function WebSocketNotificationHandler() {
         switch (lastReceivedMessage.type) {
             case 'received':
                 {
-                    unreadRefetch();
+                    invalidateUnreadCounts();
                     const address = lastReceivedMessage.value;
-                    if (urlAddressSegment === address) {
-                        mailItemsRefetch();
-                    } else if (address) {
-                        invalidateMailItems(address);
+                    reconcile(address);
+                    // Only show a toast if the user is not currently viewing this mailbox
+                    if (urlAddressSegment !== address) {
                         toast.info("New mail for " + address);
                     }
                 }
@@ -43,60 +42,42 @@ export default function WebSocketNotificationHandler() {
 
             case 'read':
                 {
-                    unreadRefetch();
+                    invalidateUnreadCounts();
                     const address = lastReceivedMessage.value;
-                    if (urlAddressSegment === address) {
-                        mailItemsRefetch();
-                    } else {
-                        invalidateMailItems(address);
-                    }
+                    reconcile(address);
                 }
                 break;
 
             case 'softDeleted':
                 {
-                    // Mail moved to trash - refresh source mailbox and invalidate deleted
-                    unreadRefetch();
+                    // Mail moved to trash - refresh source mailbox and reset deleted mailbox cache
+                    invalidateUnreadCounts();
                     const address = lastReceivedMessage.value;
-                    if (urlAddressSegment === address) {
-                        mailItemsRefetch();
-                    } else {
-                        invalidateMailItems(address);
-                    }
-                    invalidateDeleted();
+                    reconcile(address);
+                    resetDeleted();
                 }
                 break;
 
             case 'hardDeleted':
                 {
                     // Mail permanently deleted from trash - refresh deleted mailbox
-                    const address = lastReceivedMessage.value;
-                    if (urlAddressSegment === address) {
-                        mailItemsRefetch();
-                    } else {
-                        invalidateMailItems(address);
-                    }
-                    invalidateDeleted();
+                    resetDeleted();
                 }
                 break;
 
             case 'binEmptied':
                 {
-                    // All deleted mails removed - just invalidate deleted cache
-                    invalidateDeleted();
+                    // All deleted mails removed - just reset deleted cache
+                    resetDeleted();
                 }
                 break;
 
             case 'binRestored':
                 {
                     // Deleted mails restored to inbox - invalidate both deleted and all mailboxes
-                    unreadRefetch();
-                    invalidateDeleted();
-                    invalidateAllMails();
-                    // We don't know whether the current mailbox had mails restored, so refetch if we have an address segment
-                    if (urlAddressSegment) {
-                        mailItemsRefetch();
-                    }
+                    invalidateUnreadCounts();
+                    resetDeleted();
+                    resetAllMails();
                 }
                 break;
 
@@ -104,13 +85,24 @@ export default function WebSocketNotificationHandler() {
             case 'addressUpdated':
             case 'addressDeleted':
                 {
-                    // Address list changed - refetch addresses for immediate UI update
-                    refetchAddresses();
+                    // Address list changed - invalidate addresses query to trigger refetch for active observers / mark data as stale
+                    invalidateAddresses();
                 }
                 break;
 
             case 'connected':
-                // Handle connected state if needed
+                if (!hasConnectedOnceRef.current) {
+                    hasConnectedOnceRef.current = true;
+                    break;
+                }
+
+                invalidateUnreadCounts();
+                resetDeleted();
+                resetAllMails();
+                invalidateAddresses();
+                if (urlAddressSegment) {
+                    reconcile(urlAddressSegment);
+                }
                 break;
 
             default:
@@ -118,7 +110,16 @@ export default function WebSocketNotificationHandler() {
         }
 
         setLastReceivedMessage(null);
-    }, [lastReceivedMessage, invalidateMailItems, invalidateDeleted, invalidateAllMails, refetchAddresses, unreadRefetch, mailItemsRefetch, urlAddressSegment, setLastReceivedMessage]);
+    }, [
+        lastReceivedMessage,
+        invalidateUnreadCounts,
+        resetDeleted,
+        resetAllMails,
+        invalidateAddresses,
+        urlAddressSegment,
+        setLastReceivedMessage,
+        reconcile]);
 
     return null;
 }
+
