@@ -36,7 +36,7 @@ export default function PageTitle() {
             const dotRadius = Math.max(16, Math.round(size * 0.16));
             const margin = Math.max(2, Math.round(size * 0.04));
             const cx = size - margin - dotRadius;
-            const cy = margin + dotRadius;
+            const cy = size - margin - dotRadius;
             ctx.beginPath();
             ctx.arc(cx, cy, dotRadius, 0, Math.PI * 2);
             ctx.fillStyle = "#ef4444"; // bg-red-500
