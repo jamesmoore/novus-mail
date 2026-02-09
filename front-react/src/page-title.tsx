@@ -42,7 +42,7 @@ export default function PageTitle() {
             ctx.fillStyle = "#ef4444"; // bg-red-500
             ctx.fill();
             ctx.strokeStyle = "#ffffff"; // white outline
-            ctx.lineWidth = Math.max(2, Math.round(size * 0.04));
+            ctx.lineWidth = Math.max(2, Math.round(size * 0.02));
             ctx.stroke();
             const dataUrl = canvas.toDataURL("image/png");
             for (const link of iconLinks) {
