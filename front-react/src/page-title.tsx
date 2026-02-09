@@ -41,6 +41,9 @@ export default function PageTitle() {
             ctx.beginPath();
             ctx.arc(cx, cy, dotRadius, 0, Math.PI * 2);
             ctx.fill();
+            ctx.strokeStyle = "#ffffff"; // white outline
+            ctx.lineWidth = Math.max(2, Math.round(size * 0.04));
+            ctx.stroke();
             const dataUrl = canvas.toDataURL("image/png");
             for (const link of iconLinks) {
                 link.href = dataUrl;
