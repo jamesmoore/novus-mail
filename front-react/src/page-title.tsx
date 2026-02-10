@@ -61,6 +61,19 @@ export default function PageTitle() {
 
         setFaviconBadge(unreadCount > 0);
 
+        // Update Badge API for PWA
+        if ('setAppBadge' in navigator) {
+            if (unreadCount > 0) {
+                navigator.setAppBadge(unreadCount).catch(() => {
+                    // Ignore errors if Badge API is not supported
+                });
+            } else {
+                navigator.clearAppBadge().catch(() => {
+                    // Ignore errors if Badge API is not supported
+                });
+            }
+        }
+
     }, [unreadCounts, setFaviconBadge]);
 
     return null;
