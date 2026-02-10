@@ -58,7 +58,9 @@ export default function PageTitle() {
             const isDark = document.documentElement.classList.contains('dark');
             const themeColor = isDark ? '#171717' : '#fafafa';
             
-            let metaThemeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+            // Find or create a theme-color meta tag without media query
+            // This will override the media-query based tags when user explicitly sets theme
+            let metaThemeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]:not([media])');
             if (!metaThemeColor) {
                 metaThemeColor = document.createElement('meta');
                 metaThemeColor.name = 'theme-color';
