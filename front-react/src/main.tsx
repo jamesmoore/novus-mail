@@ -20,8 +20,12 @@ import TopBarSettings from './top-bar-settings.tsx';
 import TopBarDeleted from './top-bar-deleted.tsx';
 import TopBarAddress from './top-bar-address.tsx';
 import { Toaster } from 'sonner';
+import { registerServiceWorker } from './service-worker-registration';
 
 const queryClient = new QueryClient();
+
+// Register service worker for PWA
+registerServiceWorker();
 
 // Renamed from root to app for css compatability
 createRoot(document.getElementById('app')!).render(
