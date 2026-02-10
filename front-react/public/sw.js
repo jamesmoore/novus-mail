@@ -47,7 +47,9 @@ self.addEventListener('fetch', (event) => {
   // Skip API requests
   if (event.request.url.includes('/api/') || 
       event.request.url.includes('/auth/') ||
-      event.request.url.includes('/ws/')) {
+      event.request.url.includes('/ws/') ||
+      event.request.url.includes('/logout') || 
+      event.request.url.includes('/login')) {
     return;
   }
 
