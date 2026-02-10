@@ -36,11 +36,14 @@ export default function PageTitle() {
             const dotRadius = Math.max(16, Math.round(size * 0.16));
             const margin = Math.max(2, Math.round(size * 0.04));
             const cx = size - margin - dotRadius;
-            const cy = margin + dotRadius;
-            ctx.fillStyle = "#ef4444"; // bg-red-500
+            const cy = size - margin - dotRadius;
             ctx.beginPath();
             ctx.arc(cx, cy, dotRadius, 0, Math.PI * 2);
+            ctx.fillStyle = "#ef4444"; // bg-red-500
             ctx.fill();
+            ctx.strokeStyle = "#ffffff"; // white outline
+            ctx.lineWidth = Math.max(2, Math.round(size * 0.02));
+            ctx.stroke();
             const dataUrl = canvas.toDataURL("image/png");
             for (const link of iconLinks) {
                 link.href = dataUrl;
