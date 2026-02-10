@@ -71,12 +71,8 @@ export default function PageTitle() {
         updateThemeColor();
 
         // Watch for theme changes
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                    updateThemeColor();
-                }
-            });
+        const observer = new MutationObserver(() => {
+            updateThemeColor();
         });
 
         observer.observe(document.documentElement, {
