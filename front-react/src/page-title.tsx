@@ -52,39 +52,6 @@ export default function PageTitle() {
         img.src = sourceLink.href;
     }, []);
 
-    // Update theme-color meta tag based on current theme
-    useEffect(() => {
-        const updateThemeColor = () => {
-            const isDark = document.documentElement.classList.contains('dark');
-            const themeColor = isDark ? '#171717' : '#fafafa';
-            
-            // Find or create a theme-color meta tag without media query
-            // This will override the media-query based tags when user explicitly sets theme
-            let metaThemeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]:not([media])');
-            if (!metaThemeColor) {
-                metaThemeColor = document.createElement('meta');
-                metaThemeColor.name = 'theme-color';
-                document.head.appendChild(metaThemeColor);
-            }
-            metaThemeColor.content = themeColor;
-        };
-
-        // Initial update
-        updateThemeColor();
-
-        // Watch for theme changes
-        const observer = new MutationObserver(() => {
-            updateThemeColor();
-        });
-
-        observer.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ['class']
-        });
-
-        return () => observer.disconnect();
-    }, []);
-
     // update page titles
     useEffect(() => {
         const unreadCount = unreadCounts?.map(p => p.unread).reduce((p, q) => p + q, 0) ?? 0;
