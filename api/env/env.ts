@@ -21,9 +21,10 @@ const trustProxyValue = z.string().default('false').transform((s) => {
   if (s.toLowerCase() === "false" || s === "0") {
     return false;
   }
-  // Try to parse as number (strict check ensures no leading zeros or extra characters)
-  const num = parseInt(s, 10);
-  if (!isNaN(num) && num > 0 && num.toString() === s) {
+  // Try to parse as positive integer (hop count)
+  // The strict check ensures the input is a clean integer without leading zeros, decimals, or extra characters
+  const num = Number(s);
+  if (Number.isInteger(num) && num > 0) {
     return num;
   }
   // Otherwise, return as string (for IP addresses, subnets, or predefined names)
