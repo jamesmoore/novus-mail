@@ -11,6 +11,26 @@ const SessionStoreSchema = z.union([
 ]).default('LOKI');
 
 const booleanValue = z.string().default('false').transform((s) => s.toLowerCase() !== "false" && s !== "0");
+
+// TRUST_PROXY can be boolean, positive number, or string as per https://expressjs.com/en/guide/behind-proxies.html
+const trustProxyValue = z.string().default('false').transform((s) => {
+  // Try to parse as boolean first
+  if (s.toLowerCase() === "true") {
+    return true;
+  }
+  if (s.toLowerCase() === "false") {
+    return false;
+  }
+  // Try to parse as positive integer (hop count)
+  // The strict check ensures the input is a clean integer without leading zeros, decimals, or extra characters
+  const num = Number(s);
+  if (Number.isInteger(num) && num >= 0) {
+    return num;
+  }
+  // Otherwise, return as string (for IP addresses, subnets, or predefined names)
+  return s;
+});
+
 export const env = createEnv({
   server: {
     MAIL_COUNT_PER_PAGE: z.string().optional().default("50").transform((s) => parseInt(s, 10)).pipe(z.number().min(1)),
@@ -26,7 +46,7 @@ export const env = createEnv({
       .transform((value) => value ?? fallbackSessionSecret()),
 
     CORS_ALLOW_ALL_ORIGINS: booleanValue,
-    TRUST_PROXY: booleanValue,
+    TRUST_PROXY: trustProxyValue,
     SESSION_STORE: SessionStoreSchema,
     REDIS_URL: z.string().min(1).optional(),
     POSTGRES_URL: z.string().min(1).optional(),
