@@ -21,7 +21,7 @@ const trustProxyValue = z.string().default('false').transform((s) => {
   if (s.toLowerCase() === "false" || s === "0") {
     return false;
   }
-  // Try to parse as number
+  // Try to parse as number (strict check ensures no leading zeros or extra characters)
   const num = parseInt(s, 10);
   if (!isNaN(num) && num > 0 && num.toString() === s) {
     return num;
