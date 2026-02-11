@@ -98,7 +98,6 @@ export default function WebSocketNotificationHandler() {
 
                 invalidateUnreadCounts();
                 resetDeleted();
-                resetAllMails();
                 invalidateAddresses();
                 if (urlAddressSegment) {
                     reconcile(urlAddressSegment);
