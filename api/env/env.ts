@@ -15,10 +15,10 @@ const booleanValue = z.string().default('false').transform((s) => s.toLowerCase(
 // TRUST_PROXY can be boolean, positive number, or string as per https://expressjs.com/en/guide/behind-proxies.html
 const trustProxyValue = z.string().default('false').transform((s) => {
   // Try to parse as boolean first
-  if (s.toLowerCase() === "true" || s === "1") {
+  if (s.toLowerCase() === "true") {
     return true;
   }
-  if (s.toLowerCase() === "false" || s === "0") {
+  if (s.toLowerCase() === "false") {
     return false;
   }
   // Try to parse as positive integer (hop count)
