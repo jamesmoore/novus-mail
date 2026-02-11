@@ -24,7 +24,7 @@ const trustProxyValue = z.string().default('false').transform((s) => {
   // Try to parse as positive integer (hop count)
   // The strict check ensures the input is a clean integer without leading zeros, decimals, or extra characters
   const num = Number(s);
-  if (Number.isInteger(num) && num > 0) {
+  if (Number.isInteger(num) && num >= 0) {
     return num;
   }
   // Otherwise, return as string (for IP addresses, subnets, or predefined names)
