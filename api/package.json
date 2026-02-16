@@ -28,7 +28,7 @@
     "passport": "^0.7.0",
     "passport-anonymous": "^1.0.1",
     "postgres": "^3.4.7",
-    "redis": "^5.10.0",
+    "redis": "^5.11.0",
     "smtp-server": "^3.18.1",
     "ulid": "^3.0.2",
     "ws": "^8.19.0",
@@ -53,6 +53,6 @@
     "eslint": "^9.39.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.55.0"
+    "typescript-eslint": "^8.56.0"
   }
 }
