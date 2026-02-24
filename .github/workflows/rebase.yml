@@ -34,7 +34,7 @@ jobs:
             // Capture the exact SHA so the checkout is pinned to the verified commit (avoids TOCTOU)
             core.setOutput('head_sha', pr.data.head.sha);
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           # Use the exact SHA verified above to prevent TOCTOU between the fork check and checkout
           ref: ${{ steps.pr.outputs.head_sha }}
