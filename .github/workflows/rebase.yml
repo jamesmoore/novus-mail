@@ -4,19 +4,46 @@ on:
     types: [created]
 permissions:
   contents: write
-  pull-requests: write
+  # Read-only access is sufficient to fetch PR details via the API
+  pull-requests: read
 jobs:
   rebase:
-    if: github.event.issue.pull_request != '' && contains(github.event.comment.body, '@bot rebase')
+    # Truthy check that the comment is on a PR (not a plain issue),
+    # the trigger phrase is present, and the commenter is the repo OWNER.
+    # Non-owners are skipped rather than failed.
+    if: github.event.issue.pull_request && contains(github.event.comment.body, '@bot rebase') && github.event.comment.author_association == 'OWNER'
     runs-on: ubuntu-latest
     steps:
+      - name: Get PR details and guard against forks
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            // Guard: this workflow only supports same-repo PRs, not forks.
+            // Also handle the edge case where head.repo is null (e.g. the fork was deleted).
+            if (!pr.data.head.repo || pr.data.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}`) {
+              core.setFailed('Rebase is only supported for same-repo pull requests, not forks.');
+              return;
+            }
+            core.setOutput('head_ref', pr.data.head.ref);
+            // Capture the exact SHA so the checkout is pinned to the verified commit (avoids TOCTOU)
+            core.setOutput('head_sha', pr.data.head.sha);
+
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.issue.pull_request.head.ref }}
+          # Use the exact SHA verified above to prevent TOCTOU between the fork check and checkout
+          ref: ${{ steps.pr.outputs.head_sha }}
           fetch-depth: 0
+
       - run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin main
           git rebase origin/main
-          git push --force-with-lease
+          # Push back to the PR head branch explicitly
+          git push --force-with-lease origin HEAD:${{ steps.pr.outputs.head_ref }}
