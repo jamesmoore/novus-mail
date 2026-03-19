@@ -3,8 +3,8 @@ import { useWebSocket } from "react-use-websocket/dist/lib/use-websocket";
 import { WebSocketMessage, WebSocketContext } from './use-websocket-notifier';
 
 export const WebSocketNotificationProvider: FC<{ children: ReactNode; }> = ({ children }) => {
-    const websocketUrl = `${import.meta.env.VITE_API_BASE_URL ?? ''}/ws`;
-    const webSocketHook = useWebSocket<WebSocketMessage>(websocketUrl, {
+    const webSocketUrl = `${import.meta.env.VITE_API_BASE_URL ?? ''}/ws`;
+    const webSocketHook = useWebSocket<WebSocketMessage>(webSocketUrl, {
         onOpen: () => console.debug("ws connected"),
         shouldReconnect: () => true
     });
