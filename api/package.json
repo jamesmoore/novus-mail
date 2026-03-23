@@ -11,7 +11,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@t3-oss/env-core": "^0.13.10",
+    "@t3-oss/env-core": "^0.13.11",
     "adm-zip": "^0.5.16",
     "better-sqlite3": "^12.8.0",
     "connect-ensure-login": "^0.1.1",
@@ -22,16 +22,16 @@
     "express": "^5.2.1",
     "express-rate-limit": "^8.3.1",
     "express-session": "^1.19.0",
-    "mailparser": "^3.9.4",
+    "mailparser": "^3.9.5",
     "multer": "^2.1.1",
     "openid-client": "^6.8.2",
     "passport": "^0.7.0",
     "passport-anonymous": "^1.0.1",
     "postgres": "^3.4.7",
     "redis": "^5.11.0",
-    "smtp-server": "^3.18.1",
+    "smtp-server": "^3.18.2",
     "ulid": "^3.0.2",
-    "ws": "^8.19.0",
+    "ws": "^8.20.0",
     "zod": "^4.3.6"
   },
   "type": "module",
@@ -53,6 +53,6 @@
     "eslint": "^9.39.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.57.1"
+    "typescript-eslint": "^8.57.2"
   }
 }
