@@ -50,7 +50,7 @@ INSERT INTO meta ${tx({ key: 'schemaVersion', value: '3' })} ON CONFLICT DO NOTH
         });
         console.log("Completed DB schema update");
     } catch (e) {
-        throw new Error(`Failed to initialize database schema: ${e instanceof Error ? e.message : String(e)}`);
+        throw new Error(`Failed to initialize database schema: ${e instanceof Error ? e.message : String(e)}`, { cause: e });
     }
 
     return new PostgresDatabaseFacade(sql);
@@ -71,7 +71,7 @@ function getPostgresUrl(postgresUrl: string) {
     try {
         return new URL(postgresUrl);
     } catch (e) {
-        throw new Error(`Invalid Postgres URL format: ${e instanceof Error ? e.message : String(e)}`);
+        throw new Error(`Invalid Postgres URL format: ${e instanceof Error ? e.message : String(e)}`, { cause: e });
     }
 }
 
@@ -86,6 +86,6 @@ function getPostgresClient(postgresLogSql: boolean, postgresUrl: string) {
         } : undefined;
         return postgres(postgresUrl, postgresOptions);
     } catch (e) {
-        throw new Error(`Failed to initialize Postgres client: ${e instanceof Error ? e.message : String(e)}`);
+        throw new Error(`Failed to initialize Postgres client: ${e instanceof Error ? e.message : String(e)}`, { cause: e });
     }
 }

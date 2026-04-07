@@ -36,6 +36,7 @@
   },
   "type": "module",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/adm-zip": "^0.5.8",
     "@types/better-sqlite3": "^7.6.13",
     "@types/connect-ensure-login": "^0.1.9",
@@ -50,7 +51,8 @@
     "@types/passport-anonymous": "^1.0.5",
     "@types/smtp-server": "^3.5.13",
     "@types/ws": "^8.18.1",
-    "eslint": "^9.39.2",
+    "eslint": "^10.2.0",
+    "globals": "^17.4.0",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2",
     "typescript-eslint": "^8.58.0"
