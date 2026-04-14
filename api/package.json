@@ -28,7 +28,7 @@
     "passport": "^0.7.0",
     "passport-anonymous": "^1.0.1",
     "postgres": "^3.4.7",
-    "redis": "^5.11.0",
+    "redis": "^5.12.1",
     "smtp-server": "^3.18.4",
     "ulid": "^3.0.2",
     "ws": "^8.20.0",
