@@ -12,7 +12,7 @@ export function useIsMobile() {
   }, [])
 
   const getSnapshot = React.useCallback(
-    () => window.matchMedia(MOBILE_QUERY).matches,
+    () => window.innerWidth < MOBILE_BREAKPOINT,
     []
   )
 
