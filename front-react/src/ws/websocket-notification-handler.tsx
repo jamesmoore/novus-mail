@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { useWebSocketNotifier, WebSocketMessage } from "./use-websocket-notifier";
+import { useEffect, useRef } from "react";
+import { useWebSocketNotifier } from "./use-websocket-notifier";
 import { useResetAllMailItemsCache, useResetDeletedMailItemsCache, useReconcileMailbox } from "../use-mail-items";
 import { useParams } from "react-router-dom";
 import { useInvalidateUnreadCounts } from "../use-unread-counts";
@@ -14,24 +14,17 @@ export default function WebSocketNotificationHandler() {
     const { reset: resetDeleted } = useResetDeletedMailItemsCache();
     const { reset: resetAllMails } = useResetAllMailItemsCache();
     const { invalidate: invalidateAddresses } = useInvalidateAddress();
-    const [lastReceivedMessage, setLastReceivedMessage] = useState<WebSocketMessage | null>(null);
     const { reconcile } = useReconcileMailbox();
     const hasConnectedOnceRef = useRef(false);
 
     useEffect(() => {
-        setLastReceivedMessage(lastJsonMessage);
-    },
-        [lastJsonMessage]
-    )
+        if (!lastJsonMessage) return;
 
-    useEffect(() => {
-        if (!lastReceivedMessage) return;
-
-        switch (lastReceivedMessage.type) {
+        switch (lastJsonMessage.type) {
             case 'received':
                 {
                     invalidateUnreadCounts();
-                    const address = lastReceivedMessage.value;
+                    const address = lastJsonMessage.value;
                     reconcile(address);
                     // Only show a toast if the user is not currently viewing this mailbox
                     if (urlAddressSegment !== address) {
@@ -43,7 +36,7 @@ export default function WebSocketNotificationHandler() {
             case 'read':
                 {
                     invalidateUnreadCounts();
-                    const address = lastReceivedMessage.value;
+                    const address = lastJsonMessage.value;
                     reconcile(address);
                 }
                 break;
@@ -52,7 +45,7 @@ export default function WebSocketNotificationHandler() {
                 {
                     // Mail moved to trash - refresh source mailbox and reset deleted mailbox cache
                     invalidateUnreadCounts();
-                    const address = lastReceivedMessage.value;
+                    const address = lastJsonMessage.value;
                     reconcile(address);
                     resetDeleted();
                 }
@@ -105,20 +98,16 @@ export default function WebSocketNotificationHandler() {
                 break;
 
             default:
-                console.error('Unhandled message type:', JSON.stringify(lastReceivedMessage));
+                console.error('Unhandled message type:', JSON.stringify(lastJsonMessage));
         }
-
-        setLastReceivedMessage(null);
     }, [
-        lastReceivedMessage,
+        lastJsonMessage,
         invalidateUnreadCounts,
         resetDeleted,
         resetAllMails,
         invalidateAddresses,
         urlAddressSegment,
-        setLastReceivedMessage,
         reconcile]);
 
     return null;
 }
-
