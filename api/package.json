@@ -12,7 +12,7 @@
   "description": "",
   "dependencies": {
     "@t3-oss/env-core": "^0.13.11",
-    "adm-zip": "^0.5.18",
+    "adm-zip": "^0.6.0",
     "better-sqlite3": "^12.11.1",
     "connect-ensure-login": "^0.1.1",
     "connect-loki": "^1.2.0",
