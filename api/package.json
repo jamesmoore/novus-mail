@@ -24,7 +24,7 @@
     "express-session": "^1.19.0",
     "mailparser": "^3.9.15",
     "multer": "^2.2.0",
-    "openid-client": "^6.8.5",
+    "openid-client": "^6.8.6",
     "passport": "^0.7.0",
     "passport-anonymous": "^1.0.1",
     "postgres": "^3.4.7",
