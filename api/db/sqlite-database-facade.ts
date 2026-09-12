@@ -247,9 +247,10 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
         return rows.map(mapApiKeyMetadata);
     }
 
-    public async touchApiKeyLastUsed(id: string, usedAt: Date) {
-        this.db.prepare('UPDATE api_key SET last_used_at = @usedAt WHERE id = @id')
-            .run({ id, usedAt: usedAt.getTime() });
+    public async touchApiKeyLastUsed(id: string, usedAt: Date, staleBefore: Date) {
+        this.db.prepare(`UPDATE api_key SET last_used_at = @usedAt
+            WHERE id = @id AND (last_used_at IS NULL OR last_used_at < @staleBefore)`)
+            .run({ id, usedAt: usedAt.getTime(), staleBefore: staleBefore.getTime() });
     }
 
     public async revokeApiKey(id: string, owner: string) {

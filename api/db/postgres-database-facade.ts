@@ -205,8 +205,9 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
             FROM api_key WHERE access_mode = 'global' ORDER BY created_at DESC`;
     }
 
-    public async touchApiKeyLastUsed(id: string, usedAt: Date) {
-        await this.sql`UPDATE api_key SET last_used_at = ${usedAt} WHERE id = ${id}`;
+    public async touchApiKeyLastUsed(id: string, usedAt: Date, staleBefore: Date) {
+        await this.sql`UPDATE api_key SET last_used_at = ${usedAt}
+            WHERE id = ${id} AND (last_used_at IS NULL OR last_used_at < ${staleBefore})`;
     }
 
     public async revokeApiKey(id: string, owner: string) {

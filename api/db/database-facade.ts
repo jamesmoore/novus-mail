@@ -36,7 +36,7 @@ export interface DatabaseFacade {
     getApiKeyByPrefix(prefix: string): Promise<ApiKeyRecord | undefined>;
     listApiKeys(owner: string): Promise<ApiKeyMetadata[]>;
     listGlobalApiKeys(): Promise<ApiKeyMetadata[]>;
-    touchApiKeyLastUsed(id: string, usedAt: Date): Promise<void>;
+    touchApiKeyLastUsed(id: string, usedAt: Date, staleBefore: Date): Promise<void>;
     revokeApiKey(id: string, owner: string): Promise<number>;
     revokeGlobalApiKey(id: string): Promise<number>;
 

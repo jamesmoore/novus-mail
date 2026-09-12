@@ -4,6 +4,7 @@ import { DatabaseFacade } from '../db/database-facade.js';
 import { ApiKeyAccessMode, ApiKeyRecord } from '../models/api-key.js';
 
 const KEY_PREFIX = 'nvm';
+const LAST_USED_UPDATE_INTERVAL_MS = 10 * 60 * 1000;
 
 export class ApiKeyService {
     constructor(private readonly database: DatabaseFacade) { }
@@ -57,7 +58,12 @@ export class ApiKeyService {
             return undefined;
         }
 
-        await this.database.touchApiKeyLastUsed(record.id, new Date());
+        const usedAt = new Date();
+        await this.database.touchApiKeyLastUsed(
+            record.id,
+            usedAt,
+            new Date(usedAt.getTime() - LAST_USED_UPDATE_INTERVAL_MS),
+        );
         return record;
     }
 
