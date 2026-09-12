@@ -4,6 +4,7 @@ import { DatabaseFacade } from "./database-facade.js";
 import { UnreadCount } from "../models/unread-count.js";
 import postgres from "postgres";
 import { ulid } from "ulid";
+import { ApiKeyMetadata, ApiKeyRecord, NewApiKeyRecord } from "../models/api-key.js";
 
 export class PostgresDatabaseFacade implements DatabaseFacade {
     // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -40,8 +41,9 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
         });
     }
 
-    public async getAddressCount() {
-        const addressCountResult = await this.sql<{ addresses: number }[]>`SELECT count(*)::int as addresses from address`;
+    public async getAddressCount(owner: string | undefined) {
+        const ownerClause = owner ? this.sql`WHERE owner IS NULL OR owner = ${owner}` : this.sql``;
+        const addressCountResult = await this.sql<{ addresses: number }[]>`SELECT count(*)::int as addresses from address ${ownerClause}`;
         return addressCountResult[0].addresses;
     }
 
@@ -158,11 +160,66 @@ export class PostgresDatabaseFacade implements DatabaseFacade {
         return result.count;
     }
 
-    public async getUnreadMailsCount() {
+    public async getUnreadMailsCount(owner: string | undefined) {
+        const ownerClause = owner ? this.sql`AND (address.owner IS NULL OR address.owner = ${owner})` : this.sql``;
         const unreadMailCount = await this.sql<{ unread: number }[]>`SELECT count(*)::int as unread 
             FROM mail
-            WHERE read = false AND deleted = false`;
+            JOIN address ON address.id = mail.addressid
+            WHERE read = false AND deleted = false ${ownerClause}`;
         return unreadMailCount[0].unread;
+    }
+
+    // API keys
+    public async createApiKey(apiKey: NewApiKeyRecord) {
+        await this.sql`INSERT INTO api_key ${this.sql({
+            id: apiKey.id,
+            name: apiKey.name,
+            access_mode: apiKey.accessMode,
+            owner: apiKey.owner,
+            key_prefix: apiKey.keyPrefix,
+            secret_hash: apiKey.secretHash,
+            created_at: apiKey.createdAt,
+            expires_at: apiKey.expiresAt,
+        })}`;
+    }
+
+    public async getApiKeyByPrefix(prefix: string) {
+        const rows = await this.sql<ApiKeyRecord[]>`SELECT id, name, access_mode AS "accessMode", owner,
+            key_prefix AS "keyPrefix", secret_hash AS "secretHash", created_at AS "createdAt",
+            expires_at AS "expiresAt", revoked_at AS "revokedAt", last_used_at AS "lastUsedAt"
+            FROM api_key WHERE key_prefix = ${prefix}`;
+        return rows[0];
+    }
+
+    public async listApiKeys(owner: string) {
+        return await this.sql<ApiKeyMetadata[]>`SELECT id, name, access_mode AS "accessMode", owner,
+            key_prefix AS "keyPrefix", created_at AS "createdAt", expires_at AS "expiresAt",
+            revoked_at AS "revokedAt", last_used_at AS "lastUsedAt"
+            FROM api_key WHERE access_mode = 'owner' AND owner = ${owner} ORDER BY created_at DESC`;
+    }
+
+    public async listGlobalApiKeys() {
+        return await this.sql<ApiKeyMetadata[]>`SELECT id, name, access_mode AS "accessMode", owner,
+            key_prefix AS "keyPrefix", created_at AS "createdAt", expires_at AS "expiresAt",
+            revoked_at AS "revokedAt", last_used_at AS "lastUsedAt"
+            FROM api_key WHERE access_mode = 'global' ORDER BY created_at DESC`;
+    }
+
+    public async touchApiKeyLastUsed(id: string, usedAt: Date, staleBefore: Date) {
+        await this.sql`UPDATE api_key SET last_used_at = ${usedAt}
+            WHERE id = ${id} AND (last_used_at IS NULL OR last_used_at < ${staleBefore})`;
+    }
+
+    public async revokeApiKey(id: string, owner: string) {
+        const result = await this.sql`UPDATE api_key SET revoked_at = now()
+            WHERE id = ${id} AND access_mode = 'owner' AND owner = ${owner} AND revoked_at IS NULL`;
+        return result.count;
+    }
+
+    public async revokeGlobalApiKey(id: string) {
+        const result = await this.sql`UPDATE api_key SET revoked_at = now()
+            WHERE id = ${id} AND access_mode = 'global' AND revoked_at IS NULL`;
+        return result.count;
     }
 
     // Deletions
