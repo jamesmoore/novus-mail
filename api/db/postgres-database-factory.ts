@@ -41,12 +41,31 @@ CREATE TABLE IF NOT EXISTS meta (
 );`
 
             await tx`
+CREATE TABLE IF NOT EXISTS api_key (
+    id char(26) PRIMARY KEY,
+    name text NOT NULL,
+    access_mode text NOT NULL CHECK (access_mode IN ('owner', 'global')),
+    owner text,
+    key_prefix text NOT NULL UNIQUE,
+    secret_hash text NOT NULL,
+    created_at timestamptz NOT NULL,
+    expires_at timestamptz,
+    revoked_at timestamptz,
+    last_used_at timestamptz,
+    CHECK (
+        (access_mode = 'owner' AND owner IS NOT NULL)
+        OR (access_mode = 'global' AND owner IS NULL)
+    )
+);`
+
+            await tx`
 CREATE INDEX IF NOT EXISTS idx_mail_addressid_id_desc_active
     ON mail (addressid, id DESC)
     WHERE deleted = false`
 
             await tx`
-INSERT INTO meta ${tx({ key: 'schemaVersion', value: '3' })} ON CONFLICT DO NOTHING;`;
+INSERT INTO meta ${tx({ key: 'schemaVersion', value: '4' })}
+ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;`;
         });
         console.log("Completed DB schema update");
     } catch (e) {

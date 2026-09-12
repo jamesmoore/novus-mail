@@ -44,6 +44,41 @@ Configuration is done through environment variables, which can be set in the doc
 |REDIS_URL|redis://redis:6379|Redis url if `REDIS` session store is to be used. See https://redis.io/docs/latest/develop/clients/nodejs/connect/| 
 |POSTGRES_URL|postgres://user:pass@host:5432/db|Postgres URL if Postgres DB is to be used. If absent local Sqlite will be used.| 
 |POSTGRES_LOG_SQL|false|```true``` \| ```false``` If set the Postgres SQL and parameters will be logged.|
+
+## Status authentication and API keys
+
+`GET /api/health` is always public and returns only the service health. `GET /api/status` behaves according to the configured authentication mode:
+
+- Without OIDC configuration, status remains public and reports global counts.
+- With OIDC configuration, status requires either the logged-in OIDC session or an API key.
+- An OIDC session or owner API key reports shared addresses and addresses owned by that OIDC subject.
+- A global API key reports counts across all addresses.
+
+Send an API key in the authorization header:
+
+```http
+Authorization: ApiKey nvm_prefix_secret
+```
+
+Logged-in OIDC users can manage their own status API keys through:
+
+```text
+GET    /api/api-keys
+POST   /api/api-keys       { "name": "monitor", "expiresAt": "2027-01-01T00:00:00Z" }
+DELETE /api/api-keys/:id
+```
+
+The complete key is returned only by `POST`; only its hash is stored. Deleting a key revokes it rather than removing its audit metadata.
+
+Global status keys are administrative and are managed from the `api` directory using the same database configuration as the server:
+
+```bash
+npm run api-key -- create-global "uptime monitor"
+npm run api-key -- list-global
+npm run api-key -- revoke-global <key-id>
+```
+
+The complete global key is likewise printed only when it is created. Rotate a key by creating its replacement, updating the consumer, and then revoking the old key.
 # Adding TLS / Encryption (optional) 🔒
 copy your certificate and private key files into the `data` folder (usually, the file extensions are `.crt` and `.key`). The file name and extension don't actually matter as Novus Mail can automatically detect which one is which
 

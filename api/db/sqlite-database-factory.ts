@@ -8,6 +8,7 @@ import { SqliteDatabaseFacade } from './sqlite-database-facade.js';
 const v1DatabaseFileName = './data/data.db';
 const v2DatabaseFileName = './data/data2.db';
 const v3DatabaseFileName = './data/data3.db';
+const v4DatabaseFileName = './data/data4.db';
 
 export default function dbinit() {
 	try {
@@ -16,7 +17,9 @@ export default function dbinit() {
 
 		const db2 = fs.existsSync(v1DatabaseFileName) || fs.existsSync(v2DatabaseFileName) ? getV2Database() : undefined;
 
-		const db3 = getV3Database();
+		const db3 = fs.existsSync(v1DatabaseFileName) || fs.existsSync(v2DatabaseFileName) || fs.existsSync(v3DatabaseFileName) ? getV3Database() : undefined;
+
+		const db4 = getV4Database();
 
 		if (db1 && db2) {
 			console.log("Migrating schema v1 to v2");
@@ -44,8 +47,17 @@ export default function dbinit() {
 			console.log("Migrating schema v2 to v3 Completed");
 		}
 
-		console.log(`Using database ${db3.name}`);
-		return new SqliteDatabaseFacade(db3);
+		if (db3) {
+			console.log("Migrating schema v3 to v4");
+			const migrate = db4.transaction(() => migrateV3toV4(db3, db4));
+			migrate();
+			db3.close();
+			fs.renameSync(v3DatabaseFileName, `${v3DatabaseFileName}.bak`);
+			console.log("Migrating schema v3 to v4 Completed");
+		}
+
+		console.log(`Using database ${db4.name}`);
+		return new SqliteDatabaseFacade(db4);
 	}
 	catch (err) {
 		console.error("DB init fail")
@@ -158,6 +170,49 @@ function getV3Database() {
 	return db;
 }
 
+function getV4Database() {
+	const db = Database(v4DatabaseFileName);
+	db.exec("PRAGMA foreign_keys = ON");
+
+	db.exec(`CREATE TABLE IF NOT EXISTS address (
+		id TEXT NOT NULL PRIMARY KEY,
+		addr TEXT NOT NULL UNIQUE,
+		owner TEXT
+		)`);
+
+	db.exec(`CREATE TABLE IF NOT EXISTS mail (
+		id TEXT NOT NULL PRIMARY KEY,
+		addressid TEXT NOT NULL,
+		sender TEXT NOT NULL,
+		subject TEXT NOT NULL,
+		content TEXT NOT NULL,
+		read INTEGER NOT NULL default 0,
+		received INTEGER NOT NULL default 0,
+		deleted INTEGER NOT NULL default 0,
+		sendername TEXT,
+		FOREIGN KEY(addressid) REFERENCES address(id)
+		)`);
+
+	db.exec(`CREATE TABLE IF NOT EXISTS api_key (
+		id TEXT NOT NULL PRIMARY KEY,
+		name TEXT NOT NULL,
+		access_mode TEXT NOT NULL CHECK(access_mode IN ('owner', 'global')),
+		owner TEXT,
+		key_prefix TEXT NOT NULL UNIQUE,
+		secret_hash TEXT NOT NULL,
+		created_at INTEGER NOT NULL,
+		expires_at INTEGER,
+		revoked_at INTEGER,
+		last_used_at INTEGER,
+		CHECK((access_mode = 'owner' AND owner IS NOT NULL) OR (access_mode = 'global' AND owner IS NULL))
+		)`);
+
+	db.exec(`CREATE INDEX IF NOT EXISTS idx_mail_addressid ON mail(addressid)`);
+	db.exec(`CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)`);
+	db.prepare("INSERT OR REPLACE INTO meta (key,value) VALUES (?,?)").run('schemaVersion', '4');
+	return db;
+}
+
 function migrateV1toV2(db1: BetterSqlite3Database, db2: BetterSqlite3Database) {
 	const insertAddress = db2.prepare(
 		"INSERT OR IGNORE INTO address (addr, owner) VALUES (?, ?)"
@@ -241,3 +296,32 @@ function migrateV2toV3(db2: BetterSqlite3Database, db3: BetterSqlite3Database) {
 		);
 	}
 }
+
+function migrateV3toV4(db3: BetterSqlite3Database, db4: BetterSqlite3Database) {
+	const insertAddress = db4.prepare("INSERT OR IGNORE INTO address (id, addr, owner) VALUES (?, ?, ?)");
+	const insertMail = db4.prepare(`INSERT OR IGNORE INTO mail
+		(id, addressid, sender, subject, content, read, received, deleted, sendername)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+
+	for (const row of db3.prepare("SELECT id, addr, owner FROM address").iterate()) {
+		const address = row as { id: string, addr: string, owner: string | null };
+		insertAddress.run(address.id, address.addr, address.owner);
+	}
+
+	for (const row of db3.prepare(`SELECT id, addressid, sender, subject, content, read, received, deleted, sendername FROM mail`).iterate()) {
+		const mail = row as SqliteV3Mail;
+		insertMail.run(mail.id, mail.addressid, mail.sender, mail.subject, mail.content, mail.read, mail.received, mail.deleted, mail.sendername);
+	}
+}
+
+type SqliteV3Mail = {
+	id: string;
+	addressid: string;
+	sender: string;
+	subject: string;
+	content: string;
+	read: number;
+	received: number;
+	deleted: number;
+	sendername: string | null;
+};

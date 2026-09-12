@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "tsx watch main.ts",
     "build": "tsc",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "npm run build && node --test tests/*.test.mjs",
+    "api-key": "tsx api-key-cli.ts"
   },
   "author": "",
   "license": "ISC",
