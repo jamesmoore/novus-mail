@@ -152,6 +152,12 @@ test('OIDC status HTTP authentication selects owner and global visibility', asyn
         assert.equal((await fetch(`${baseUrl}/api/status`, {
             headers: { Authorization: 'ApiKey invalid' },
         })).status, 401);
+        assert.equal((await fetch(`${baseUrl}/api/status`, {
+            headers: { Authorization: 'ApiKey                              ' },
+        })).status, 401);
+        assert.equal((await fetch(`${baseUrl}/api/status`, {
+            headers: { Authorization: 'Bearer invalid' },
+        })).status, 401);
 
         const oidcStatus = await fetch(`${baseUrl}/api/status`, {
             headers: { 'x-test-oidc-sub': 'alice-sub' },

@@ -12,12 +12,12 @@ export class ApiKeyStrategy extends Strategy {
     async authenticate(req: Request) {
         try {
             const authorization = req.get('authorization');
-            const match = authorization?.match(/^ApiKey\s+(.+)$/i);
-            if (!match) {
+            const key = getApiKeyCredential(authorization);
+            if (!key) {
                 return this.fail({ message: 'API key required' }, 401);
             }
 
-            const apiKey = await this.apiKeys.verify(match[1]);
+            const apiKey = await this.apiKeys.verify(key);
             if (!apiKey) {
                 return this.fail({ message: 'Invalid API key' }, 401);
             }
@@ -32,4 +32,22 @@ export class ApiKeyStrategy extends Strategy {
             this.error(error instanceof Error ? error : new Error(String(error)));
         }
     }
+}
+
+function getApiKeyCredential(authorization: string | undefined) {
+    if (!authorization) {
+        return undefined;
+    }
+
+    const separator = authorization.indexOf(' ');
+    if (separator < 0 || authorization.slice(0, separator).toLowerCase() !== 'apikey') {
+        return undefined;
+    }
+
+    let keyStart = separator + 1;
+    while (keyStart < authorization.length && authorization.charCodeAt(keyStart) === 32) {
+        keyStart++;
+    }
+
+    return keyStart < authorization.length ? authorization.slice(keyStart) : undefined;
 }
