@@ -69,7 +69,7 @@ function Manage() {
             try {
                 await addAddress(newAddressText);
                 toast.success('Added ' + newAddressText);
-                setNewAddressText("");
+                setNewAddressText('');
             } catch (error) {
                 toast.error(error instanceof Error ? error.message : 'Failed to add address');
             }
@@ -250,4 +250,3 @@ function Manage() {
 }
 
 export default Manage;
-

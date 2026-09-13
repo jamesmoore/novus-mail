@@ -25,21 +25,21 @@ class ApiError extends Error {
         readonly response: Response,
     ) {
         super(message);
-        this.name = "ApiError";
+        this.name = 'ApiError';
     }
 }
 
 async function getErrorMessage(response: Response) {
-    const fallback = `${response.status} ${response.statusText || "Request failed"}`;
-    const contentType = response.headers.get("content-type") ?? "";
+    const fallback = `${response.status} ${response.statusText || 'Request failed'}`;
+    const contentType = response.headers.get('content-type') ?? '';
 
-    if (contentType.includes("application/json")) {
+    if (contentType.includes('application/json')) {
         const body = await response.clone().json().catch(() => undefined) as
             { error?: string; message?: string; title?: string } | undefined;
         return body?.error ?? body?.message ?? body?.title ?? fallback;
     }
 
-    const body = await response.clone().text().catch(() => "");
+    const body = await response.clone().text().catch(() => '');
     return body.trim() || fallback;
 }
 
@@ -51,7 +51,7 @@ async function apiFetch(
     const response = await fetch(input, init);
 
     if (response.status === 401) {
-        window.dispatchEvent(new Event("auth-lost"));
+        window.dispatchEvent(new Event('auth-lost'));
     }
 
     if (!response.ok && !allowedErrorStatuses.includes(response.status)) {
@@ -239,12 +239,12 @@ const exportMail = async () => {
 
 const importMail = async (file: File) => {
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append('file', file);
 
     const response = await apiFetch(`${ApiUrl}/import`, {
-        method: "POST",
+        method: 'POST',
         body: formData,
-        //credentials: "include", // important if you rely on session/OIDC cookies
+        //credentials: 'include', // important if you rely on session/OIDC cookies
     });
 
     return response.json() as Promise<ImportStatus>;
