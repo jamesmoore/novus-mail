@@ -23,6 +23,7 @@ import { Label } from './components/ui/label';
 import { toast } from 'sonner';
 import { ImportForm } from './import-form';
 import { ExportButton } from './export-button';
+import { ApiKeyManagement } from './api-key-management';
 
 function Manage() {
     const [newAddressText, setNewAddressText] = useState('');
@@ -223,6 +224,8 @@ function Manage() {
                     </div>
                 </div>
             </div>
+
+            <ApiKeyManagement />
 
             <div className={paperClassName}>
                 <div className="flex flex-wrap items-center m-1 ml-2 p-1">

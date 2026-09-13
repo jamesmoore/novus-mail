@@ -14,6 +14,8 @@ import { dirname, join } from 'path';
 import { DatabaseFacade } from './db/database-facade.js';
 import { NotificationEmitter } from './events/notification-emitter.js';
 import { errorCatchMiddleware } from './routes/error-catch-middleware.js';
+import { createRouter as createApiKeyRouter } from './routes/api-key-routes.js';
+import { configureStatusAuthentication } from './auth/status-auth-middleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -37,6 +39,7 @@ export class HttpServer {
 	public start(): Server {
 
 		const app = express();
+		configureStatusAuthentication(this.db);
 
 		app.set('trust proxy', env.TRUST_PROXY);
 
@@ -71,6 +74,7 @@ export class HttpServer {
 		app.use('/api', createStatusRouter(this.db));
 
 		const authMiddleware = passportConfig.middleware;
+		app.use('/api/api-keys', authMiddleware, createApiKeyRouter(this.db));
 		app.use('/api', authMiddleware, createAddressRouter(this.db, this.domainName, this.notificationEmitter));
 		app.use('/api', authMiddleware, createMailRouter(this.db, this.notificationEmitter));
 		app.use('/api', authMiddleware, createExportRouter(this.db));

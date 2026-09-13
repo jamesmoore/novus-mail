@@ -8,6 +8,7 @@ import { UnreadCount } from "./models/unread-count";
 import { User } from "./models/user";
 import { MailDto } from "./dto/mail-dto";
 import { MailMessageDto } from "./dto/mail-message-dto";
+import { ApiKey, CreatedApiKey } from "./models/api-key";
 
 const defaultHeaders = {
     'Content-Type': 'application/json',
@@ -229,6 +230,40 @@ const importMail = async (file: File) => {
     }
 }
 
+const fetchApiKeys = async () => {
+    const response = await apiFetch(`${ApiUrl}/api-keys`, {
+        method: 'GET',
+        headers: defaultHeaders,
+    });
+    if (!response.ok) {
+        throw new Error('Failed to load API keys');
+    }
+    return response.json() as Promise<ApiKey[]>;
+};
+
+const createApiKey = async (name: string, expiresAt: string | null) => {
+    const response = await apiFetch(`${ApiUrl}/api-keys`, {
+        method: 'POST',
+        headers: defaultHeaders,
+        body: JSON.stringify({ name, expiresAt }),
+    });
+    if (!response.ok) {
+        const body = await response.json().catch(() => undefined) as { error?: string } | undefined;
+        throw new Error(body?.error ?? 'Failed to create API key');
+    }
+    return response.json() as Promise<CreatedApiKey>;
+};
+
+const revokeApiKey = async (id: string) => {
+    const response = await apiFetch(`${ApiUrl}/api-keys/${id}`, {
+        method: 'DELETE',
+        headers: defaultHeaders,
+    });
+    if (!response.ok) {
+        throw new Error('Failed to revoke API key');
+    }
+};
+
 export {
     fetchDomain,
     fetchAddress,
@@ -250,6 +285,9 @@ export {
     logout,
     exportMail,
     importMail,
+    fetchApiKeys,
+    createApiKey,
+    revokeApiKey,
 };
 
 function mapMailResponseDtoToMailResponse(responseDto: MailResponseDto) {

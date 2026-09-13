@@ -4,6 +4,7 @@ import { Address } from "../models/address.js";
 import { DatabaseFacade } from "./database-facade.js";
 import { UnreadCount } from "../models/unread-count.js";
 import { ulid } from "ulid";
+import { ApiKeyMetadata, ApiKeyRecord, NewApiKeyRecord } from "../models/api-key.js";
 
 type SqliteMailRow = {
     id: string;
@@ -80,8 +81,9 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
         this.db.prepare("DELETE FROM address WHERE addr = @address").run({ address });
     }
 
-    public async getAddressCount() {
-        const addressCountResult = this.db.prepare('SELECT count(*) as addresses from address').get() as { addresses: number };
+    public async getAddressCount(owner: string | undefined) {
+        const ownerClause = owner ? ' WHERE owner IS NULL OR owner = @owner' : '';
+        const addressCountResult = this.db.prepare(`SELECT count(*) as addresses from address${ownerClause}`).get({ owner }) as { addresses: number };
         return addressCountResult.addresses;
     }
 
@@ -198,9 +200,71 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
         return result.changes;
     }
 
-    public async getUnreadMailsCount() {
-        const unreadMailCount = this.db.prepare('SELECT count(*) as unread from mail where read = 0 and deleted = 0').get() as { unread: number };
+    public async getUnreadMailsCount(owner: string | undefined) {
+        const ownerClause = owner ? ' AND (address.owner IS NULL OR address.owner = @owner)' : '';
+        const unreadMailCount = this.db.prepare(`SELECT count(*) as unread
+            FROM mail
+            JOIN address ON address.id = mail.addressid
+            WHERE read = 0 AND deleted = 0${ownerClause}`).get({ owner }) as { unread: number };
         return unreadMailCount.unread;
+    }
+
+    // API keys
+    public async createApiKey(apiKey: NewApiKeyRecord) {
+        this.db.prepare(`INSERT INTO api_key
+            (id, name, access_mode, owner, key_prefix, secret_hash, created_at, expires_at)
+            VALUES (@id, @name, @accessMode, @owner, @keyPrefix, @secretHash, @createdAt, @expiresAt)`)
+            .run({
+                ...apiKey,
+                createdAt: apiKey.createdAt.getTime(),
+                expiresAt: apiKey.expiresAt?.getTime() ?? null,
+            });
+    }
+
+    public async getApiKeyByPrefix(prefix: string) {
+        const row = this.db.prepare(`SELECT id, name, access_mode AS accessMode, owner,
+            key_prefix AS keyPrefix, secret_hash AS secretHash, created_at AS createdAt,
+            expires_at AS expiresAt, revoked_at AS revokedAt, last_used_at AS lastUsedAt
+            FROM api_key WHERE key_prefix = @prefix`).get({ prefix }) as SqliteApiKeyRow | undefined;
+        return row ? mapApiKey(row) : undefined;
+    }
+
+    public async listApiKeys(owner: string) {
+        const rows = this.db.prepare(`SELECT id, name, access_mode AS accessMode, owner,
+            key_prefix AS keyPrefix, secret_hash AS secretHash, created_at AS createdAt,
+            expires_at AS expiresAt, revoked_at AS revokedAt, last_used_at AS lastUsedAt
+            FROM api_key WHERE access_mode = 'owner' AND owner = @owner ORDER BY created_at DESC`)
+            .all({ owner }) as SqliteApiKeyRow[];
+        return rows.map(mapApiKeyMetadata);
+    }
+
+    public async listGlobalApiKeys() {
+        const rows = this.db.prepare(`SELECT id, name, access_mode AS accessMode, owner,
+            key_prefix AS keyPrefix, secret_hash AS secretHash, created_at AS createdAt,
+            expires_at AS expiresAt, revoked_at AS revokedAt, last_used_at AS lastUsedAt
+            FROM api_key WHERE access_mode = 'global' ORDER BY created_at DESC`)
+            .all() as SqliteApiKeyRow[];
+        return rows.map(mapApiKeyMetadata);
+    }
+
+    public async touchApiKeyLastUsed(id: string, usedAt: Date, staleBefore: Date) {
+        this.db.prepare(`UPDATE api_key SET last_used_at = @usedAt
+            WHERE id = @id AND (last_used_at IS NULL OR last_used_at < @staleBefore)`)
+            .run({ id, usedAt: usedAt.getTime(), staleBefore: staleBefore.getTime() });
+    }
+
+    public async revokeApiKey(id: string, owner: string) {
+        const result = this.db.prepare(`UPDATE api_key SET revoked_at = @revokedAt
+            WHERE id = @id AND access_mode = 'owner' AND owner = @owner AND revoked_at IS NULL`)
+            .run({ id, owner, revokedAt: Date.now() });
+        return result.changes;
+    }
+
+    public async revokeGlobalApiKey(id: string) {
+        const result = this.db.prepare(`UPDATE api_key SET revoked_at = @revokedAt
+            WHERE id = @id AND access_mode = 'global' AND revoked_at IS NULL`)
+            .run({ id, revokedAt: Date.now() });
+        return result.changes;
     }
 
     // Deletions
@@ -263,4 +327,35 @@ export class SqliteDatabaseFacade implements DatabaseFacade {
     private getOwnerWhereClause(owner: string | undefined) {
         return owner && '(address.owner IS NULL OR address.owner = @owner)';
     }
+}
+
+type SqliteApiKeyRow = Omit<ApiKeyRecord, 'createdAt' | 'expiresAt' | 'revokedAt' | 'lastUsedAt'> & {
+    createdAt: number;
+    expiresAt: number | null;
+    revokedAt: number | null;
+    lastUsedAt: number | null;
+};
+
+function mapApiKey(row: SqliteApiKeyRow): ApiKeyRecord {
+    return {
+        ...row,
+        createdAt: new Date(row.createdAt),
+        expiresAt: row.expiresAt === null ? null : new Date(row.expiresAt),
+        revokedAt: row.revokedAt === null ? null : new Date(row.revokedAt),
+        lastUsedAt: row.lastUsedAt === null ? null : new Date(row.lastUsedAt),
+    };
+}
+
+function mapApiKeyMetadata(row: SqliteApiKeyRow): ApiKeyMetadata {
+    return {
+        id: row.id,
+        name: row.name,
+        accessMode: row.accessMode,
+        owner: row.owner,
+        keyPrefix: row.keyPrefix,
+        createdAt: new Date(row.createdAt),
+        expiresAt: row.expiresAt === null ? null : new Date(row.expiresAt),
+        revokedAt: row.revokedAt === null ? null : new Date(row.revokedAt),
+        lastUsedAt: row.lastUsedAt === null ? null : new Date(row.lastUsedAt),
+    };
 }

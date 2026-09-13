@@ -4,9 +4,17 @@
  */
 declare namespace Express {
     interface User {
-        sub: string
+        sub?: string
         name?: string
         email?: string
         picture?: string
+        authType?: 'api-key'
+        accessMode?: 'owner' | 'global'
+        owner?: string
+        apiKeyId?: string
+    }
+
+    interface Request {
+        authPrincipal?: import('../../auth/auth-principal.js').AuthPrincipal
     }
 }

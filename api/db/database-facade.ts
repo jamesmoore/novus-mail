@@ -1,6 +1,7 @@
 import { Address } from "../models/address.js";
 import { Mail } from "../models/mail.js";
 import { UnreadCount } from "../models/unread-count.js";
+import { ApiKeyMetadata, ApiKeyRecord, NewApiKeyRecord } from "../models/api-key.js";
 
 export interface DatabaseFacade {
     // Address
@@ -9,7 +10,7 @@ export interface DatabaseFacade {
     getAddress(address: string): Promise<Address | undefined>;
     updateAddressOwner(address: string, owner: string | null | undefined): Promise<void>;
     deleteAddress(address: string): Promise<void>;
-    getAddressCount(): Promise<number>;
+    getAddressCount(owner: string | undefined): Promise<number>;
 
     // Mails
     addMail(mail: Mail): Promise<void>;
@@ -28,7 +29,16 @@ export interface DatabaseFacade {
     getUnread(owner: string | undefined): Promise<UnreadCount[]>;
     markMailAsRead(mailId: string): Promise<number>;
     markAllAsRead(addr: string): Promise<number>;
-    getUnreadMailsCount(): Promise<number>;
+    getUnreadMailsCount(owner: string | undefined): Promise<number>;
+
+    // API keys
+    createApiKey(apiKey: NewApiKeyRecord): Promise<void>;
+    getApiKeyByPrefix(prefix: string): Promise<ApiKeyRecord | undefined>;
+    listApiKeys(owner: string): Promise<ApiKeyMetadata[]>;
+    listGlobalApiKeys(): Promise<ApiKeyMetadata[]>;
+    touchApiKeyLastUsed(id: string, usedAt: Date, staleBefore: Date): Promise<void>;
+    revokeApiKey(id: string, owner: string): Promise<number>;
+    revokeGlobalApiKey(id: string): Promise<number>;
 
     // Deletions
     softDeleteMail(id: string): Promise<number>;
