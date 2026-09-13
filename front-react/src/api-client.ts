@@ -18,14 +18,47 @@ const defaultHeaders = {
 const BaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
 const ApiUrl = `${BaseUrl}/api`;
 
-async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-    const res = await fetch(input, init);
+class ApiError extends Error {
+    constructor(
+        message: string,
+        readonly status: number,
+        readonly response: Response,
+    ) {
+        super(message);
+        this.name = "ApiError";
+    }
+}
 
-    if (res.status === 401) {
+async function getErrorMessage(response: Response) {
+    const fallback = `${response.status} ${response.statusText || "Request failed"}`;
+    const contentType = response.headers.get("content-type") ?? "";
+
+    if (contentType.includes("application/json")) {
+        const body = await response.clone().json().catch(() => undefined) as
+            { error?: string; message?: string; title?: string } | undefined;
+        return body?.error ?? body?.message ?? body?.title ?? fallback;
+    }
+
+    const body = await response.clone().text().catch(() => "");
+    return body.trim() || fallback;
+}
+
+async function apiFetch(
+    input: RequestInfo | URL,
+    init?: RequestInit,
+    allowedErrorStatuses: readonly number[] = [],
+): Promise<Response> {
+    const response = await fetch(input, init);
+
+    if (response.status === 401) {
         window.dispatchEvent(new Event("auth-lost"));
     }
 
-    return res;
+    if (!response.ok && !allowedErrorStatuses.includes(response.status)) {
+        throw new ApiError(await getErrorMessage(response), response.status, response);
+    }
+
+    return response;
 }
 
 const fetchDomain = async () => {
@@ -48,33 +81,29 @@ const getAddress = async (newAddressText: string) => {
     const response = await apiFetch(`${ApiUrl}/address/${newAddressText}`, {
         method: 'GET',
         headers: defaultHeaders
-    });
+    }, [404]);
     if (response.status === 404) {
         return '';
     }
-    else if (response.status === 200) {
-        return response.text();
-    }
+    return response.text();
 }
 
 const addAddress = async (newAddressText: string) => {
-    const response = await apiFetch(`${ApiUrl}/address/${newAddressText}`, {
+    await apiFetch(`${ApiUrl}/address/${newAddressText}`, {
         method: 'PUT',
         headers: defaultHeaders
     });
-    return response.status === 200;
 }
 
 const deleteAddress = async (selectedAddress: string) => {
-    const response = await apiFetch(`${ApiUrl}/address/${selectedAddress}`, {
+    await apiFetch(`${ApiUrl}/address/${selectedAddress}`, {
         method: 'DELETE',
         headers: defaultHeaders
     });
-    return response.status === 200;
 }
 
 const updateAddress = async (selectedAddress: string, makePrivate: boolean) => {
-    const response = await apiFetch(`${ApiUrl}/address/${selectedAddress}`, {
+    await apiFetch(`${ApiUrl}/address/${selectedAddress}`, {
         method: 'POST',
         body: JSON.stringify(
             {
@@ -83,7 +112,6 @@ const updateAddress = async (selectedAddress: string, makePrivate: boolean) => {
         ),
         headers: defaultHeaders,
     });
-    return response.status === 200;
 }
 
 const fetchMails = async (selectedAddress: string, cursorId: string) => {
@@ -206,9 +234,6 @@ const exportMail = async () => {
         method: 'GET',
         headers: defaultHeaders,
     });
-    if (!response.ok) {
-        throw new Error("Export failed");
-    }
     return response;
 }
 
@@ -216,18 +241,13 @@ const importMail = async (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch(`${ApiUrl}/import`, {
+    const response = await apiFetch(`${ApiUrl}/import`, {
         method: "POST",
         body: formData,
         //credentials: "include", // important if you rely on session/OIDC cookies
     });
 
-    if (!response.ok) {
-        throw new Error("Import failed");
-    }
-    else {
-        return response.json() as Promise<ImportStatus>;
-    }
+    return response.json() as Promise<ImportStatus>;
 }
 
 const fetchApiKeys = async () => {
@@ -235,9 +255,6 @@ const fetchApiKeys = async () => {
         method: 'GET',
         headers: defaultHeaders,
     });
-    if (!response.ok) {
-        throw new Error('Failed to load API keys');
-    }
     return response.json() as Promise<ApiKey[]>;
 };
 
@@ -247,21 +264,14 @@ const createApiKey = async (name: string, expiresAt: string | null) => {
         headers: defaultHeaders,
         body: JSON.stringify({ name, expiresAt }),
     });
-    if (!response.ok) {
-        const body = await response.json().catch(() => undefined) as { error?: string } | undefined;
-        throw new Error(body?.error ?? 'Failed to create API key');
-    }
     return response.json() as Promise<CreatedApiKey>;
 };
 
 const revokeApiKey = async (id: string) => {
-    const response = await apiFetch(`${ApiUrl}/api-keys/${id}`, {
+    await apiFetch(`${ApiUrl}/api-keys/${id}`, {
         method: 'DELETE',
         headers: defaultHeaders,
     });
-    if (!response.ok) {
-        throw new Error('Failed to revoke API key');
-    }
 };
 
 export {
@@ -288,6 +298,7 @@ export {
     fetchApiKeys,
     createApiKey,
     revokeApiKey,
+    ApiError,
 };
 
 function mapMailResponseDtoToMailResponse(responseDto: MailResponseDto) {

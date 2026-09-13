@@ -66,34 +66,31 @@ function Manage() {
             toast.error('Address already exists');
         }
         else if (newAddressText !== '') {
-            const result = await addAddress(newAddressText);
-            if (result) {
+            try {
+                await addAddress(newAddressText);
                 toast.success('Added ' + newAddressText);
                 setNewAddressText("");
-            }
-            else {
-                toast.error('Failed to add address');
+            } catch (error) {
+                toast.error(error instanceof Error ? error.message : 'Failed to add address');
             }
         }
     }
 
     async function confirmDeleteClicked(addr: string) {
-        const success = await deleteAddress(addr);
-        if (success) {
+        try {
+            await deleteAddress(addr);
             toast.success('Deleted ' + addr);
-        }
-        else {
-            toast.error('Failed to delete ' + addr);
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Failed to delete ' + addr);
         }
     }
 
     async function setVisibility(addr: string, makePrivate: boolean) {
-        const success = await updateAddress(addr, makePrivate);
-        if (success) {
+        try {
+            await updateAddress(addr, makePrivate);
             toast.success(addr + (makePrivate ? ' made private 🔒' : ' made public 🔓'));
-        }
-        else {
-            toast.error('Failed to update ' + addr);
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Failed to update ' + addr);
         }
     }
 
