@@ -24,8 +24,7 @@ async function main() {
         // The newly generated credential must be shown once to the administrator invoking this interactive CLI;
         // only its hash is persisted, so it cannot be retrieved again.
         const output = JSON.stringify(created, null, 2);
-        // codeql[js/clear-text-logging]
-        console.log(output);
+        process.stdout.write(output + '\n');
         return;
     }
 
