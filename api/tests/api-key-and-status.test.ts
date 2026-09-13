@@ -131,6 +131,9 @@ test('OIDC status HTTP authentication selects owner and global visibility', asyn
         next();
     });
     app.use('/api', createStatusRouter(facade, createStatusAuthenticationMiddleware('oidc')));
+    // This is an ephemeral, in-process test probe used only to verify that a status API key does not
+    // authenticate unrelated routes. It is not part of the production application or exposed externally.
+    // codeql[js/missing-rate-limiting]
     app.get('/api/mail-probe', (req, res) => {
         if (!req.isAuthenticated()) {
             res.status(401).send();
