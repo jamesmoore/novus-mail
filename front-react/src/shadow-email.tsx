@@ -6,7 +6,6 @@ function ShadowEmail({ html }: { html: string }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const shadowRef = useRef<ShadowRoot | null>(null);
 
-  // memoize sanitized content
   const sanitized = useMemo(() => {
     return DOMPurify.sanitize(html,
       {
@@ -17,46 +16,33 @@ function ShadowEmail({ html }: { html: string }) {
       });
   }, [html])
 
-  const lastClientWidth = useRef<number | null>(null);
-
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
 
-    // Attach shadow root only once
-    if (!shadowRef.current) {
-      shadowRef.current = host.attachShadow({ mode: "open" });
+    const shadow = shadowRef.current ?? host.attachShadow({ mode: "open" });
+    shadowRef.current = shadow;
 
-      const shadow = shadowRef.current!;
-      shadow.replaceChildren(); // clears all nodes in one line
+    host.classList.toggle("email-light", !isColorSchemeAware(sanitized));
+    host.classList.toggle("email-unstyled", isUnstyledEmail(sanitized));
 
-      const colorSchemeAware = isColorSchemeAware(sanitized);
-      shadowRef.current!.host.classList.toggle("email-light", !colorSchemeAware);
-      const isUnStyled = isUnstyledEmail(sanitized);
-      shadowRef.current!.host.classList.toggle("email-unstyled", isUnStyled);
-      const baseStyle = document.createElement("style");
-      baseStyle.textContent = emailStyles;
-
-      shadowRef.current.appendChild(baseStyle);
-    }
-
+    const baseStyle = document.createElement("style");
+    baseStyle.textContent = emailStyles;
     const wrapper = document.createElement("div");
     wrapper.classList.add("mail-container");
-    wrapper.appendChild(sanitized);
-    shadowRef.current!.appendChild(wrapper);
+    wrapper.appendChild(sanitized.cloneNode(true));
+
+    // Replace the previous message rather than appending to it. Cloning the
+    // fragment also keeps the memoized sanitized value reusable in Strict Mode.
+    shadow.replaceChildren(baseStyle, wrapper);
 
     const checkOverflow = () => {
       const exceeds = wrapper.scrollWidth > host.clientWidth + 1; // +1 to avoid rounding blips
-      if (host.clientWidth !== lastClientWidth.current || exceeds) {
-        console.log(wrapper.scrollWidth, host.clientWidth, exceeds);
-        shadowRef.current!.host.classList.toggle("email-overflowing", exceeds);
-        lastClientWidth.current = host.clientWidth;
-      }
+      host.classList.toggle("email-overflowing", exceeds);
     };
 
     checkOverflow();
 
-    // optional: keep checking when resized
     const resizeObserver = new ResizeObserver(checkOverflow);
     resizeObserver.observe(wrapper);
     resizeObserver.observe(host);
@@ -88,21 +74,14 @@ function isColorSchemeAware(fragment: DocumentFragment) {
 }
 
 function isUnstyledEmail(fragment: DocumentFragment) {
-  // 1. If any <style> tag exists → definitely styled
   if (fragment.querySelector("style")) return false;
 
-  // 2. Count elements
   const total = fragment.querySelectorAll("*").length;
 
-  if (total === 0) return true; // empty/plain
+  if (total === 0) return true;
 
-  // 3. Count elements with inline styles
   const styled = fragment.querySelectorAll<HTMLElement>("[style]").length;
-
-  // 4. Heuristic threshold
   const ratio = styled / total;
-
-  console.log("Total elements:", total, "Styled:", styled, "Ratio:", ratio);
 
   return ratio < 0.25;
 }
